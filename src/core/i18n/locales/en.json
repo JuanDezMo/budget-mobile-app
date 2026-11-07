@@ -57,7 +57,27 @@
       "delete": "Delete",
       "deleteTitle": "Delete this budget?",
       "deleteMessage": "Its movements are kept but stop counting towards it. This cannot be undone.",
-      "notFound": "This budget no longer exists."
+      "notFound": "This budget no longer exists.",
+      "spent": "Spent",
+      "available": "Available",
+      "remainingLabel": "Left",
+      "lines": "Movements counting for this budget",
+      "noLines": "No movements count for this budget yet.",
+      "showMore": "Show more",
+      "openLine": "Open movement"
+    },
+    "usage": {
+      "spentOf": "{{spent}} of {{available}}",
+      "percent": "{{percent}} used",
+      "remaining": "Left: {{amount}}",
+      "exceeded": "You went over by {{amount}}",
+      "exceededTag": "Exceeded",
+      "saved": "Saved: {{amount}}"
+    },
+    "summary": {
+      "title": "Left to spend",
+      "spentOf": "Spent {{spent}} of {{available}}",
+      "empty": "You have no open budgets."
     }
   },
   "movements": {

@@ -6,6 +6,7 @@ import { BudgetDetail } from '@/features/budgets/components/BudgetDetail';
 import { useCategories } from '@/features/categories/useCategories';
 
 const BUDGET_FORM_ROUTE = '/budget-form';
+const MOVEMENT_FORM_ROUTE = '/movement-form';
 
 export default function BudgetDetailScreen() {
   const refreshKey = useRefreshOnFocus();
@@ -21,6 +22,9 @@ export default function BudgetDetailScreen() {
         categories={categories}
         onEdit={() => router.push({ pathname: BUDGET_FORM_ROUTE, params: { id } })}
         onDeleted={() => router.back()}
+        onOpenMovement={(movementId) =>
+          router.push({ pathname: MOVEMENT_FORM_ROUTE, params: { id: movementId } })
+        }
       />
     </Screen>
   );

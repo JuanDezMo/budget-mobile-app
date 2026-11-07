@@ -11,10 +11,11 @@ import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import { mockDatePicker } from '@/test-support/date-picker';
 import { createInMemoryBudgetRepository } from '@/features/budgets/budget.repository';
 import type { BudgetRepository } from '@/features/budgets/budget.repository';
-import type { Budget } from '@/features/budgets/budget.types';
+import type { Budget, BudgetLine, UsageTotals } from '@/features/budgets/budget.types';
 import { BudgetDetail } from '@/features/budgets/components/BudgetDetail';
 import { BudgetForm } from '@/features/budgets/components/BudgetForm';
 import { BudgetList } from '@/features/budgets/components/BudgetList';
+import { OpenBudgetsOverview } from '@/features/budgets/components/OpenBudgetsOverview';
 import { BudgetRepositoryProvider } from '@/features/budgets/useBudgetRepository';
 import type { Category } from '@/features/categories/category.types';
 
@@ -33,6 +34,7 @@ const categories: Category[] = SEED_SYSTEM_CATEGORIES.map((c) => ({
 }));
 const ENTRETENIMIENTO = SEED_SYSTEM_CATEGORIES[2]?.id ?? '';
 const today = todayLocalDate();
+const day = (offset: number) => addDaysToLocalDate(today, offset);
 
 function budgetEndingIn(
   id: string,
@@ -65,9 +67,13 @@ function Providers({ children }: { children: ReactNode }) {
   );
 }
 
-function makeRepository(budgets: Budget[] = [], spent: Record<string, number> = {}) {
+function makeRepository(
+  budgets: Budget[] = [],
+  spent: Record<string, number> = {},
+  fake: { usageById?: Record<string, UsageTotals>; linesById?: Record<string, BudgetLine[]> } = {},
+) {
   let n = 0;
-  repository = createInMemoryBudgetRepository(budgets, () => `new-${(n += 1)}`, spent);
+  repository = createInMemoryBudgetRepository(budgets, () => `new-${(n += 1)}`, spent, fake);
 }
 
 async function pickDate(label: string, date: Date) {
@@ -281,6 +287,7 @@ describe('budget detail', () => {
         categories={categories}
         onEdit={() => undefined}
         onDeleted={() => undefined}
+        onOpenMovement={() => undefined}
       />,
       { wrapper: Providers },
     );
@@ -298,6 +305,7 @@ describe('budget detail', () => {
         categories={categories}
         onEdit={() => undefined}
         onDeleted={() => undefined}
+        onOpenMovement={() => undefined}
       />,
       { wrapper: Providers },
     );
@@ -316,6 +324,7 @@ describe('budget detail', () => {
         categories={categories}
         onEdit={() => undefined}
         onDeleted={() => (deleted = true)}
+        onOpenMovement={() => undefined}
       />,
       { wrapper: Providers },
     );
@@ -335,5 +344,228 @@ describe('budget detail', () => {
     await waitFor(() => expect(deleted).toBe(true));
     expect(await repository.list()).toEqual([]);
     expect(await repository.list({ includeDeleted: true })).toHaveLength(1);
+  });
+});
+
+describe('budget usage', () => {
+  // The example of the rules: USD 55, expenses 40, refund 10, income 15 -> spent 30, available 70.
+  const example: UsageTotals = { expenseMinor: 4000, refundMinor: 1000, incomeMinor: 1500 };
+  const noop = () => undefined;
+
+  it('RN-22 / RN-23 the card shows spent, available and the percentage worked out by hand', async () => {
+    makeRepository([budgetEndingIn('b1', 5)], {}, { usageById: { b1: example } });
+    await render(<BudgetList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText(/USD\s30,00 de USD\s70,00/)).toBeTruthy();
+    expect(screen.getByText(/42,9\s?%/)).toBeTruthy();
+    expect(screen.getByText(/Queda: USD\s40,00/)).toBeTruthy();
+    expect(screen.getByRole('progressbar', { name: /42,9\s?% usado/ })).toBeTruthy();
+  });
+
+  it('a budget with no movements shows 0% and everything left', async () => {
+    makeRepository([budgetEndingIn('b1', 5)]);
+    await render(<BudgetList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText(/Queda: USD\s55,00/)).toBeTruthy();
+    expect(screen.getByText(/^0\s?%$/)).toBeTruthy();
+  });
+
+  it('RN-29 over 100% it is marked as exceeded, with how much over', async () => {
+    makeRepository(
+      [budgetEndingIn('b1', 5)],
+      {},
+      { usageById: { b1: { expenseMinor: 8000, refundMinor: 0, incomeMinor: 0 } } },
+    );
+    await render(<BudgetList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText(/Te pasaste por USD\s25,00/)).toBeTruthy();
+    expect(screen.getByText(/Excedido · 145,5\s?%/)).toBeTruthy();
+  });
+
+  it('RN-09 a closed budget with money left shows it as saved', async () => {
+    makeRepository([budgetEndingIn('b1', -30, { status: 'CLOSED', spentFinalMinor: 3000 })]);
+    await render(<BudgetList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText(/Ahorrado: USD\s25,00/)).toBeTruthy();
+  });
+
+  it('RN-05 a closed budget shows the spent amount frozen when it closed', async () => {
+    makeRepository(
+      [budgetEndingIn('b1', -30, { status: 'CLOSED', spentFinalMinor: 3000 })],
+      {},
+      { usageById: { b1: { expenseMinor: 9999, refundMinor: 0, incomeMinor: 0 } } },
+    );
+    await render(<BudgetList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText(/USD\s30,00 de USD\s55,00/)).toBeTruthy();
+  });
+
+  it('the detail shows the same spent and percentage, and the lines counting for the budget', async () => {
+    const lines: BudgetLine[] = [
+      {
+        lineId: 'l1',
+        movementId: 'm1',
+        kind: 'EXPENSE',
+        localDate: day(-1),
+        note: 'Cinema',
+        categoryId: ENTRETENIMIENTO,
+        amountMinor: 4000,
+      },
+      {
+        lineId: 'l2',
+        movementId: 'm2',
+        kind: 'REFUND',
+        localDate: day(-2),
+        note: null,
+        categoryId: ENTRETENIMIENTO,
+        amountMinor: 1000,
+      },
+      {
+        lineId: 'l3',
+        movementId: 'm3',
+        kind: 'INCOME',
+        localDate: day(-3),
+        note: null,
+        categoryId: ENTRETENIMIENTO,
+        amountMinor: 1500,
+      },
+    ];
+    makeRepository(
+      [budgetEndingIn('b1', 5)],
+      {},
+      { usageById: { b1: example }, linesById: { b1: lines } },
+    );
+    let opened = '';
+    await render(
+      <BudgetDetail
+        budgetId="b1"
+        categories={categories}
+        onEdit={noop}
+        onDeleted={noop}
+        onOpenMovement={(id) => (opened = id)}
+      />,
+      { wrapper: Providers },
+    );
+
+    expect(await screen.findByText(/42,9\s?%/)).toBeTruthy();
+    expect(screen.getByText('Cinema')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Abrir movimiento: Gasto USD\s40,00/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Abrir movimiento: Reembolso/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Abrir movimiento: Ingreso/ })).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('button', { name: /Abrir movimiento: Reembolso/ }));
+    expect(opened).toBe('m2');
+  });
+
+  it('the detail says so when no movement counts for the budget', async () => {
+    makeRepository([budgetEndingIn('b1', 5)]);
+    await render(
+      <BudgetDetail
+        budgetId="b1"
+        categories={categories}
+        onEdit={noop}
+        onDeleted={noop}
+        onOpenMovement={noop}
+      />,
+      { wrapper: Providers },
+    );
+
+    expect(await screen.findByText('Aún no hay movimientos para este presupuesto.')).toBeTruthy();
+  });
+
+  it('the detail loads the lines in pages of 20', async () => {
+    const many: BudgetLine[] = Array.from({ length: 45 }, (_, i) => ({
+      lineId: `l${i}`,
+      movementId: `m${i}`,
+      kind: 'EXPENSE',
+      localDate: day(-1),
+      note: `Line ${i}`,
+      categoryId: ENTRETENIMIENTO,
+      amountMinor: 100,
+    }));
+    makeRepository([budgetEndingIn('b1', 5)], {}, { linesById: { b1: many } });
+    await render(
+      <BudgetDetail
+        budgetId="b1"
+        categories={categories}
+        onEdit={noop}
+        onDeleted={noop}
+        onOpenMovement={noop}
+      />,
+      { wrapper: Providers },
+    );
+
+    expect(await screen.findAllByRole('button', { name: /Abrir movimiento/ })).toHaveLength(20);
+    await fireEvent.press(screen.getByRole('button', { name: 'Ver más' }));
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: /Abrir movimiento/ })).toHaveLength(40),
+    );
+    await fireEvent.press(screen.getByRole('button', { name: 'Ver más' }));
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: /Abrir movimiento/ })).toHaveLength(45),
+    );
+    expect(screen.queryByRole('button', { name: 'Ver más' })).toBeNull();
+  });
+});
+
+describe('home overview', () => {
+  const noop = () => undefined;
+
+  it('RN-33 shows what is left per currency, never added across currencies', async () => {
+    makeRepository(
+      [
+        budgetEndingIn('usd', 5),
+        {
+          ...budgetEndingIn('cop', 5, { categoryId: SEED_SYSTEM_CATEGORIES[0]?.id ?? '' }),
+          currency: 'COP',
+          amountMinor: 500000,
+        },
+      ],
+      {},
+      {
+        usageById: {
+          usd: { expenseMinor: 3000, refundMinor: 0, incomeMinor: 0 },
+          cop: { expenseMinor: 125000, refundMinor: 0, incomeMinor: 0 },
+        },
+      },
+    );
+    await render(<OpenBudgetsOverview categories={categories} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByLabelText('USD Queda por gastar')).toHaveTextContent(/USD\s25,00/);
+    expect(screen.getByLabelText('COP Queda por gastar')).toHaveTextContent(/COP\s375\.000/);
+  });
+
+  it('leaves closed budgets out of the summary', async () => {
+    makeRepository([budgetEndingIn('old', -30, { status: 'CLOSED', spentFinalMinor: 100 })]);
+    await render(<OpenBudgetsOverview categories={categories} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText('No tienes presupuestos abiertos.')).toBeTruthy();
+  });
+
+  it('lists the open budgets and opens one when pressed', async () => {
+    makeRepository([budgetEndingIn('a', 5), budgetEndingIn('g', -2, { startDate: day(-12) })]);
+    let opened = '';
+    await render(<OpenBudgetsOverview categories={categories} onOpen={(id) => (opened = id)} />, {
+      wrapper: Providers,
+    });
+
+    const cards = await screen.findAllByRole('button', { name: /Entretenimiento/ });
+    expect(cards).toHaveLength(2);
+    await fireEvent.press(cards[0] as (typeof cards)[number]);
+    expect(['a', 'g']).toContain(opened);
   });
 });

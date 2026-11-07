@@ -6,7 +6,6 @@ import { AppText } from '@/core/theme/AppText';
 import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
 
 import type { Category } from '../../categories/category.types';
-import { getBudgetPhase } from '../budget.rules';
 import { useBudgets } from '../useBudgets';
 import { BudgetCard } from './BudgetCard';
 
@@ -20,7 +19,7 @@ type Props = {
 // Budgets grouped by phase: active, in grace and closed (RN-05).
 export function BudgetList({ refreshKey, categories, onCreate, onOpen }: Props) {
   const { t } = useTranslation();
-  const { active, grace, closed, today, isLoading } = useBudgets(refreshKey);
+  const { active, grace, closed, isLoading } = useBudgets(refreshKey);
   if (isLoading) return null;
 
   const sections = [
@@ -38,13 +37,12 @@ export function BudgetList({ refreshKey, categories, onCreate, onOpen }: Props) 
           section.budgets.length === 0 ? null : (
             <Fragment key={section.key}>
               <AppText variant="muted">{t(`budgets.${section.key}`)}</AppText>
-              {section.budgets.map((budget) => (
+              {section.budgets.map((item) => (
                 <BudgetCard
-                  key={budget.id}
-                  budget={budget}
-                  category={categories.find((category) => category.id === budget.categoryId)}
-                  phase={getBudgetPhase(budget, today)}
-                  onPress={() => onOpen(budget.id)}
+                  key={item.budget.id}
+                  item={item}
+                  category={categories.find((category) => category.id === item.budget.categoryId)}
+                  onPress={() => onOpen(item.budget.id)}
                 />
               ))}
             </Fragment>

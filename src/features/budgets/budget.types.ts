@@ -40,3 +40,44 @@ export type BudgetFilter = {
   status?: BudgetStatus;
   includeDeleted?: boolean;
 };
+
+// What the movement lines assigned to a budget add up to, by kind (RN-22, RN-23).
+export type UsageTotals = {
+  expenseMinor: number;
+  refundMinor: number;
+  incomeMinor: number;
+};
+
+export const ZERO_USAGE_TOTALS: UsageTotals = { expenseMinor: 0, refundMinor: 0, incomeMinor: 0 };
+
+// How much of a budget is used. All amounts are in the budget's currency, in the minor unit.
+export type BudgetUsage = {
+  spentMinor: number; // expenses - refunds, never below 0
+  availableMinor: number; // budget amount + incomes
+  remainingMinor: number; // available - spent; negative means exceeded
+  percentage: number; // spent / available * 100 (can pass 100)
+};
+
+// How the screen presents the usage (RN-09, RN-29).
+export type UsageState = 'NORMAL' | 'EXCEEDED' | 'SAVED';
+
+// A movement line counting for a budget, with what is needed to show it in the detail.
+export type BudgetLine = {
+  lineId: string;
+  movementId: string;
+  kind: 'EXPENSE' | 'REFUND' | 'INCOME';
+  localDate: LocalDate;
+  note: string | null;
+  categoryId: string;
+  amountMinor: number;
+};
+
+export const BUDGET_LINES_PAGE_SIZE = 20;
+
+// A budget as the screens list it: with its phase, its usage and how that usage is presented.
+export type BudgetItem = {
+  budget: Budget;
+  phase: BudgetPhase;
+  usage: BudgetUsage;
+  state: UsageState;
+};

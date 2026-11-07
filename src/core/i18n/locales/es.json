@@ -57,7 +57,27 @@
       "delete": "Borrar",
       "deleteTitle": "¿Borrar este presupuesto?",
       "deleteMessage": "Sus movimientos se conservan pero dejan de contar para él. No se puede deshacer.",
-      "notFound": "Este presupuesto ya no existe."
+      "notFound": "Este presupuesto ya no existe.",
+      "spent": "Gastado",
+      "available": "Disponible",
+      "remainingLabel": "Queda",
+      "lines": "Movimientos que cuentan para este presupuesto",
+      "noLines": "Aún no hay movimientos para este presupuesto.",
+      "showMore": "Ver más",
+      "openLine": "Abrir movimiento"
+    },
+    "usage": {
+      "spentOf": "{{spent}} de {{available}}",
+      "percent": "{{percent}} usado",
+      "remaining": "Queda: {{amount}}",
+      "exceeded": "Te pasaste por {{amount}}",
+      "exceededTag": "Excedido",
+      "saved": "Ahorrado: {{amount}}"
+    },
+    "summary": {
+      "title": "Queda por gastar",
+      "spentOf": "Gastado {{spent}} de {{available}}",
+      "empty": "No tienes presupuestos abiertos."
     }
   },
   "movements": {

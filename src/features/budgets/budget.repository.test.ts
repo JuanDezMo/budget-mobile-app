@@ -227,3 +227,113 @@ describe('BudgetRepository spent amount (sqlite)', () => {
     expect(await repository.getSpentMinor(budgetId)).toBe(200);
   });
 });
+
+describe('BudgetRepository usage and lines (sqlite)', () => {
+  let db: AppDatabase;
+  let repository: BudgetRepository;
+  let first: string;
+  let second: string;
+
+  async function addMovement(
+    id: string,
+    kind: 'EXPENSE' | 'REFUND' | 'INCOME',
+    amount: number,
+    budgetId: string | null,
+    options: { deleted?: boolean; date?: string; note?: string | null } = {},
+  ) {
+    const date = options.date ?? '2026-11-06';
+    await db
+      .insertInto('movement')
+      .values({
+        id,
+        kind,
+        currency_code: 'USD',
+        total_minor: amount,
+        occurred_at: `${date}T10:00:00-05:00`,
+        local_date: date,
+        payment_method: 'CASH',
+        note: options.note ?? null,
+        created_at: NOW,
+        updated_at: NOW,
+        deleted_at: options.deleted ? NOW : null,
+      })
+      .execute();
+    await db
+      .insertInto('movement_line')
+      .values({
+        id: `line-${id}`,
+        movement_id: id,
+        category_id: ENTRETENIMIENTO,
+        budget_id: budgetId,
+        amount_minor: amount,
+      })
+      .execute();
+  }
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    repository = createBudgetRepository(db, counter());
+    const a = await repository.create(entertainment);
+    const b = await repository.create({ ...entertainment, categoryId: ALIMENTACION });
+    first = a.ok ? a.value.id : '';
+    second = b.ok ? b.value.id : '';
+  });
+
+  it('RN-22 / RN-23 adds expenses, refunds and incomes apart for each budget', async () => {
+    await addMovement('m1', 'EXPENSE', 4000, first);
+    await addMovement('m2', 'EXPENSE', 500, first);
+    await addMovement('m3', 'REFUND', 1000, first);
+    await addMovement('m4', 'INCOME', 1500, first);
+    await addMovement('m5', 'EXPENSE', 700, second);
+
+    expect(await repository.listUsageTotals()).toEqual({
+      [first]: { expenseMinor: 4500, refundMinor: 1000, incomeMinor: 1500 },
+      [second]: { expenseMinor: 700, refundMinor: 0, incomeMinor: 0 },
+    });
+  });
+
+  it('RN-21 / RN-41 ignores deleted movements and lines with no budget', async () => {
+    await addMovement('m1', 'EXPENSE', 4000, first, { deleted: true });
+    await addMovement('m2', 'EXPENSE', 700, null);
+    await addMovement('m3', 'EXPENSE', 200, first);
+
+    expect(await repository.listUsageTotals()).toEqual({
+      [first]: { expenseMinor: 200, refundMinor: 0, incomeMinor: 0 },
+    });
+  });
+
+  it('a budget with no lines is not in the totals', async () => {
+    expect(await repository.listUsageTotals()).toEqual({});
+  });
+
+  it('lists the lines of one budget newest first, with the movement data', async () => {
+    await addMovement('old', 'EXPENSE', 100, first, { date: '2026-11-02' });
+    await addMovement('new', 'REFUND', 300, first, { date: '2026-11-09', note: 'Returned' });
+    await addMovement('other', 'EXPENSE', 999, second);
+
+    const lines = await repository.listLines(first, { limit: 20, offset: 0 });
+
+    expect(lines.map((line) => line.movementId)).toEqual(['new', 'old']);
+    expect(lines[0]).toMatchObject({
+      kind: 'REFUND',
+      amountMinor: 300,
+      note: 'Returned',
+      localDate: '2026-11-09',
+    });
+  });
+
+  it('lists lines in pages and leaves out deleted movements', async () => {
+    for (let i = 0; i < 25; i += 1) {
+      await addMovement(`m${String(i).padStart(2, '0')}`, 'EXPENSE', 100, first, {
+        date: `2026-11-${String(i + 1).padStart(2, '0')}`,
+      });
+    }
+    await addMovement('gone', 'EXPENSE', 100, first, { deleted: true });
+
+    const page1 = await repository.listLines(first, { limit: 20, offset: 0 });
+    const page2 = await repository.listLines(first, { limit: 20, offset: 20 });
+
+    expect([page1.length, page2.length]).toEqual([20, 5]);
+    expect(new Set([...page1, ...page2].map((line) => line.movementId)).size).toBe(25);
+  });
+});

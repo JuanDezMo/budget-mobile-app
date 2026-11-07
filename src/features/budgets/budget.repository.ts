@@ -8,7 +8,15 @@ import { rangesOverlap, todayLocalDate } from '@/core/shared/dates';
 import { err, ok } from '@/core/shared/result';
 import type { Result } from '@/core/shared/result';
 
-import type { Budget, BudgetFilter, BudgetUpdate, NewBudget } from './budget.types';
+import { ZERO_USAGE_TOTALS } from './budget.types';
+import type {
+  Budget,
+  BudgetFilter,
+  BudgetLine,
+  BudgetUpdate,
+  NewBudget,
+  UsageTotals,
+} from './budget.types';
 
 export type BudgetSaveError = 'BUDGET_OVERLAP';
 
@@ -25,6 +33,12 @@ export interface BudgetRepository {
   close(id: string, spentFinalMinor: number): Promise<void>;
   // Spent so far = expenses - refunds, never below 0 (calculation section of the rules).
   getSpentMinor(id: string): Promise<number>;
+  // What the lines assigned to each budget add up to, by kind (RN-22, RN-23). One query for all
+  // the budgets, so a list does not ask once per budget. Budgets with no lines are not in the map.
+  listUsageTotals(): Promise<Record<string, UsageTotals>>;
+  // The lines counting for a budget, newest first, one page at a time. Lines of deleted
+  // movements are left out (RN-21).
+  listLines(budgetId: string, page: { limit: number; offset: number }): Promise<BudgetLine[]>;
 }
 
 // Row (snake_case) -> entity (camelCase).
@@ -185,6 +199,67 @@ export function createBudgetRepository(
 
       return Math.max(0, Number(row?.spent ?? 0));
     },
+
+    async listUsageTotals() {
+      const rows = await db
+        .selectFrom('movement_line as line')
+        .innerJoin('movement', 'movement.id', 'line.movement_id')
+        .select([
+          'line.budget_id as budget_id',
+          'movement.kind as kind',
+          sql<number>`sum(line.amount_minor)`.as('total'),
+        ])
+        .where('line.budget_id', 'is not', null)
+        .where('movement.deleted_at', 'is', null)
+        .groupBy(['line.budget_id', 'movement.kind'])
+        .execute();
+
+      const totals: Record<string, UsageTotals> = {};
+      for (const row of rows) {
+        if (row.budget_id === null) continue;
+        const entry = totals[row.budget_id] ?? { ...ZERO_USAGE_TOTALS };
+        const total = Number(row.total);
+        if (row.kind === 'EXPENSE') entry.expenseMinor = total;
+        else if (row.kind === 'REFUND') entry.refundMinor = total;
+        else entry.incomeMinor = total;
+        totals[row.budget_id] = entry;
+      }
+
+      return totals;
+    },
+
+    async listLines(budgetId, page) {
+      const rows = await db
+        .selectFrom('movement_line as line')
+        .innerJoin('movement', 'movement.id', 'line.movement_id')
+        .select([
+          'line.id as line_id',
+          'movement.id as movement_id',
+          'movement.kind as kind',
+          'movement.local_date as local_date',
+          'movement.note as note',
+          'line.category_id as category_id',
+          'line.amount_minor as amount_minor',
+        ])
+        .where('line.budget_id', '=', budgetId)
+        .where('movement.deleted_at', 'is', null)
+        .orderBy('movement.local_date', 'desc')
+        .orderBy('movement.occurred_at', 'desc')
+        .orderBy('line.id')
+        .limit(page.limit)
+        .offset(page.offset)
+        .execute();
+
+      return rows.map((row) => ({
+        lineId: row.line_id,
+        movementId: row.movement_id,
+        kind: row.kind,
+        localDate: row.local_date,
+        note: row.note,
+        categoryId: row.category_id,
+        amountMinor: row.amount_minor,
+      }));
+    },
   };
 }
 
@@ -194,6 +269,11 @@ export function createInMemoryBudgetRepository(
   initial: readonly Budget[],
   generateId: () => string,
   spentById: Readonly<Record<string, number>> = {},
+  // Usage and lines to fake, per budget id (the movements themselves live in another repository).
+  fake: {
+    usageById?: Readonly<Record<string, UsageTotals>>;
+    linesById?: Readonly<Record<string, readonly BudgetLine[]>>;
+  } = {},
 ): BudgetRepository {
   let budgets: Budget[] = [...initial];
 
@@ -270,6 +350,23 @@ export function createInMemoryBudgetRepository(
       });
       return Promise.resolve();
     },
-    getSpentMinor: (id) => Promise.resolve(spentById[id] ?? 0),
+    getSpentMinor(id) {
+      const usage = fake.usageById?.[id];
+      if (usage) return Promise.resolve(Math.max(0, usage.expenseMinor - usage.refundMinor));
+
+      return Promise.resolve(spentById[id] ?? 0);
+    },
+    listUsageTotals() {
+      const totals: Record<string, UsageTotals> = { ...fake.usageById };
+      for (const [id, spent] of Object.entries(spentById)) {
+        totals[id] ??= { expenseMinor: spent, refundMinor: 0, incomeMinor: 0 };
+      }
+
+      return Promise.resolve(totals);
+    },
+    listLines: (budgetId, page) =>
+      Promise.resolve(
+        (fake.linesById?.[budgetId] ?? []).slice(page.offset, page.offset + page.limit),
+      ),
   };
 }

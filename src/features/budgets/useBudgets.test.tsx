@@ -58,9 +58,12 @@ describe('useBudgets', () => {
     const { result } = await renderHook(() => useBudgets(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.active.map((b) => b.id)).toEqual(['active']);
-    expect(result.current.grace.map((b) => b.id)).toEqual(['grace']);
-    expect(result.current.closed.map((b) => b.id).sort()).toEqual(['expired', 'stored-closed']);
+    expect(result.current.active.map((item) => item.budget.id)).toEqual(['active']);
+    expect(result.current.grace.map((item) => item.budget.id)).toEqual(['grace']);
+    expect(result.current.closed.map((item) => item.budget.id).sort()).toEqual([
+      'expired',
+      'stored-closed',
+    ]);
   });
 });
 

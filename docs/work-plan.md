@@ -126,11 +126,11 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 
 ## Iteración 5 — Uso del presupuesto
 
-- [ ] T5.1 Regla de cálculo: gastado (mín. 0), disponible, %, sobrante (RN-22, RN-23) + prueba del ejemplo USD 55 → 42,9 %
-- [ ] T5.2 Consulta agregada en el repositorio por `budget_id` + pruebas
-- [ ] T5.3 Barra de progreso en lista y detalle; estados "ahorrado" (RN-09) y "excedido" (RN-29)
-- [ ] T5.4 Detalle de presupuesto con sus líneas
-- [ ] T5.5 Resumen general agrupado por moneda, nunca sumado entre monedas (RN-33)
+- [x] T5.1 Regla de cálculo: gastado (mín. 0), disponible, %, sobrante (RN-22, RN-23) + prueba del ejemplo USD 55 → 42,9 %
+- [x] T5.2 Consulta agregada en el repositorio por `budget_id` + pruebas
+- [x] T5.3 Barra de progreso en lista y detalle; estados "ahorrado" (RN-09) y "excedido" (RN-29)
+- [x] T5.4 Detalle de presupuesto con sus líneas
+- [x] T5.5 Resumen general agrupado por moneda, nunca sumado entre monedas (RN-33)
 
 **Hecho cuando:** el detalle muestra el mismo gastado y % que se calcula a mano.
 
@@ -199,6 +199,7 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - El historial usa FlashList 2 (`@shopify/flash-list`, incluido en Expo Go); Jest necesita `setupFiles` y transformar el paquete. Paginado de 20 en 20 (`MOVEMENT_PAGE_SIZE`): el repositorio elige primero los movimientos de la página y luego sus líneas, para no partir un movimiento; los totales por moneda (RN-33) salen de una consulta aparte sobre todo el historial filtrado, no de la página cargada. Medir igual con 1 000+ en T7.2.
 - Punto de control en emulador (Android 14, Expo Go, 2026-11-07): registro, PIN, bloqueo, presupuesto con selector de fecha nativo y movimiento USD 100 en 3 líneas funcionan con `expo-sqlite` real y los datos sobreviven al reinicio. Hallazgos corregidos: `enableAppSwitcherProtectionAsync` solo existe en iOS (ahora `useScreenPrivacy`, solo en builds de release, ignora fallos); `Intl.DisplayNames` no trae nombres de país en Hermes (tabla propia `country-names.json`, generada con `scripts/generate-country-names.mjs`); botón principal de las listas fijo abajo (`FloatingAction`).
 - Filtros del historial compactos (`OptionGroup compact`: una fila de chips con desplazamiento lateral, etiqueta solo para lectores de pantalla) y totales en una sola tarjeta por moneda; verificado en el emulador. Pendiente de pulir: los formularios largos dejan un espacio grande bajo el título.
+- Uso del presupuesto (it. 5): `calculateUsage` (`budget-usage.rules.ts`) saca gastado, disponible, % y sobrante de las sumas por tipo que entrega el repositorio (`listUsageTotals`, una consulta para toda la lista; `listLines`, paginado de 20 en 20). Un presupuesto cerrado muestra el gastado congelado (`spent_final_minor`, RN-05). "Excedido" (RN-29) = restante negativo; "Ahorrado" (RN-09) = cerrado con restante positivo. La barra se llena hasta 100 % y el excedido se marca con borde y texto de color de alerta, sin relleno rojo (dirección visual). El resumen del inicio suma solo presupuestos abiertos (activos y en gracia) y por moneda (RN-33). Verificado en el emulador: USD 20 de 55 = 36,4 %, queda 35.
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes
