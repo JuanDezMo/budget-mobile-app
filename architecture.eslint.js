@@ -53,6 +53,7 @@ const policies = [
     featureFile('schemas', sameFeature),
     featureFile('viewmodel', sameFeature),
     ...coreForUi,
+    core('security'),
   ]),
   ...crossFeature(featureFile('viewmodel')),
   // Rules: pure functions over types and core/shared only.
@@ -80,6 +81,8 @@ const policies = [
   // Core modules: shared is the base; db never reaches UI modules.
   ...allow(core('shared'), [core('shared')]),
   ...allow(core('db'), [core('db'), core('shared')]),
+  // Security (PIN vault) only needs shared; ViewModels reach it through context.
+  ...allow(core('security'), [core('security'), core('shared')]),
   ...['i18n', 'theme', 'notifications'].flatMap((module) => allow(core(module), coreForUi)),
   // Tests may import anything local (in-memory repositories, fixtures...).
   { from: { file: { categories: 'test' } }, allow: { to: { module: { origin: 'local' } } } },

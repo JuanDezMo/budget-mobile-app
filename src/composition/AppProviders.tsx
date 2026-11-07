@@ -1,4 +1,9 @@
 import { getLocales } from 'expo-localization';
+import {
+  disableAppSwitcherProtectionAsync,
+  enableAppSwitcherProtectionAsync,
+  usePreventScreenCapture,
+} from 'expo-screen-capture';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +13,21 @@ import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
+import { createProfileRepository } from '@/features/profile/profile.repository';
+import type { ProfileRepository } from '@/features/profile/profile.repository';
+import { loadAccess, useAppLock } from '@/features/profile/useAccess';
+import {
+  PinVaultProvider,
+  ProfileRepositoryProvider,
+} from '@/features/profile/useProfileDependencies';
+import { createDevicePinVault } from '@/core/security/device-security';
+import type { PinVault } from '@/core/security/pin-vault';
 import { createSettingsRepository } from '@/features/settings/settings.repository';
 import type { SettingsRepository } from '@/features/settings/settings.repository';
 import { loadSettings, useSettingsStore } from '@/features/settings/useSettings';
 import { SettingsRepositoryProvider } from '@/features/settings/useSettingsRepository';
 
-type Repositories = { settings: SettingsRepository };
+type Repositories = { settings: SettingsRepository; profile: ProfileRepository; vault: PinVault };
 type Boot = { status: 'loading' } | { status: 'error' } | { status: 'ready'; repos: Repositories };
 
 // Composition root: the only place that knows both the database and the features.
@@ -33,7 +47,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
         const settingsRepository = createSettingsRepository(db);
         const settings = await loadSettings(settingsRepository, deviceLanguage);
         await setAppLanguage(settings.language);
-        if (!cancelled) setBoot({ status: 'ready', repos: { settings: settingsRepository } });
+        const profileRepository = createProfileRepository(db);
+        await loadAccess(profileRepository);
+        const repos = {
+          settings: settingsRepository,
+          profile: profileRepository,
+          vault: createDevicePinVault(),
+        };
+        if (!cancelled) setBoot({ status: 'ready', repos });
       } catch {
         if (!cancelled) setBoot({ status: 'error' });
       }
@@ -50,12 +71,24 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <SettingsRepositoryProvider value={boot.repos.settings}>
-      <ThemedRoot>{children}</ThemedRoot>
+      <ProfileRepositoryProvider value={boot.repos.profile}>
+        <PinVaultProvider value={boot.repos.vault}>
+          <ThemedRoot>{children}</ThemedRoot>
+        </PinVaultProvider>
+      </ProfileRepositoryProvider>
     </SettingsRepositoryProvider>
   );
 }
 
 function ThemedRoot({ children }: { children: ReactNode }) {
+  useAppLock(); // RN-44
+  usePreventScreenCapture(); // Android: blank preview and no screenshots
+  useEffect(() => {
+    // iOS: blur the app in the app switcher so balances are not visible.
+    void enableAppSwitcherProtectionAsync();
+    return () => void disableAppSwitcherProtectionAsync();
+  }, []);
+
   const theme = useSettingsStore((state) => state.settings?.theme ?? 'SYSTEM');
 
   return <ThemeProvider mode={theme}>{children}</ThemeProvider>;

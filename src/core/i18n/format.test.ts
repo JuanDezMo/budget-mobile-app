@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { formatLocalDate, formatMoney, formatPercentage } from './format';
+import { formatCountryName, formatLocalDate, formatMoney, formatPercentage } from './format';
 import { resolveInitialLanguage } from '@/core/shared/app-preferences';
 import en from './locales/en.json';
 import es from './locales/es.json';
@@ -42,5 +42,10 @@ describe('i18n', () => {
   it('formats a calendar day by language', () => {
     expect(formatLocalDate('2026-11-06', 'en')).toBe('Nov 6, 2026');
     expect(formatLocalDate('2026-11-06', 'es')).toMatch(/^6 nov\.? 2026$/);
+  });
+
+  it('RN-42 names a country in the current language', () => {
+    expect(formatCountryName('CO', 'en')).toBe('Colombia');
+    expect(formatCountryName('US', 'es')).toMatch(/Estados Unidos/);
   });
 });

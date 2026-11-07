@@ -34,11 +34,57 @@
       "SYSTEM": "Sistema"
     }
   },
+  "registration": {
+    "title": "Crea tu perfil",
+    "intro": "Tus datos se quedan en este teléfono. No se envía nada a ningún lado.",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "country": "País",
+    "pin": "PIN (de 4 a 6 dígitos)",
+    "pinConfirmation": "Repite tu PIN",
+    "pinWarning": "Si olvidas tu PIN no se puede recuperar. La única forma de volver a entrar es borrar todos los datos de este teléfono.",
+    "submit": "Crear perfil"
+  },
+  "country": {
+    "search": "Buscar país",
+    "none": "No hay países",
+    "change": "Cambiar"
+  },
+  "unlock": {
+    "title": "Ingresa tu PIN",
+    "pin": "PIN",
+    "submit": "Desbloquear",
+    "wait": "Demasiados intentos. Intenta de nuevo en {{seconds}} s.",
+    "forgot": "Olvidé mi PIN",
+    "eraseTitle": "¿Borrar todos los datos?",
+    "eraseMessage": "Esto elimina tu perfil, presupuestos y movimientos de este teléfono. No se puede deshacer.",
+    "eraseConfirm": "Borrar todo"
+  },
+  "profile": {
+    "link": "Perfil y seguridad",
+    "title": "Perfil y seguridad",
+    "currentPin": "PIN actual",
+    "save": "Guardar cambios",
+    "saved": "Guardado",
+    "changePin": "Cambiar PIN",
+    "newPin": "PIN nuevo (de 4 a 6 dígitos)",
+    "newPinConfirmation": "Repite el PIN nuevo",
+    "changePinSubmit": "Cambiar PIN"
+  },
   "errors": {
     "UNEXPECTED": "Algo salió mal. Inténtalo de nuevo.",
     "CURRENCY_MISMATCH": "No se pueden combinar montos de monedas distintas.",
     "AMOUNT_INVALID": "Ingresa un monto válido.",
     "AMOUNT_TOO_MANY_DECIMALS": "Esta moneda no admite tantos decimales.",
-    "AMOUNT_TOO_LARGE": "El monto es demasiado grande."
+    "AMOUNT_TOO_LARGE": "El monto es demasiado grande.",
+    "PIN_INVALID": "El PIN debe tener de 4 a 6 dígitos.",
+    "PIN_MISMATCH": "Los PIN no coinciden.",
+    "PIN_WRONG": "PIN incorrecto.",
+    "PIN_LOCKED": "Demasiados intentos fallidos. Espera un momento e inténtalo de nuevo.",
+    "FULL_NAME_REQUIRED": "Ingresa tu nombre.",
+    "FULL_NAME_TOO_LONG": "El nombre es demasiado largo.",
+    "EMAIL_INVALID": "Ingresa un correo válido.",
+    "COUNTRY_INVALID": "Elige tu país.",
+    "INVALID": "Revisa los datos e inténtalo de nuevo."
   }
 }

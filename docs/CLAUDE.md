@@ -112,7 +112,7 @@ Monedas, categorías y configuración
 Perfil y seguridad
 - RN-42 Registro obligatorio al primer arranque (nombre, correo sin verificar, país ISO). El país no cambia reglas.
 - RN-43 PIN obligatorio de 4–6 dígitos, solo hash con sal en secure-store; bloquea la pantalla pero no cifra la base.
-- RN-44 Bloqueo al abrir y tras 30 s en segundo plano; sin datos en la vista previa. RN-45 5 fallos → espera creciente.
+- RN-44 Bloqueo al abrir y tras 30 s en segundo plano; sin datos en la vista previa. RN-45 5 fallos → espera creciente (30 s, ×2, máx. 15 min; contador persistente).
 - RN-46 PIN olvidado = borrar todos los datos con confirmación; no hay recuperación. RN-47 Editar perfil/PIN pidiendo el PIN actual.
 
 ## Orden de implementación

@@ -38,3 +38,13 @@ export function formatLocalDate(date: LocalDate, language: AppLanguage): string 
 
   return format(parseISO(date), pattern, { locale: DATE_FNS_LOCALE[language] });
 }
+
+// Country name in the current language (RN-42). Falls back to the code if the engine has no
+// country names (Intl.DisplayNames is not available everywhere).
+export function formatCountryName(code: string, language: AppLanguage): string {
+  try {
+    return new Intl.DisplayNames([INTL_LOCALE[language]], { type: 'region' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}

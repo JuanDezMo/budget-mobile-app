@@ -65,15 +65,15 @@ Configuración (feature `settings`)
 Feature `profile`. Depende de T1.7–T1.15. Detalle: RN-42 a RN-47. La app queda tras una puerta: sin perfil → registro; con perfil → bloqueo por PIN.
 
 - [x] T1B.1 Verificar en la documentación del SDK 58 `expo-secure-store`, rutas protegidas y vista previa del selector de apps (hallazgos abajo); falta solo instalar con `npx expo install expo-secure-store expo-screen-capture` al empezar T1B.5
-- [ ] T1B.2 `profile.types.ts` + `profile.schemas.ts` (nombre, correo, país ISO 3166-1 alfa-2, PIN 4–6 dígitos) + pruebas
-- [ ] T1B.3 `profile.rules.ts`: registro obligatorio (RN-42), formato del PIN (RN-43), espera por intentos fallidos (RN-45) + pruebas RN
-- [ ] T1B.4 `profile.repository.ts` (`user_profile`) + mapper + pruebas contra SQLite; implementación en memoria
-- [ ] T1B.5 Servicio de PIN en `core/security`: hash con sal (sal aleatoria con `expo-crypto`), guardado con `setItemAsync` y `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`, verificación; descartar hash huérfano al registrarse; nunca en SQLite (RN-43) + pruebas con almacenamiento falso
-- [ ] T1B.6 `useRegistration` + pantalla de registro (nombre, correo, país, PIN y confirmación) con aviso de que el PIN no se recupera (RN-42, RN-46)
-- [ ] T1B.7 Puerta con `Stack.Protected` y `useAppLock`: pantalla de PIN al abrir y al volver de segundo plano tras 30 s; ocultar vista previa con `expo-screen-capture` (RN-44)
-- [ ] T1B.8 Intentos fallidos con espera creciente y opción "Olvidé mi PIN" que borra todos los datos con confirmación (RN-45, RN-46)
-- [ ] T1B.9 Editar perfil y cambiar PIN desde Ajustes, pidiendo el PIN actual (RN-47)
-- [ ] T1B.10 Textos es/en (incluye nombres de país con `Intl.DisplayNames`) y modo oscuro
+- [x] T1B.2 `profile.types.ts` + `profile.schemas.ts` (nombre, correo, país ISO 3166-1 alfa-2, PIN 4–6 dígitos) + pruebas
+- [x] T1B.3 `profile.rules.ts`: registro obligatorio (RN-42), formato del PIN (RN-43), espera por intentos fallidos (RN-45) + pruebas RN
+- [x] T1B.4 `profile.repository.ts` (`user_profile`) + mapper + pruebas contra SQLite; implementación en memoria
+- [x] T1B.5 Servicio de PIN en `core/security`: hash con sal (sal aleatoria con `expo-crypto`), guardado con `setItemAsync` y `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`, verificación; descartar hash huérfano al registrarse; nunca en SQLite (RN-43) + pruebas con almacenamiento falso
+- [x] T1B.6 `useRegistration` + pantalla de registro (nombre, correo, país, PIN y confirmación) con aviso de que el PIN no se recupera (RN-42, RN-46)
+- [x] T1B.7 Puerta con `Stack.Protected` y `useAppLock`: pantalla de PIN al abrir y al volver de segundo plano tras 30 s; ocultar vista previa con `expo-screen-capture` (RN-44)
+- [x] T1B.8 Intentos fallidos con espera creciente y opción "Olvidé mi PIN" que borra todos los datos con confirmación (RN-45, RN-46)
+- [x] T1B.9 Editar perfil y cambiar PIN desde Ajustes, pidiendo el PIN actual (RN-47)
+- [x] T1B.10 Textos es/en (incluye nombres de país con `Intl.DisplayNames`) y modo oscuro
 
 Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - `expo-secure-store` (~58.0.2): `getItemAsync`, `setItemAsync`, `deleteItemAsync`; usar las asíncronas, las síncronas bloquean el hilo de JS. Claves solo con letras, números, `.`, `-` y `_`. Funciona en Expo Go.
@@ -187,6 +187,8 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - Las migraciones usan SQL crudo con `STRICT` explícito para que el esquema sea idéntico en el teléfono y en las pruebas.
 - `src/composition/AppProviders.tsx` es la raíz de composición: abre la base, carga ajustes e inyecta repositorios; es el único lugar que conoce la base y las features.
 - Repositorios por contexto: `createRepositoryContext` en `core/shared`, un contexto por repositorio.
+- Perfil y PIN (1B): el hash del PIN es un SHA-256 con sal (expo-crypto no ofrece PBKDF2); la defensa real es el almacenamiento seguro y la espera por intentos (RN-45). Un perfil sin PIN guardado (p. ej. Keystore limpiado) queda bloqueado y solo se sale con "Olvidé mi PIN".
+- La puerta de acceso usa `Stack.Protected` en `src/app/_layout.tsx` y el formulario de registro vive en `useRegistration` (las capas no dejan que un componente importe un schema).
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes
