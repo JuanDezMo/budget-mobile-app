@@ -20,6 +20,33 @@
   "movements": {
     "empty": "Your movements will appear here"
   },
+  "categories": {
+    "ALIMENTACION": "Food",
+    "TRANSPORTE": "Transport",
+    "ENTRETENIMIENTO": "Entertainment",
+    "URGENCIAS": "Emergencies",
+    "OBLIGACIONES_HOGAR": "Household bills",
+    "SIN_CLASIFICAR": "Unclassified",
+    "link": "Categories",
+    "title": "Categories",
+    "sectionSystem": "Built-in",
+    "sectionCustom": "Yours",
+    "sectionArchived": "Archived",
+    "emptyCustom": "You have not created any categories yet.",
+    "new": "New category",
+    "remove": "Remove",
+    "removeTitle": "Remove category?",
+    "removeMessage": "If it has budgets or movements it will be archived and its history kept. Otherwise it will be deleted.",
+    "archivedDone": "Archived: its history is kept.",
+    "deletedDone": "Category deleted.",
+    "form": {
+      "title": "New category",
+      "name": "Name",
+      "icon": "Icon",
+      "color": "Color",
+      "submit": "Create category"
+    }
+  },
   "settings": {
     "title": "Settings",
     "language": {
@@ -85,6 +112,15 @@
     "FULL_NAME_TOO_LONG": "The name is too long.",
     "EMAIL_INVALID": "Enter a valid email.",
     "COUNTRY_INVALID": "Choose your country.",
-    "INVALID": "Check the data and try again."
+    "INVALID": "Check the data and try again.",
+    "CATEGORY_NAME_REQUIRED": "Enter a name.",
+    "CATEGORY_NAME_TOO_LONG": "The name is too long.",
+    "CATEGORY_NAME_DUPLICATE": "You already have a category with that name.",
+    "CATEGORY_ICON_REQUIRED": "Choose an icon.",
+    "CATEGORY_COLOR_REQUIRED": "Choose a color.",
+    "CATEGORY_SYSTEM_PROTECTED": "Built-in categories cannot be changed or removed.",
+    "CATEGORY_ALREADY_ARCHIVED": "This category is already archived.",
+    "CATEGORY_ARCHIVED": "Archived categories cannot be used for new items.",
+    "CATEGORY_NO_BUDGET_ALLOWED": "This category cannot have a budget."
   }
 }

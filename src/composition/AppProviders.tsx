@@ -13,6 +13,10 @@ import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
+import { createCategoryRepository } from '@/features/categories/category.repository';
+import type { CategoryRepository } from '@/features/categories/category.repository';
+import { CategoryRepositoryProvider } from '@/features/categories/useCategoryRepository';
+import { newId } from '@/core/shared/id';
 import { createProfileRepository } from '@/features/profile/profile.repository';
 import type { ProfileRepository } from '@/features/profile/profile.repository';
 import { loadAccess, useAppLock } from '@/features/profile/useAccess';
@@ -27,7 +31,12 @@ import type { SettingsRepository } from '@/features/settings/settings.repository
 import { loadSettings, useSettingsStore } from '@/features/settings/useSettings';
 import { SettingsRepositoryProvider } from '@/features/settings/useSettingsRepository';
 
-type Repositories = { settings: SettingsRepository; profile: ProfileRepository; vault: PinVault };
+type Repositories = {
+  settings: SettingsRepository;
+  profile: ProfileRepository;
+  categories: CategoryRepository;
+  vault: PinVault;
+};
 type Boot = { status: 'loading' } | { status: 'error' } | { status: 'ready'; repos: Repositories };
 
 // Composition root: the only place that knows both the database and the features.
@@ -52,6 +61,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         const repos = {
           settings: settingsRepository,
           profile: profileRepository,
+          categories: createCategoryRepository(db, newId),
           vault: createDevicePinVault(),
         };
         if (!cancelled) setBoot({ status: 'ready', repos });
@@ -73,7 +83,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <SettingsRepositoryProvider value={boot.repos.settings}>
       <ProfileRepositoryProvider value={boot.repos.profile}>
         <PinVaultProvider value={boot.repos.vault}>
-          <ThemedRoot>{children}</ThemedRoot>
+          <CategoryRepositoryProvider value={boot.repos.categories}>
+            <ThemedRoot>{children}</ThemedRoot>
+          </CategoryRepositoryProvider>
         </PinVaultProvider>
       </ProfileRepositoryProvider>
     </SettingsRepositoryProvider>

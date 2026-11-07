@@ -1,4 +1,7 @@
 import { Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@/core/theme/ThemeProvider';
 import { StatusBar } from 'expo-status-bar';
 
 import { AppProviders } from '@/composition/AppProviders';
@@ -8,6 +11,15 @@ import { useAccessStore } from '@/features/profile/useAccess';
 // No profile -> register (RN-42). Profile but locked -> unlock (RN-44). Otherwise the app.
 function RootNavigator() {
   const status = useAccessStore((state) => state.status);
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  // Screens opened from Settings show a header so the user can go back.
+  const withHeader = {
+    headerShown: true,
+    headerStyle: { backgroundColor: colors.ground },
+    headerTintColor: colors.ink,
+    headerShadowVisible: false,
+  } as const;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -19,7 +31,12 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={status === 'unlocked'}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="profile" />
+        <Stack.Screen name="profile" options={{ ...withHeader, title: t('profile.title') }} />
+        <Stack.Screen name="categories" options={{ ...withHeader, title: t('categories.title') }} />
+        <Stack.Screen
+          name="category-new"
+          options={{ ...withHeader, title: t('categories.form.title') }}
+        />
       </Stack.Protected>
     </Stack>
   );

@@ -86,12 +86,12 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 
 ## Iteración 2 — Categorías
 
-- [ ] T2.1 `category.types.ts` + `category.schemas.ts`
-- [ ] T2.2 `category.rules.ts`: nombre único sin mayúsculas (RN-35), sistema no editable (RN-34), archivar vs. borrar según historial (RN-36), SIN_CLASIFICAR sin presupuesto (RN-40) + pruebas RN
-- [ ] T2.3 `category.repository.ts` + mapper + pruebas contra SQLite
-- [ ] T2.4 `useCategories` (listar, crear, archivar)
-- [ ] T2.5 Pantalla de lista (sistema traducidas por `code`, personalizadas, archivadas aparte)
-- [ ] T2.6 Formulario de creación con ícono y color
+- [x] T2.1 `category.types.ts` + `category.schemas.ts`
+- [x] T2.2 `category.rules.ts`: nombre único sin mayúsculas (RN-35), sistema no editable (RN-34), archivar vs. borrar según historial (RN-36), SIN_CLASIFICAR sin presupuesto (RN-40) + pruebas RN
+- [x] T2.3 `category.repository.ts` + mapper + pruebas contra SQLite
+- [x] T2.4 `useCategories` (listar, crear, archivar)
+- [x] T2.5 Pantalla de lista (sistema traducidas por `code`, personalizadas, archivadas aparte)
+- [x] T2.6 Formulario de creación con ícono y color
 
 **Hecho cuando:** creo "Mascotas" con ícono y color, no puedo crear "mascotas" otra vez y no puedo renombrar "Transporte".
 
@@ -189,6 +189,8 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - Repositorios por contexto: `createRepositoryContext` en `core/shared`, un contexto por repositorio.
 - Perfil y PIN (1B): el hash del PIN es un SHA-256 con sal (expo-crypto no ofrece PBKDF2); la defensa real es el almacenamiento seguro y la espera por intentos (RN-45). Un perfil sin PIN guardado (p. ej. Keystore limpiado) queda bloqueado y solo se sale con "Olvidé mi PIN".
 - La puerta de acceso usa `Stack.Protected` en `src/app/_layout.tsx` y el formulario de registro vive en `useRegistration` (las capas no dejan que un componente importe un schema).
+- Categorías (it. 2): los íconos se guardan como clave (`paw`, `bus`…) y se dibujan como emoji (sin fuente de íconos, más liviano); el color es uno de 12 fijos. Quitar una personalizada la archiva si tiene presupuestos o líneas y la elimina si no (RN-36). Renombrar existe en reglas, repositorio y ViewModel (RN-34/RN-35) pero aún no tiene pantalla. El nombre de una personalizada no se compara con los nombres traducidos de las del sistema.
+- Los ids los genera `newId` (expo-crypto) desde la raíz de composición; en Jest `randomUUID` devuelve `undefined`, por eso los repositorios reciben el generador.
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes

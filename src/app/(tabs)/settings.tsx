@@ -15,6 +15,9 @@ export default function SettingsScreen() {
     <Screen>
       <AppText variant="title">{t('settings.title')}</AppText>
       <SettingsForm />
+      <Link href="/categories" style={[styles.link, { color: colors.link }]}>
+        {t('categories.link')}
+      </Link>
       <Link href="/profile" style={[styles.link, { color: colors.link }]}>
         {t('profile.link')}
       </Link>
@@ -22,4 +25,4 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({ link: { marginTop: 24, fontSize: 16, fontWeight: '600' } });
+const styles = StyleSheet.create({ link: { marginTop: 20, fontSize: 16, fontWeight: '600' } });

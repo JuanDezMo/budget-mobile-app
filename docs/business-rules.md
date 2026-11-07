@@ -94,7 +94,7 @@ Ejemplo con Entretenimiento USD 55 y umbrales de 50% y 90%:
 - **RN-33 — Sin conversión.** No se convierten monedas. Los totales y resúmenes se muestran agrupados por moneda, nunca sumados entre sí.
 - **RN-34 — Categorías del sistema.** Vienen precargadas: ALIMENTACION, TRANSPORTE, ENTRETENIMIENTO, URGENCIAS, OBLIGACIONES\_HOGAR y SIN\_CLASIFICAR. No se pueden borrar ni renombrar; su nombre visible se traduce según el idioma usando su código.
 - **RN-35 — Categorías personalizadas.** El usuario puede crear las suyas con nombre, ícono y color. El nombre es único sin distinguir mayúsculas.
-- **RN-36 — Archivar categorías.** Una categoría personalizada con historial no se borra, se archiva. Una categoría archivada no admite nuevos presupuestos ni líneas, pero su historial se conserva.
+- **RN-36 — Archivar categorías.** Una categoría personalizada con historial no se borra, se archiva; una sin historial sí se elimina. Una categoría archivada no admite nuevos presupuestos ni líneas, pero su historial se conserva.
 - **RN-37 — Configuración de la app.** Idioma (español o inglés) y tema (`LIGHT`, `DARK`, `SYSTEM`). No hay moneda por defecto: se elige en cada presupuesto.
 - **RN-38 — Días de gracia fijos.** El periodo de gracia es de 5 días para todos los presupuestos y no es configurable en esta fase.
 - **RN-40 — Categoría SIN\_CLASIFICAR.** Toda línea tiene categoría; la categoría nunca es nula. Si el usuario no elige una, la línea queda en SIN\_CLASIFICAR, sin presupuesto. No se pueden crear presupuestos para SIN\_CLASIFICAR. El usuario puede reclasificar la línea después, lo que dispara la reasignación (RN-39). En los reportes aparece como el grupo “Sin clasificar”.

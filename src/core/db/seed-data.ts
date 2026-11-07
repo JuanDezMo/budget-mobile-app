@@ -1,3 +1,5 @@
+import type { SystemCategoryCode } from '@/core/shared/system-categories';
+
 // Reference data every installation starts with (RN-32, RN-34).
 // System categories use fixed ids so they are the same on every device
 // (useful later for backup and sync). Names are not stored: the UI translates `code`.
@@ -7,17 +9,6 @@ export const SEED_CURRENCIES = [
   { code: 'USD', name: 'US dollar', decimals: 2 },
   { code: 'EUR', name: 'Euro', decimals: 2 },
 ] as const;
-
-export const SYSTEM_CATEGORY_CODES = [
-  'ALIMENTACION',
-  'TRANSPORTE',
-  'ENTRETENIMIENTO',
-  'URGENCIAS',
-  'OBLIGACIONES_HOGAR',
-  'SIN_CLASIFICAR',
-] as const;
-
-export type SystemCategoryCode = (typeof SYSTEM_CATEGORY_CODES)[number];
 
 export const SEED_SYSTEM_CATEGORIES: readonly {
   id: string;

@@ -20,6 +20,33 @@
   "movements": {
     "empty": "Aquí aparecerán tus movimientos"
   },
+  "categories": {
+    "ALIMENTACION": "Alimentación",
+    "TRANSPORTE": "Transporte",
+    "ENTRETENIMIENTO": "Entretenimiento",
+    "URGENCIAS": "Urgencias",
+    "OBLIGACIONES_HOGAR": "Obligaciones del hogar",
+    "SIN_CLASIFICAR": "Sin clasificar",
+    "link": "Categorías",
+    "title": "Categorías",
+    "sectionSystem": "Del sistema",
+    "sectionCustom": "Tuyas",
+    "sectionArchived": "Archivadas",
+    "emptyCustom": "Aún no has creado categorías.",
+    "new": "Nueva categoría",
+    "remove": "Quitar",
+    "removeTitle": "¿Quitar categoría?",
+    "removeMessage": "Si tiene presupuestos o movimientos se archivará y se conservará su historial. Si no, se eliminará.",
+    "archivedDone": "Archivada: se conserva su historial.",
+    "deletedDone": "Categoría eliminada.",
+    "form": {
+      "title": "Nueva categoría",
+      "name": "Nombre",
+      "icon": "Ícono",
+      "color": "Color",
+      "submit": "Crear categoría"
+    }
+  },
   "settings": {
     "title": "Ajustes",
     "language": {
@@ -85,6 +112,15 @@
     "FULL_NAME_TOO_LONG": "El nombre es demasiado largo.",
     "EMAIL_INVALID": "Ingresa un correo válido.",
     "COUNTRY_INVALID": "Elige tu país.",
-    "INVALID": "Revisa los datos e inténtalo de nuevo."
+    "INVALID": "Revisa los datos e inténtalo de nuevo.",
+    "CATEGORY_NAME_REQUIRED": "Ingresa un nombre.",
+    "CATEGORY_NAME_TOO_LONG": "El nombre es demasiado largo.",
+    "CATEGORY_NAME_DUPLICATE": "Ya tienes una categoría con ese nombre.",
+    "CATEGORY_ICON_REQUIRED": "Elige un ícono.",
+    "CATEGORY_COLOR_REQUIRED": "Elige un color.",
+    "CATEGORY_SYSTEM_PROTECTED": "Las categorías del sistema no se pueden cambiar ni quitar.",
+    "CATEGORY_ALREADY_ARCHIVED": "Esta categoría ya está archivada.",
+    "CATEGORY_ARCHIVED": "Las categorías archivadas no se pueden usar en nuevos registros.",
+    "CATEGORY_NO_BUDGET_ALLOWED": "Esta categoría no puede tener presupuesto."
   }
 }
