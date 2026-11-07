@@ -2,6 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { formatCountryName, formatLocalDate, formatMoney, formatPercentage } from './format';
 import { resolveInitialLanguage } from '@/core/shared/app-preferences';
+import { COUNTRY_CODES } from '@/core/shared/countries';
 import en from './locales/en.json';
 import es from './locales/es.json';
 
@@ -44,8 +45,17 @@ describe('i18n', () => {
     expect(formatLocalDate('2026-11-06', 'es')).toMatch(/^6 nov\.? 2026$/);
   });
 
+  it('RN-42 every country code has a name in both languages', () => {
+    for (const code of COUNTRY_CODES) {
+      expect(formatCountryName(code, 'es')).not.toBe(code);
+      expect(formatCountryName(code, 'en')).not.toBe(code);
+    }
+  });
+
   it('RN-42 names a country in the current language', () => {
     expect(formatCountryName('CO', 'en')).toBe('Colombia');
-    expect(formatCountryName('US', 'es')).toMatch(/Estados Unidos/);
+    expect(formatCountryName('US', 'es')).toBe('Estados Unidos');
+    expect(formatCountryName('ES', 'en')).toBe('Spain');
+    expect(formatCountryName('ZZ', 'en')).toBe('ZZ'); // unknown code: shown as is
   });
 });

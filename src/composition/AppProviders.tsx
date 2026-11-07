@@ -1,9 +1,4 @@
 import { getLocales } from 'expo-localization';
-import {
-  disableAppSwitcherProtectionAsync,
-  enableAppSwitcherProtectionAsync,
-  usePreventScreenCapture,
-} from 'expo-screen-capture';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +31,7 @@ import {
   ProfileRepositoryProvider,
 } from '@/features/profile/useProfileDependencies';
 import { createDevicePinVault } from '@/core/security/device-security';
+import { useScreenPrivacy } from '@/core/security/screen-privacy';
 import type { PinVault } from '@/core/security/pin-vault';
 import { createSettingsRepository } from '@/features/settings/settings.repository';
 import type { SettingsRepository } from '@/features/settings/settings.repository';
@@ -120,12 +116,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
 function ThemedRoot({ children }: { children: ReactNode }) {
   useAppLock(); // RN-44
-  usePreventScreenCapture(); // Android: blank preview and no screenshots
-  useEffect(() => {
-    // iOS: blur the app in the app switcher so balances are not visible.
-    void enableAppSwitcherProtectionAsync();
-    return () => void disableAppSwitcherProtectionAsync();
-  }, []);
+  useScreenPrivacy();
 
   const theme = useSettingsStore((state) => state.settings?.theme ?? 'SYSTEM');
 

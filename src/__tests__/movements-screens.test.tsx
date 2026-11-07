@@ -310,9 +310,9 @@ describe('movement history', () => {
     });
 
     const usd = await screen.findByLabelText('USD Totales');
-    expect(usd).toHaveTextContent(/Gastos: USD\s40,00/);
-    expect(usd).toHaveTextContent(/Reembolsos: USD\s10,00/);
-    expect(screen.getByLabelText('COP Totales')).toHaveTextContent(/Gastos: COP\s50\.000/);
+    expect(usd).toHaveTextContent(/GastosUSD\s40,00/);
+    expect(usd).toHaveTextContent(/ReembolsosUSD\s10,00/);
+    expect(screen.getByLabelText('COP Totales')).toHaveTextContent(/GastosCOP\s50\.000/);
   });
 
   it('filters by kind and by currency', async () => {

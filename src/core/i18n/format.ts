@@ -6,6 +6,8 @@ import { CURRENCY_DECIMALS } from '@/core/shared/currency';
 import type { Money } from '@/core/shared/money';
 import type { LocalDate } from '@/core/shared/dates';
 
+import COUNTRY_NAMES from './country-names.json';
+
 import type { AppLanguage } from '@/core/shared/app-preferences';
 
 const INTL_LOCALE: Record<AppLanguage, string> = { es: 'es-CO', en: 'en-US' };
@@ -39,12 +41,9 @@ export function formatLocalDate(date: LocalDate, language: AppLanguage): string 
   return format(parseISO(date), pattern, { locale: DATE_FNS_LOCALE[language] });
 }
 
-// Country name in the current language (RN-42). Falls back to the code if the engine has no
-// country names (Intl.DisplayNames is not available everywhere).
+// Country name in the current language (RN-42). It reads our own table because Hermes has no
+// country names in Intl.DisplayNames; an unknown code falls back to the code itself.
 export function formatCountryName(code: string, language: AppLanguage): string {
-  try {
-    return new Intl.DisplayNames([INTL_LOCALE[language]], { type: 'region' }).of(code) ?? code;
-  } catch {
-    return code;
-  }
+  const names: Record<string, string> = COUNTRY_NAMES[language];
+  return names[code] ?? code;
 }

@@ -8,7 +8,7 @@ import { CURRENCY_CODES } from '@/core/shared/currency';
 import type { CurrencyCode } from '@/core/shared/currency';
 import { AppText } from '@/core/theme/AppText';
 import { OptionGroup } from '@/core/theme/OptionGroup';
-import { PrimaryButton } from '@/core/theme/PrimaryButton';
+import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { getCategoryLabel } from '../../categories/category.rules';
@@ -23,6 +23,9 @@ type Props = {
   onCreate: () => void;
   onOpen: (movementId: string) => void;
 };
+
+// Columns of the totals card, in the order they are shown.
+const TOTAL_KEYS = ['expense', 'refund', 'income'] as const;
 
 const ALL = 'ALL';
 type KindChoice = MovementKind | typeof ALL;
@@ -58,8 +61,8 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
 
   const header = (
     <View style={styles.header}>
-      <PrimaryButton label={t('movements.new')} onPress={onCreate} />
       <OptionGroup<KindChoice>
+        compact
         label={t('movements.sectionKind')}
         options={[
           { value: ALL, label: t('movements.filterAll') },
@@ -69,6 +72,7 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
         onSelect={(value) => setKind(value === ALL ? undefined : value)}
       />
       <OptionGroup<CurrencyChoice>
+        compact
         label={t('movements.sectionCurrency')}
         options={[
           { value: ALL, label: t('movements.filterAll') },
@@ -77,26 +81,21 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
         selected={currency ?? ALL}
         onSelect={(value) => setCurrency(value === ALL ? undefined : value)}
       />
-      {totals.length > 0 ? <AppText variant="muted">{t('movements.totalsTitle')}</AppText> : null}
       {totals.map((total) => (
         <View
           key={total.currency}
           accessibilityLabel={`${total.currency} ${t('movements.totalsTitle')}`}
           style={[styles.totals, { backgroundColor: colors.surface, borderColor: colors.line }]}
         >
-          <AppText>{total.currency}</AppText>
-          <AppText variant="muted">
-            {t('movements.totals.expense')}:{' '}
-            {formatMoney({ amountMinor: total.expense, currency: total.currency }, language)}
-          </AppText>
-          <AppText variant="muted">
-            {t('movements.totals.refund')}:{' '}
-            {formatMoney({ amountMinor: total.refund, currency: total.currency }, language)}
-          </AppText>
-          <AppText variant="muted">
-            {t('movements.totals.income')}:{' '}
-            {formatMoney({ amountMinor: total.income, currency: total.currency }, language)}
-          </AppText>
+          <AppText style={styles.currency}>{total.currency}</AppText>
+          {TOTAL_KEYS.map((key) => (
+            <View key={key} style={styles.totalColumn}>
+              <AppText variant="muted">{t(`movements.totals.${key}`)}</AppText>
+              <AppText>
+                {formatMoney({ amountMinor: total[key], currency: total.currency }, language)}
+              </AppText>
+            </View>
+          ))}
         </View>
       ))}
       {movements.length === 0 ? <AppText variant="muted">{t('movements.empty')}</AppText> : null}
@@ -104,60 +103,73 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
   );
 
   return (
-    <FlashList
-      data={movements}
-      keyExtractor={(movement) => movement.id}
-      ListHeaderComponent={header}
-      onEndReached={() => void loadMore()}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={
-        isLoadingMore ? (
-          <ActivityIndicator accessibilityLabel={t('common.loading')} color={colors.mute} />
-        ) : null
-      }
-      contentContainerStyle={styles.content}
-      renderItem={({ item }) => {
-        const amount = formatMoney(
-          { amountMinor: item.totalMinor, currency: item.currency },
-          language,
-        );
+    <View style={styles.screen}>
+      <FlashList
+        data={movements}
+        keyExtractor={(movement) => movement.id}
+        ListHeaderComponent={header}
+        onEndReached={() => void loadMore()}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isLoadingMore ? (
+            <ActivityIndicator accessibilityLabel={t('common.loading')} color={colors.mute} />
+          ) : null
+        }
+        contentContainerStyle={styles.content}
+        renderItem={({ item }) => {
+          const amount = formatMoney(
+            { amountMinor: item.totalMinor, currency: item.currency },
+            language,
+          );
 
-        return (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`${t(`movements.kind.${item.kind}`)} ${amount}`}
-            onPress={() => onOpen(item.id)}
-            style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.line }]}
-          >
-            <View style={styles.rowText}>
-              <AppText>{t(`movements.kind.${item.kind}`)}</AppText>
-              <AppText variant="muted">{categoryNames(item)}</AppText>
-              <AppText variant="muted">
-                {formatLocalDate(item.localDate, language)} ·{' '}
-                {t(`movements.payment.${item.paymentMethod}`)}
-              </AppText>
-            </View>
-            <AppText
-              style={[
-                styles.amount,
-                { color: item.kind === 'EXPENSE' ? colors.ink : colors.positive },
-              ]}
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${t(`movements.kind.${item.kind}`)} ${amount}`}
+              onPress={() => onOpen(item.id)}
+              style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.line }]}
             >
-              {item.kind === 'EXPENSE' ? '−' : '+'}
-              {amount}
-            </AppText>
-          </Pressable>
-        );
-      }}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-    />
+              <View style={styles.rowText}>
+                <AppText>{t(`movements.kind.${item.kind}`)}</AppText>
+                <AppText variant="muted">{categoryNames(item)}</AppText>
+                <AppText variant="muted">
+                  {formatLocalDate(item.localDate, language)} ·{' '}
+                  {t(`movements.payment.${item.paymentMethod}`)}
+                </AppText>
+              </View>
+              <AppText
+                style={[
+                  styles.amount,
+                  { color: item.kind === 'EXPENSE' ? colors.ink : colors.positive },
+                ]}
+              >
+                {item.kind === 'EXPENSE' ? '−' : '+'}
+                {amount}
+              </AppText>
+            </Pressable>
+          );
+        }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+      />
+      <FloatingAction label={t('movements.new')} onPress={onCreate} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: 32 },
-  header: { gap: 12, paddingBottom: 12 },
-  totals: { padding: 12, borderRadius: 12, borderWidth: 1, gap: 2 },
+  screen: { flex: 1 },
+  content: { paddingBottom: FLOATING_ACTION_SPACE },
+  header: { gap: 8, paddingBottom: 12 },
+  totals: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  currency: { fontWeight: '700' },
+  totalColumn: { flex: 1 },
   row: {
     minHeight: 72,
     padding: 12,

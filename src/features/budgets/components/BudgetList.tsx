@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/core/theme/AppText';
-import { PrimaryButton } from '@/core/theme/PrimaryButton';
+import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
 
 import type { Category } from '../../categories/category.types';
 import { getBudgetPhase } from '../budget.rules';
@@ -31,27 +31,32 @@ export function BudgetList({ refreshKey, categories, onCreate, onOpen }: Props) 
   const isEmpty = active.length + grace.length + closed.length === 0;
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <PrimaryButton label={t('budgets.new')} onPress={onCreate} />
-      {isEmpty ? <AppText variant="muted">{t('budgets.empty')}</AppText> : null}
-      {sections.map((section) =>
-        section.budgets.length === 0 ? null : (
-          <Fragment key={section.key}>
-            <AppText variant="muted">{t(`budgets.${section.key}`)}</AppText>
-            {section.budgets.map((budget) => (
-              <BudgetCard
-                key={budget.id}
-                budget={budget}
-                category={categories.find((category) => category.id === budget.categoryId)}
-                phase={getBudgetPhase(budget, today)}
-                onPress={() => onOpen(budget.id)}
-              />
-            ))}
-          </Fragment>
-        ),
-      )}
-    </ScrollView>
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {isEmpty ? <AppText variant="muted">{t('budgets.empty')}</AppText> : null}
+        {sections.map((section) =>
+          section.budgets.length === 0 ? null : (
+            <Fragment key={section.key}>
+              <AppText variant="muted">{t(`budgets.${section.key}`)}</AppText>
+              {section.budgets.map((budget) => (
+                <BudgetCard
+                  key={budget.id}
+                  budget={budget}
+                  category={categories.find((category) => category.id === budget.categoryId)}
+                  phase={getBudgetPhase(budget, today)}
+                  onPress={() => onOpen(budget.id)}
+                />
+              ))}
+            </Fragment>
+          ),
+        )}
+      </ScrollView>
+      <FloatingAction label={t('budgets.new')} onPress={onCreate} />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({ content: { gap: 10, paddingBottom: 32 } });
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  content: { gap: 10, paddingBottom: FLOATING_ACTION_SPACE },
+});

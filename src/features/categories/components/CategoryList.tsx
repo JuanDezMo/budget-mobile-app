@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/core/theme/AppText';
-import { PrimaryButton } from '@/core/theme/PrimaryButton';
+import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { getCategoryLabel } from '../category.rules';
@@ -63,31 +63,33 @@ export function CategoryList({ refreshKey, onCreate }: Props) {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <PrimaryButton label={t('categories.new')} onPress={onCreate} />
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <AppText variant="muted">{t('categories.sectionCustom')}</AppText>
+        {custom.length === 0 ? (
+          <AppText variant="muted">{t('categories.emptyCustom')}</AppText>
+        ) : (
+          custom.map((category) => renderRow(category, true))
+        )}
 
-      <AppText variant="muted">{t('categories.sectionCustom')}</AppText>
-      {custom.length === 0 ? (
-        <AppText variant="muted">{t('categories.emptyCustom')}</AppText>
-      ) : (
-        custom.map((category) => renderRow(category, true))
-      )}
+        <AppText variant="muted">{t('categories.sectionSystem')}</AppText>
+        {system.map((category) => renderRow(category, false))}
 
-      <AppText variant="muted">{t('categories.sectionSystem')}</AppText>
-      {system.map((category) => renderRow(category, false))}
-
-      {archived.length > 0 ? (
-        <>
-          <AppText variant="muted">{t('categories.sectionArchived')}</AppText>
-          {archived.map((category) => renderRow(category, false))}
-        </>
-      ) : null}
-    </ScrollView>
+        {archived.length > 0 ? (
+          <>
+            <AppText variant="muted">{t('categories.sectionArchived')}</AppText>
+            {archived.map((category) => renderRow(category, false))}
+          </>
+        ) : null}
+      </ScrollView>
+      <FloatingAction label={t('categories.new')} onPress={onCreate} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 10, paddingBottom: 32 },
+  screen: { flex: 1 },
+  content: { gap: 10, paddingBottom: FLOATING_ACTION_SPACE },
   row: {
     minHeight: 64,
     paddingHorizontal: 12,
