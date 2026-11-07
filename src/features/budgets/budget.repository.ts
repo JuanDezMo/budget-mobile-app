@@ -1,6 +1,8 @@
 import { sql } from 'kysely';
 
 import type { AppDatabase, BudgetTable } from '@/core/db/database.types';
+import { ignoreBudgetsChanged, notifyBudgetsChanged } from '@/core/db/budgets-changed';
+import type { BudgetsChangedListener } from '@/core/db/budgets-changed';
 import { noReassign } from '@/core/db/line-reassigner';
 import type { LineReassigner } from '@/core/db/line-reassigner';
 import { isCurrencyCode } from '@/core/shared/currency';
@@ -64,11 +66,13 @@ function isOverlapError(error: unknown): boolean {
 }
 
 // `reassignLines` keeps movement lines in step with the budget (RN-39). It runs inside the same
-// transaction as the budget write, so either both happen or neither does.
+// transaction as the budget write, so either both happen or neither does. After it commits,
+// `onBudgetsChanged` gets the budgets whose usage may have moved (RN-26), to evaluate alerts.
 export function createBudgetRepository(
   db: AppDatabase,
   generateId: () => string,
   reassignLines: LineReassigner = noReassign,
+  onBudgetsChanged: BudgetsChangedListener = ignoreBudgetsChanged,
 ): BudgetRepository {
   async function get(id: string): Promise<Budget | null> {
     const row = await db.selectFrom('budget').selectAll().where('id', '=', id).executeTakeFirst();
@@ -98,6 +102,7 @@ export function createBudgetRepository(
     async create(input) {
       const id = generateId();
       const now = new Date().toISOString();
+      let affected: string[] = [];
       try {
         await db.transaction().execute(async (trx) => {
           await trx
@@ -118,18 +123,23 @@ export function createBudgetRepository(
             })
             .execute();
           // RN-39 (2): the new budget takes the unassigned lines that fit it.
-          await reassignLines(trx, { categoryId: input.categoryId, today: todayLocalDate() });
+          affected = await reassignLines(trx, {
+            categoryId: input.categoryId,
+            today: todayLocalDate(),
+          });
         });
       } catch (error) {
         if (isOverlapError(error)) return err('BUDGET_OVERLAP');
         throw error;
       }
+      await notifyBudgetsChanged(onBudgetsChanged, [id, ...affected]);
 
       return ok(await required(id));
     },
 
     async update(id, change) {
       const current = await required(id);
+      let affected: string[] = [];
       try {
         await db.transaction().execute(async (trx) => {
           await trx
@@ -144,13 +154,18 @@ export function createBudgetRepository(
             .execute();
           // RN-39 (3): new dates may free some lines and cover others.
           if (change.startDate !== undefined || change.endDate !== undefined) {
-            await reassignLines(trx, { categoryId: current.categoryId, today: todayLocalDate() });
+            affected = await reassignLines(trx, {
+              categoryId: current.categoryId,
+              today: todayLocalDate(),
+            });
           }
         });
       } catch (error) {
         if (isOverlapError(error)) return err('BUDGET_OVERLAP');
         throw error;
       }
+      // RN-26: a new amount or new dates change how much of the budget is used.
+      await notifyBudgetsChanged(onBudgetsChanged, [id, ...affected]);
 
       return ok(await required(id));
     },
@@ -158,6 +173,7 @@ export function createBudgetRepository(
     async softDelete(id) {
       const current = await required(id);
       const now = new Date().toISOString();
+      let affected: string[] = [];
       await db.transaction().execute(async (trx) => {
         await trx
           .updateTable('budget')
@@ -165,8 +181,12 @@ export function createBudgetRepository(
           .where('id', '=', id)
           .execute();
         // RN-39 (4): its lines stay, but no longer count for it.
-        await reassignLines(trx, { categoryId: current.categoryId, today: todayLocalDate() });
+        affected = await reassignLines(trx, {
+          categoryId: current.categoryId,
+          today: todayLocalDate(),
+        });
       });
+      await notifyBudgetsChanged(onBudgetsChanged, affected);
     },
 
     async close(id, spentFinalMinor) {

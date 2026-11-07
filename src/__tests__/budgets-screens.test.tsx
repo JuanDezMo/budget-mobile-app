@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Text } from 'react-native';
 import type { AlertButton } from 'react-native';
 
 import { SEED_SYSTEM_CATEGORIES } from '@/core/db/seed-data';
@@ -99,9 +99,17 @@ describe('budget form', () => {
 
   it('RN-01 creates "Entretenimiento USD 55, 1–15 nov"', async () => {
     let saved = false;
-    await render(<BudgetForm categories={categories} onSaved={() => (saved = true)} />, {
-      wrapper: Providers,
-    });
+    await render(
+      <BudgetForm
+        categories={categories}
+        onSaved={() => {
+          saved = true;
+        }}
+      />,
+      {
+        wrapper: Providers,
+      },
+    );
 
     await fillEntertainment();
     await fireEvent.press(screen.getByRole('button', { name: 'Crear presupuesto' }));
@@ -123,9 +131,17 @@ describe('budget form', () => {
       { ...budgetEndingIn('first', 0), startDate: '2026-11-01', endDate: '2026-11-15' },
     ]);
     let saved = false;
-    await render(<BudgetForm categories={categories} onSaved={() => (saved = true)} />, {
-      wrapper: Providers,
-    });
+    await render(
+      <BudgetForm
+        categories={categories}
+        onSaved={() => {
+          saved = true;
+        }}
+      />,
+      {
+        wrapper: Providers,
+      },
+    );
 
     await fireEvent.press(screen.getByRole('radio', { name: 'Entretenimiento' }));
     await fireEvent.changeText(screen.getByLabelText('Monto'), '20');
@@ -179,7 +195,13 @@ describe('budget form', () => {
     makeRepository([budgetEndingIn('b1', 5)]);
     let saved = false;
     await render(
-      <BudgetForm categories={categories} budgetId="b1" onSaved={() => (saved = true)} />,
+      <BudgetForm
+        categories={categories}
+        budgetId="b1"
+        onSaved={() => {
+          saved = true;
+        }}
+      />,
       { wrapper: Providers },
     );
 
@@ -208,7 +230,13 @@ describe('budget form', () => {
     makeRepository([budgetEndingIn('b1', 5)], { b1: 4000 });
     let saved = false;
     await render(
-      <BudgetForm categories={categories} budgetId="b1" onSaved={() => (saved = true)} />,
+      <BudgetForm
+        categories={categories}
+        budgetId="b1"
+        onSaved={() => {
+          saved = true;
+        }}
+      />,
       { wrapper: Providers },
     );
 
@@ -234,6 +262,39 @@ describe('budget form', () => {
       await screen.findByText('Un presupuesto solo se puede editar mientras está activo.'),
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeDisabled();
+  });
+});
+
+describe('budget form with extra fields (alert thresholds)', () => {
+  it('shows the extra section and hands the saved budget id to onSaved', async () => {
+    let savedId = '';
+    await render(
+      <BudgetForm
+        categories={categories}
+        extraSection={<Text>Extra alerts</Text>}
+        onSaved={(id) => {
+          savedId = id;
+        }}
+      />,
+      { wrapper: Providers },
+    );
+
+    expect(screen.getByText('Extra alerts')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('radio', { name: 'Entretenimiento' }));
+    await fireEvent.changeText(screen.getByLabelText('Monto'), '55');
+    await fireEvent.press(screen.getByRole('button', { name: 'Crear presupuesto' }));
+
+    await waitFor(() => expect(savedId).not.toBe(''));
+    expect((await repository.list()).map((budget) => budget.id)).toEqual([savedId]);
+  });
+
+  it('does not let the budget be saved while the extra section is invalid', async () => {
+    await render(
+      <BudgetForm categories={categories} extraValid={false} onSaved={() => undefined} />,
+      { wrapper: Providers },
+    );
+
+    expect(screen.getByRole('button', { name: 'Crear presupuesto' })).toBeDisabled();
   });
 });
 

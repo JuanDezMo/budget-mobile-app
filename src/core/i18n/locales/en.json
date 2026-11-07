@@ -257,6 +257,25 @@
     "MOVEMENT_DATE_INVALID": "Choose a valid date and time.",
     "MOVEMENT_FUTURE_DATE": "The date and time cannot be in the future.",
     "MOVEMENT_NOTE_TOO_LONG": "The note is too long.",
-    "MOVEMENT_LOCKED": "This movement counts in a closed budget and cannot be changed."
+    "MOVEMENT_LOCKED": "This movement counts in a closed budget and cannot be changed.",
+    "THRESHOLD_TOO_MANY": "You can set up to 3 alerts.",
+    "THRESHOLD_INVALID": "Use whole numbers from 1 to 99.",
+    "THRESHOLD_DUPLICATE": "You cannot repeat an alert.",
+    "THRESHOLD_AUTOMATIC": "The 100% alert is always on; choose a lower one."
+  },
+  "alerts": {
+    "title": "Budget: {{category}}",
+    "bodyThreshold": "You have used {{percent}}% of your budget ({{spent}} of {{available}}).",
+    "bodyFull": "You have used the whole budget ({{spent}} of {{available}}).",
+    "bodyPassed": "You went over your budget ({{spent}} of {{available}}).",
+    "channelName": "Budget alerts",
+    "dismiss": "Dismiss",
+    "thresholds": {
+      "title": "Alerts",
+      "label": "Alert at (%)",
+      "add": "Add alert",
+      "remove": "Remove alert",
+      "automatic": "You are always alerted at {{percent}}%."
+    }
   }
 }

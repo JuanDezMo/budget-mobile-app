@@ -257,6 +257,25 @@
     "MOVEMENT_DATE_INVALID": "Elige una fecha y hora válidas.",
     "MOVEMENT_FUTURE_DATE": "La fecha y hora no pueden ser futuras.",
     "MOVEMENT_NOTE_TOO_LONG": "La nota es demasiado larga.",
-    "MOVEMENT_LOCKED": "Este movimiento cuenta en un presupuesto cerrado y no se puede cambiar."
+    "MOVEMENT_LOCKED": "Este movimiento cuenta en un presupuesto cerrado y no se puede cambiar.",
+    "THRESHOLD_TOO_MANY": "Puedes configurar hasta 3 alertas.",
+    "THRESHOLD_INVALID": "Usa números enteros del 1 al 99.",
+    "THRESHOLD_DUPLICATE": "No puedes repetir una alerta.",
+    "THRESHOLD_AUTOMATIC": "La alerta del 100 % siempre está activa; elige una menor."
+  },
+  "alerts": {
+    "title": "Presupuesto: {{category}}",
+    "bodyThreshold": "Llevas el {{percent}} % de tu presupuesto ({{spent}} de {{available}}).",
+    "bodyFull": "Usaste todo el presupuesto ({{spent}} de {{available}}).",
+    "bodyPassed": "Te pasaste de tu presupuesto ({{spent}} de {{available}}).",
+    "channelName": "Alertas de presupuesto",
+    "dismiss": "Cerrar",
+    "thresholds": {
+      "title": "Alertas",
+      "label": "Avisar al (%)",
+      "add": "Agregar alerta",
+      "remove": "Quitar alerta",
+      "automatic": "Siempre se te avisa al {{percent}} %."
+    }
   }
 }

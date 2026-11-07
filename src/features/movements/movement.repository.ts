@@ -6,6 +6,8 @@ import type {
   MovementLineTable,
   MovementTable,
 } from '@/core/db/database.types';
+import { ignoreBudgetsChanged, notifyBudgetsChanged } from '@/core/db/budgets-changed';
+import type { BudgetsChangedListener } from '@/core/db/budgets-changed';
 import type { LineReassigner } from '@/core/db/line-reassigner';
 import { isCurrencyCode } from '@/core/shared/currency';
 import type { CurrencyCode } from '@/core/shared/currency';
@@ -135,6 +137,9 @@ export function createMovementRepository(
   db: AppDatabase,
   generateId: () => string,
   rules: BudgetAssignmentRules,
+  // After a movement is saved or deleted, gets the budgets its lines count for (RN-26), to
+  // evaluate alert thresholds.
+  onBudgetsChanged: BudgetsChangedListener = ignoreBudgetsChanged,
 ): MovementRepository {
   async function get(id: string): Promise<Movement | null> {
     const row = await db.selectFrom('movement').selectAll().where('id', '=', id).executeTakeFirst();
@@ -292,11 +297,18 @@ export function createMovementRepository(
         await insertLines(trx, id, input, localDate);
       });
 
-      return required(id);
+      const saved = await required(id);
+      await notifyBudgetsChanged(
+        onBudgetsChanged,
+        saved.lines.map((line) => line.budgetId),
+      );
+
+      return saved;
     },
 
     async update(id, input) {
       const localDate = localDateOf(input.occurredAt);
+      const before = await get(id); // its old budgets lose these lines, so they are looked at too
 
       await db.transaction().execute(async (trx) => {
         await trx
@@ -317,16 +329,28 @@ export function createMovementRepository(
         await insertLines(trx, id, input, localDate);
       });
 
-      return required(id);
+      const saved = await required(id);
+      await notifyBudgetsChanged(onBudgetsChanged, [
+        ...(before?.lines ?? []).map((line) => line.budgetId),
+        ...saved.lines.map((line) => line.budgetId),
+      ]);
+
+      return saved;
     },
 
     async softDelete(id) {
+      const before = await get(id);
       const now = new Date().toISOString();
       await db
         .updateTable('movement')
         .set({ deleted_at: now, updated_at: now })
         .where('id', '=', id)
         .execute();
+      // RN-21: the usage of the budgets it counted for goes down.
+      await notifyBudgetsChanged(
+        onBudgetsChanged,
+        (before?.lines ?? []).map((line) => line.budgetId),
+      );
     },
 
     listBudgets: () => loadBudgets(db),

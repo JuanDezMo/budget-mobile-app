@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -20,11 +21,21 @@ import { useBudgetForm } from '../useBudgetForm';
 type Props = {
   categories: readonly Category[];
   budgetId?: string;
-  onSaved: () => void;
+  onSaved: (budgetId: string) => void | Promise<void>;
+  // Extra fields for the form, owned by another feature (the alert thresholds). The form only
+  // places them; `extraValid` false blocks saving.
+  extraSection?: ReactNode;
+  extraValid?: boolean;
 };
 
 // Create or edit a budget (RN-01 to RN-03, RN-06, RN-07). Errors arrive as codes translated here.
-export function BudgetForm({ categories, budgetId, onSaved }: Props) {
+export function BudgetForm({
+  categories,
+  budgetId,
+  onSaved,
+  extraSection,
+  extraValid = true,
+}: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const {
@@ -160,6 +171,8 @@ export function BudgetForm({ categories, budgetId, onSaved }: Props) {
         )}
       />
 
+      {extraSection}
+
       {lowAmount && budget ? (
         <AppText style={{ color: colors.over }}>
           {t('budgets.form.lowAmount', {
@@ -174,7 +187,7 @@ export function BudgetForm({ categories, budgetId, onSaved }: Props) {
       <PrimaryButton
         label={submitLabel}
         onPress={() => void submit()}
-        disabled={isSubmitting || (isEditing && !isEditable)}
+        disabled={isSubmitting || !extraValid || (isEditing && !isEditable)}
       />
     </ScrollView>
   );

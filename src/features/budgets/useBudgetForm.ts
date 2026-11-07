@@ -26,7 +26,8 @@ type Options = {
   categories: readonly Category[];
   // Set when editing an existing budget.
   budgetId?: string;
-  onSaved: () => void;
+  // Called after the budget is saved, with its id (the thresholds are saved right after).
+  onSaved: (budgetId: string) => void | Promise<void>;
 };
 
 // Create / edit form (RN-01 to RN-03, RN-06, RN-07). It lives here so the screen only paints.
@@ -88,6 +89,7 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
     if (!parsed.ok) return;
     const amountMinor = parsed.value;
 
+    let savedId = '';
     try {
       const sameCategory = await repository.list({ categoryId: values.categoryId });
       const dates = { startDate: values.startDate, endDate: values.endDate };
@@ -112,6 +114,7 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
         }
         const saved = await repository.update(budget.id, { amountMinor, ...dates });
         if (!saved.ok) return form.setError('startDate', { message: saved.error });
+        savedId = budget.id;
       } else {
         const category = categories.find((candidate) => candidate.id === values.categoryId);
         if (!category) return form.setError('categoryId', { message: 'BUDGET_CATEGORY_REQUIRED' });
@@ -129,9 +132,10 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
 
         const saved = await repository.create(data);
         if (!saved.ok) return form.setError('startDate', { message: saved.error });
+        savedId = saved.value.id;
       }
 
-      onSaved();
+      await onSaved(savedId);
     } catch {
       setFailure('UNEXPECTED');
     }
