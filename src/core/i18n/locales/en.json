@@ -3,7 +3,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "comingSoon": "Coming soon",
-    "loading": "Loading"
+    "loading": "Loading",
+    "and": "and"
   },
   "navigation": {
     "home": "Home",
@@ -13,7 +14,10 @@
   },
   "home": {
     "title": "Your envelopes",
-    "empty": "Your envelopes will appear here"
+    "empty": "Your envelopes will appear here",
+    "header": "{{app}} · {{date}}",
+    "remaining": "{{amounts}} left",
+    "addExpense": "Add expense"
   },
   "currencies": {
     "COP": "Colombian peso (COP)",
@@ -64,7 +68,16 @@
       "lines": "Movements counting for this budget",
       "noLines": "No movements count for this budget yet.",
       "showMore": "Show more",
-      "openLine": "Open movement"
+      "openLine": "Open movement",
+      "leftInEnvelope": "Left in the envelope",
+      "overBy": "You went over by",
+      "savedLabel": "Saved",
+      "of": "of {{available}} · {{period}} · {{phase}}",
+      "statSpent": "Spent",
+      "statRefunds": "Refunds",
+      "statUsed": "Used",
+      "movements": "Movements",
+      "split": "{{inBudget}} of {{total}}"
     },
     "usage": {
       "spentOf": "{{spent}} of {{available}}",
@@ -78,6 +91,12 @@
       "title": "Left to spend",
       "spentOf": "Spent {{spent}} of {{available}}",
       "empty": "You have no open budgets."
+    },
+    "envelope": {
+      "left": "Left",
+      "over": "You went over",
+      "saved": "Saved",
+      "exceededTag": "Exceeded"
     }
   },
   "movements": {
@@ -107,13 +126,15 @@
       "income": "Income"
     },
     "assignment": {
-      "counts": "Counts for: {{category}} · {{start}} – {{end}}",
+      "counts": "Counts for: {{category}} · {{period}}",
       "none": "No active budget",
-      "closed": "That date belongs to a closed budget: this line will not affect it."
+      "closed": "That date belongs to a closed budget: this line will not affect it.",
+      "addsTo": "Adds to the envelope: {{category}} · {{period}}",
+      "noneIn": "No active envelope in {{currency}}"
     },
     "form": {
-      "newTitle": "New movement",
-      "editTitle": "Edit movement",
+      "newTitle": "Add",
+      "editTitle": "Edit",
       "kind": "Type",
       "currency": "Currency",
       "total": "Total amount",
@@ -134,7 +155,20 @@
       "deleteTitle": "Delete this movement?",
       "deleteMessage": "It will stop counting towards your budgets.",
       "locked": "This movement counts in a closed budget, so it cannot be edited or deleted.",
-      "closedWarning": "Some lines fall on days of a closed budget. They are saved but will not affect it."
+      "closedWarning": "Some lines fall on days of a closed budget. They are saved but will not affect it.",
+      "dateTime": "Date and time",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "toAssign": "Left to assign",
+      "splitMore": "Split into another category",
+      "forEnvelope": "Is it for an envelope?",
+      "saveExpense": "Save expense",
+      "saveRefund": "Save refund",
+      "saveIncome": "Save income",
+      "notePlaceholder": "Note (optional)",
+      "incomeNote": "The envelope will go from {{from}} to {{to}} of available money. {{left}} will be left.",
+      "chooseCategory": "Choose category",
+      "close": "Close"
     }
   },
   "categories": {
@@ -275,7 +309,8 @@
       "label": "Alert at (%)",
       "add": "Add alert",
       "remove": "Remove alert",
-      "automatic": "You are always alerted at {{percent}}%."
+      "automatic": "You are always alerted at {{percent}}%.",
+      "removeShort": "Remove"
     }
   }
 }

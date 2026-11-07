@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
 import { useTheme } from '@/core/theme/ThemeProvider';
+import { FONT_FAMILY } from '@/core/theme/typography';
 import { SettingsForm } from '@/features/settings/components/SettingsForm';
 
 export default function SettingsScreen() {
@@ -25,4 +26,6 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({ link: { marginTop: 20, fontSize: 16, fontWeight: '600' } });
+const styles = StyleSheet.create({
+  link: { marginTop: 20, fontSize: 16, fontFamily: FONT_FAMILY.semibold },
+});

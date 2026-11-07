@@ -3,6 +3,7 @@ import type { TextInputProps } from 'react-native';
 
 import { AppText } from './AppText';
 import { useTheme } from './ThemeProvider';
+import { FONT_FAMILY } from './typography';
 
 type Props = Pick<
   TextInputProps,
@@ -48,5 +49,12 @@ export function TextField({ label, error, ...inputProps }: Props) {
 
 const styles = StyleSheet.create({
   field: { gap: 6 },
-  input: { minHeight: 48, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, fontSize: 16 },
+  input: {
+    minHeight: 48,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    fontSize: 16,
+    fontFamily: FONT_FAMILY.regular,
+  },
 });

@@ -322,6 +322,41 @@ describe('BudgetRepository usage and lines (sqlite)', () => {
     });
   });
 
+  it('tells the payment method and how many lines the movement has (the "1 of 3" chip)', async () => {
+    await addMovement('single', 'EXPENSE', 100, first, { date: '2026-11-02' });
+    await addMovement('split', 'EXPENSE', 300, first, { date: '2026-11-03' });
+    await db
+      .insertInto('movement_line')
+      .values([
+        {
+          id: 'split-b',
+          movement_id: 'split',
+          category_id: ALIMENTACION,
+          budget_id: second,
+          amount_minor: 200,
+        },
+        {
+          id: 'split-c',
+          movement_id: 'split',
+          category_id: ALIMENTACION,
+          budget_id: null,
+          amount_minor: 100,
+        },
+      ])
+      .execute();
+
+    const lines = await repository.listLines(first, { limit: 20, offset: 0 });
+    const split = lines.find((line) => line.movementId === 'split');
+    const single = lines.find((line) => line.movementId === 'single');
+
+    expect(split).toMatchObject({
+      paymentMethod: 'CASH',
+      movementLineCount: 3,
+      budgetLineCount: 1,
+    });
+    expect(single?.movementLineCount).toBe(1);
+  });
+
   it('lists lines in pages and leaves out deleted movements', async () => {
     for (let i = 0; i < 25; i += 1) {
       await addMovement(`m${String(i).padStart(2, '0')}`, 'EXPENSE', 100, first, {

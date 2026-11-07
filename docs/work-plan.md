@@ -136,15 +136,29 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 
 ## Iteración 6 — Umbrales y notificaciones
 
-- [ ] T6.1 Reglas de umbrales: 0–3, enteros 1–100, sin repetir; umbral automático 100 % (RN-24, RN-25) + pruebas
-- [ ] T6.2 Repositorio de `budget_threshold` y `alert_sent` + pruebas
-- [ ] T6.3 Evaluador: cruces, un aviso por umbral, borrar registro si baja, notificar solo el más alto, nada sobre 100 %, solo activos/en gracia (RN-27–30) + pruebas con la tabla de ejemplo
-- [ ] T6.4 Llamar al evaluador en todos los puntos de RN-26 y RN-39
-- [ ] T6.5 Envoltorio de `expo-notifications` en `core/notifications` con textos traducidos
-- [ ] T6.6 Permiso de notificaciones y banner en la app si se niega (RN-31)
-- [ ] T6.7 Umbrales en el formulario de presupuesto
+- [x] T6.1 Reglas de umbrales: 0–3, enteros 1–100, sin repetir; umbral automático 100 % (RN-24, RN-25) + pruebas
+- [x] T6.2 Repositorio de `budget_threshold` y `alert_sent` + pruebas
+- [x] T6.3 Evaluador: cruces, un aviso por umbral, borrar registro si baja, notificar solo el más alto, nada sobre 100 %, solo activos/en gracia (RN-27–30) + pruebas con la tabla de ejemplo
+- [x] T6.4 Llamar al evaluador en todos los puntos de RN-26 y RN-39
+- [x] T6.5 Envoltorio de `expo-notifications` en `core/notifications` con textos traducidos
+- [x] T6.6 Permiso de notificaciones y banner en la app si se niega (RN-31)
+- [x] T6.7 Umbrales en el formulario de presupuesto
 
 **Hecho cuando:** con umbrales 50 % y 90 % llegan las alertas de la tabla de ejemplo de `business-rules.md`, sin repetirse.
+
+## Mejora de UI — "Sobres de la quincena" (entre las iteraciones 6 y 7)
+
+Se aplicó la dirección visual de `.impeccable/surfaces/src-app.md` y los bocetos de `.impeccable/mocks/sobres-pantallas.html`. Cada punto se verificó en el emulador (capturas en `validation-screenshots/`, ignoradas por git).
+
+- [x] U1 Tipografía Archivo (+ Archivo Narrow para montos grandes), cifras tabulares, carga de fuentes al arrancar
+- [x] U2 Sobres: marco con solapa, relleno = lo que queda, liga del color de la categoría; rejilla de 2 columnas en Inicio y Presupuestos
+- [x] U3 Inicio: encabezado con fecha, frase "Quedan …" por moneda, botón "＋ Anotar gasto" abajo a la derecha
+- [x] U4 Detalle del sobre: sobre grande con ligas de umbrales (cruzada = sólida), tres datos, movimientos con chip "1 de N", "Editar" en el encabezado
+- [x] U5 Barra de pestañas con íconos (activo relleno, inactivo contorno)
+- [x] U6 Formulario de movimiento según bocetos 3 y 4: control Gasto/Reembolso/Ingreso, fecha y hora en la esquina, monto grande con moneda, chips de pago, líneas con liga de color y "Cuenta para…", "Por repartir ✓", nota punteada, botón "Guardar gasto/reembolso/ingreso"; ingreso con "¿Es para un sobre?" y nota del cupo nuevo (RN-23, RN-41)
+- [x] U7 Modo oscuro de los sobres (relleno translúcido con borde manila) y barra de estado que sigue el tema de la app
+- [ ] U8 Pantallas sin boceto (historial de Movimientos, formulario de presupuesto, Categorías, Ajustes, Perfil, Registro, Bloqueo): hoy solo usan tipografía y colores nuevos; decidir si se alinean con el lenguaje de sobres
+- [ ] U9 Montos con separador de miles mientras se escriben
 
 ## Iteración 7 — Pruebas en dispositivos (opcional)
 
@@ -200,6 +214,9 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - Punto de control en emulador (Android 14, Expo Go, 2026-11-07): registro, PIN, bloqueo, presupuesto con selector de fecha nativo y movimiento USD 100 en 3 líneas funcionan con `expo-sqlite` real y los datos sobreviven al reinicio. Hallazgos corregidos: `enableAppSwitcherProtectionAsync` solo existe en iOS (ahora `useScreenPrivacy`, solo en builds de release, ignora fallos); `Intl.DisplayNames` no trae nombres de país en Hermes (tabla propia `country-names.json`, generada con `scripts/generate-country-names.mjs`); botón principal de las listas fijo abajo (`FloatingAction`).
 - Filtros del historial compactos (`OptionGroup compact`: una fila de chips con desplazamiento lateral, etiqueta solo para lectores de pantalla) y totales en una sola tarjeta por moneda; verificado en el emulador. Pendiente de pulir: los formularios largos dejan un espacio grande bajo el título.
 - Uso del presupuesto (it. 5): `calculateUsage` (`budget-usage.rules.ts`) saca gastado, disponible, % y sobrante de las sumas por tipo que entrega el repositorio (`listUsageTotals`, una consulta para toda la lista; `listLines`, paginado de 20 en 20). Un presupuesto cerrado muestra el gastado congelado (`spent_final_minor`, RN-05). "Excedido" (RN-29) = restante negativo; "Ahorrado" (RN-09) = cerrado con restante positivo. La barra se llena hasta 100 % y el excedido se marca con borde y texto de color de alerta, sin relleno rojo (dirección visual). El resumen del inicio suma solo presupuestos abiertos (activos y en gracia) y por moneda (RN-33). Verificado en el emulador: USD 20 de 55 = 36,4 %, queda 35.
+- UI (mejora "Sobres"): las pruebas pasaban mientras el emulador mostraba defectos reales; por eso cada pantalla se mira en el emulador antes de darla por buena. Hallazgos corregidos así: arranque roto por el canal de notificaciones en Expo Go (ahora no es fatal y el error se registra), `Intl.DisplayNames` sin países en Hermes, categoría por defecto vacía al abrir el formulario, monto de la línea en 0 en el aviso del ingreso, monto grande pisado por la etiqueta de una liga, texto claro ilegible sobre el relleno en modo oscuro y barra de estado oscura sobre fondo oscuro.
+- Notificaciones: en Expo Go de Android no se puede conceder el permiso (el canal falla con un error nativo), así que allí las alertas salen como aviso dentro de la app (RN-31). Probar notificaciones del sistema requiere un build de desarrollo (EAS).
+- Un ingreso "general" (sueldo) se guarda como una línea en SIN_CLASIFICAR (RN-41); "para un sobre" abre las líneas y se asigna por categoría, moneda y fecha como cualquier otra (RN-17, RN-23).
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes

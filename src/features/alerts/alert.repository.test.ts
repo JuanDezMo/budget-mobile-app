@@ -141,6 +141,14 @@ describe.each(implementations)('ThresholdRepository (%s)', (_name, create) => {
     expect((await repository.listSentIds('b1')).size).toBe(0);
   });
 
+  it('lists the percentages of every budget at once, lowest first, automatic 100% included', async () => {
+    await repository.ensureAutomatic('b1');
+    await repository.replaceConfigurable('b1', [90, 50]);
+    await repository.replaceConfigurable('b2', [70]);
+
+    expect(await repository.listPercentagesByBudget()).toEqual({ b1: [50, 90, 100], b2: [70] });
+  });
+
   it('clearing nothing does nothing', async () => {
     await repository.clearSent([]);
 

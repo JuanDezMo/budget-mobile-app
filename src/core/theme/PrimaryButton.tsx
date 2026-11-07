@@ -7,13 +7,30 @@ type Props = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  tone?: 'primary' | 'danger';
+  // primary: manila, the brand color. ink: the dark call to action (saving a movement); manila
+  // with dark text in dark mode. danger: destructive actions.
+  tone?: 'primary' | 'ink' | 'danger';
 };
 
-// Main action button. Manila is the brand color; danger is for destructive actions.
 export function PrimaryButton({ label, onPress, disabled, tone = 'primary' }: Props) {
-  const { colors } = useTheme();
-  const background = tone === 'danger' ? colors.over : colors.manila;
+  const { colors, scheme } = useTheme();
+  const dark = scheme === 'dark';
+  const background =
+    tone === 'danger'
+      ? colors.over
+      : tone === 'ink'
+        ? dark
+          ? colors.manila
+          : colors.ink
+        : colors.manila;
+  const text =
+    tone === 'danger'
+      ? colors.surface
+      : tone === 'ink'
+        ? dark
+          ? colors.onManila
+          : colors.surface
+        : colors.onManila;
 
   return (
     <Pressable
@@ -21,11 +38,13 @@ export function PrimaryButton({ label, onPress, disabled, tone = 'primary' }: Pr
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, { backgroundColor: background, opacity: disabled ? 0.5 : 1 }]}
+      style={[
+        styles.button,
+        tone === 'ink' && styles.ink,
+        { backgroundColor: background, opacity: disabled ? 0.5 : 1 },
+      ]}
     >
-      <AppText
-        style={{ color: tone === 'danger' ? colors.surface : colors.onManila, fontWeight: '700' }}
-      >
+      <AppText weight="bold" style={[{ color: text }, tone === 'ink' && styles.inkText]}>
         {label}
       </AppText>
     </Pressable>
@@ -34,4 +53,6 @@ export function PrimaryButton({ label, onPress, disabled, tone = 'primary' }: Pr
 
 const styles = StyleSheet.create({
   button: { minHeight: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  ink: { minHeight: 56, borderRadius: 16 },
+  inkText: { fontSize: 17 },
 });

@@ -1,37 +1,31 @@
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { formatLocalDate, formatMoney } from '@/core/i18n/format';
+import { formatMoney, formatShortDate } from '@/core/i18n/format';
 import { getAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
-import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
+import { iconToEmoji } from '@/core/theme/category-icons';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
-import { getCategoryLabel } from '../../categories/category.rules';
 import type { Category } from '../../categories/category.types';
-import { useBudgetDetail } from '../useBudgetDetail';
-import { UsageBar } from './UsageBar';
+import type { useBudgetDetail } from '../useBudgetDetail';
+import { EnvelopeHero } from './EnvelopeHero';
+import { EnvelopeStats } from './EnvelopeStats';
+
+type Detail = ReturnType<typeof useBudgetDetail>;
 
 type Props = {
-  refreshKey?: number;
-  budgetId: string;
+  detail: Detail; // the screen owns the hook: it also needs it for the header
   categories: readonly Category[];
-  onEdit: () => void;
+  thresholds: readonly number[];
   onDeleted: () => void;
   onOpenMovement: (movementId: string) => void;
 };
 
-// Budget detail: how much is used, the movements counting for it, edit (only while active,
-// RN-06/07/08) and delete (RN-10).
-export function BudgetDetail({
-  refreshKey,
-  budgetId,
-  categories,
-  onEdit,
-  onDeleted,
-  onOpenMovement,
-}: Props) {
+// Budget detail: the big envelope with its alert bands, three figures, and the movements counting
+// for it (RN-17). Edit is in the header (only while active, RN-06/07/08); delete is here (RN-10).
+export function BudgetDetail({ detail, categories, thresholds, onDeleted, onOpenMovement }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const {
@@ -39,14 +33,14 @@ export function BudgetDetail({
     phase,
     usage,
     state,
+    totals,
     lines,
     hasMoreLines,
     isLoadingMore,
     loadMoreLines,
-    canEdit,
     isLoading,
     remove,
-  } = useBudgetDetail(budgetId, refreshKey);
+  } = detail;
   const language = getAppLanguage();
   if (isLoading) return null;
   if (!budget || !phase || !usage || !state)
@@ -74,74 +68,76 @@ export function BudgetDetail({
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <CategoryAvatar icon={category?.icon ?? ''} color={category?.color ?? colors.mute} />
-        <AppText variant="title">{category ? getCategoryLabel(category, t) : ''}</AppText>
+      <EnvelopeHero
+        budget={budget}
+        phase={phase}
+        usage={usage}
+        state={state}
+        category={category}
+        thresholds={thresholds}
+      />
+      <EnvelopeStats currency={budget.currency} totals={totals} usage={usage} />
+
+      <View style={styles.section}>
+        <AppText variant="muted" weight="bold" style={styles.sectionText}>
+          {t('budgets.detail.movements').toUpperCase()}
+        </AppText>
+        <AppText variant="muted" weight="bold" style={styles.sectionText}>
+          {budget.currency}
+        </AppText>
       </View>
-
-      <UsageBar usage={usage} state={state} currency={budget.currency} />
-
-      <View style={styles.figures}>
-        <View style={styles.figure}>
-          <AppText variant="muted">{t('budgets.detail.amount')}</AppText>
-          <AppText>{money(budget.amountMinor)}</AppText>
-        </View>
-        <View style={styles.figure}>
-          <AppText variant="muted">{t('budgets.detail.spent')}</AppText>
-          <AppText>{money(usage.spentMinor)}</AppText>
-        </View>
-        <View style={styles.figure}>
-          <AppText variant="muted">{t('budgets.detail.available')}</AppText>
-          <AppText>{money(usage.availableMinor)}</AppText>
-        </View>
-      </View>
-
-      <AppText variant="muted">{t('budgets.detail.period')}</AppText>
-      <AppText>
-        {t('budgets.period', {
-          start: formatLocalDate(budget.startDate, language),
-          end: formatLocalDate(budget.endDate, language),
-        })}
-      </AppText>
-      <AppText variant="muted">{t('budgets.detail.status')}</AppText>
-      <AppText>{t(`budgets.phase.${phase}`)}</AppText>
-
-      <AppText variant="muted" style={styles.sectionTitle}>
-        {t('budgets.detail.lines')}
-      </AppText>
       {lines.length === 0 ? <AppText variant="muted">{t('budgets.detail.noLines')}</AppText> : null}
-      {lines.map((line) => {
-        const lineCategory = categories.find((candidate) => candidate.id === line.categoryId);
-        const amount = money(line.amountMinor);
+      <View style={[styles.list, lines.length > 0 && { borderColor: colors.line }]}>
+        {lines.map((line) => {
+          const lineCategory = categories.find((candidate) => candidate.id === line.categoryId);
+          const amount = money(line.amountMinor);
+          const title = line.note ?? t(`movements.kind.${line.kind}`);
 
-        return (
-          <Pressable
-            key={line.lineId}
-            accessibilityRole="button"
-            accessibilityLabel={`${t('budgets.detail.openLine')}: ${t(`movements.kind.${line.kind}`)} ${amount}`}
-            onPress={() => onOpenMovement(line.movementId)}
-            style={[styles.line, { backgroundColor: colors.surface, borderColor: colors.line }]}
-          >
-            <View style={styles.lineText}>
-              <AppText>{t(`movements.kind.${line.kind}`)}</AppText>
-              <AppText variant="muted">
-                {lineCategory ? getCategoryLabel(lineCategory, t) : ''} ·{' '}
-                {formatLocalDate(line.localDate, language)}
-              </AppText>
-              {line.note ? <AppText variant="muted">{line.note}</AppText> : null}
-            </View>
-            <AppText
-              style={{
-                fontWeight: '700',
-                color: line.kind === 'EXPENSE' ? colors.ink : colors.positive,
-              }}
+          return (
+            <Pressable
+              key={line.lineId}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('budgets.detail.openLine')}: ${t(`movements.kind.${line.kind}`)} ${amount}`}
+              onPress={() => onOpenMovement(line.movementId)}
+              style={[
+                styles.row,
+                { backgroundColor: colors.surface, borderBottomColor: colors.line },
+              ]}
             >
-              {line.kind === 'EXPENSE' ? '−' : '+'}
-              {amount}
-            </AppText>
-          </Pressable>
-        );
-      })}
+              <View style={[styles.icon, { backgroundColor: colors.ground }]}>
+                <AppText weight="bold">{iconToEmoji(lineCategory?.icon ?? '')}</AppText>
+              </View>
+              <View style={styles.rowText}>
+                <AppText numberOfLines={1}>{title}</AppText>
+                <AppText variant="muted" style={styles.rowSmall}>
+                  {formatShortDate(line.localDate, language)} ·{' '}
+                  {t(`movements.payment.${line.paymentMethod}`)}
+                  {line.note ? '' : ''}
+                </AppText>
+              </View>
+              <View style={styles.rowAmount}>
+                <AppText
+                  weight="bold"
+                  style={{ color: line.kind === 'EXPENSE' ? colors.ink : colors.positive }}
+                >
+                  {line.kind === 'EXPENSE' ? '−' : '+'}
+                  {amount}
+                </AppText>
+                {line.movementLineCount > 1 ? (
+                  <View style={[styles.split, { borderColor: colors.line }]}>
+                    <AppText variant="muted" weight="bold" style={styles.splitText}>
+                      {t('budgets.detail.split', {
+                        inBudget: line.budgetLineCount,
+                        total: line.movementLineCount,
+                      })}
+                    </AppText>
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
       {hasMoreLines ? (
         <PrimaryButton
           label={t('budgets.detail.showMore')}
@@ -150,26 +146,29 @@ export function BudgetDetail({
         />
       ) : null}
 
-      {canEdit ? <PrimaryButton label={t('budgets.detail.edit')} onPress={onEdit} /> : null}
       <PrimaryButton label={t('budgets.detail.delete')} onPress={confirmDelete} tone="danger" />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 8, paddingBottom: 32 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
-  figures: { flexDirection: 'row', gap: 12, marginVertical: 8 },
-  figure: { flex: 1 },
-  sectionTitle: { marginTop: 16 },
-  line: {
+  content: { gap: 12, paddingBottom: 32, paddingTop: 4 },
+  section: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  sectionText: { fontSize: 12, letterSpacing: 0.7 },
+  list: { borderRadius: 12, overflow: 'hidden', borderWidth: 0 },
+  row: {
     minHeight: 64,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  lineText: { flex: 1, gap: 2 },
+  icon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  rowText: { flex: 1, gap: 1 },
+  rowSmall: { fontSize: 12 },
+  rowAmount: { alignItems: 'flex-end', gap: 2 },
+  split: { borderWidth: 1, borderRadius: 6, paddingHorizontal: 5 },
+  splitText: { fontSize: 11 },
 });

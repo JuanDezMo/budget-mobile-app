@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 
+import { translate } from '@/core/i18n/i18n';
+
 import { err, ok } from '@/core/shared/result';
 import type { Result } from '@/core/shared/result';
 
-import { checkCanRename, checkCategoryNameAvailable, decideRemoval } from './category.rules';
+import {
+  checkCanRename,
+  checkCategoryNameAvailable,
+  decideRemoval,
+  getCategoryLabel,
+} from './category.rules';
 import type { RemovalAction } from './category.rules';
 import { categoryNameSchema } from './category.schemas';
 import type { Category } from './category.types';
@@ -93,6 +100,8 @@ export function useCategories(refreshKey = 0) {
     system: list.filter((category) => category.isSystem),
     custom: list.filter((category) => !category.isSystem && category.archivedAt === null),
     archived: list.filter((category) => !category.isSystem && category.archivedAt !== null),
+    // Name to show for a category, in the current language (built-in ones are translated).
+    labelOf: (category: Category) => getCategoryLabel(category, translate),
     remove,
     rename,
     reload,

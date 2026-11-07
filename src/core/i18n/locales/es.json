@@ -3,7 +3,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "comingSoon": "Próximamente",
-    "loading": "Cargando"
+    "loading": "Cargando",
+    "and": "y"
   },
   "navigation": {
     "home": "Inicio",
@@ -13,7 +14,10 @@
   },
   "home": {
     "title": "Tus sobres",
-    "empty": "Aquí aparecerán tus sobres"
+    "empty": "Aquí aparecerán tus sobres",
+    "header": "{{app}} · {{date}}",
+    "remaining": "Quedan {{amounts}}",
+    "addExpense": "Anotar gasto"
   },
   "currencies": {
     "COP": "Peso colombiano (COP)",
@@ -64,7 +68,16 @@
       "lines": "Movimientos que cuentan para este presupuesto",
       "noLines": "Aún no hay movimientos para este presupuesto.",
       "showMore": "Ver más",
-      "openLine": "Abrir movimiento"
+      "openLine": "Abrir movimiento",
+      "leftInEnvelope": "Queda en el sobre",
+      "overBy": "Te pasaste por",
+      "savedLabel": "Ahorrado",
+      "of": "de {{available}} · {{period}} · {{phase}}",
+      "statSpent": "Gastado",
+      "statRefunds": "Reembolsos",
+      "statUsed": "Usado",
+      "movements": "Movimientos",
+      "split": "{{inBudget}} de {{total}}"
     },
     "usage": {
       "spentOf": "{{spent}} de {{available}}",
@@ -78,6 +91,12 @@
       "title": "Queda por gastar",
       "spentOf": "Gastado {{spent}} de {{available}}",
       "empty": "No tienes presupuestos abiertos."
+    },
+    "envelope": {
+      "left": "Queda",
+      "over": "Te pasaste",
+      "saved": "Ahorrado",
+      "exceededTag": "Excedido"
     }
   },
   "movements": {
@@ -107,13 +126,15 @@
       "income": "Ingresos"
     },
     "assignment": {
-      "counts": "Cuenta para: {{category}} · {{start}} – {{end}}",
+      "counts": "Cuenta para: {{category}} · {{period}}",
       "none": "Sin presupuesto activo",
-      "closed": "Esa fecha pertenece a un presupuesto cerrado: esta línea no lo afectará."
+      "closed": "Esa fecha pertenece a un presupuesto cerrado: esta línea no lo afectará.",
+      "addsTo": "Suma al sobre: {{category}} · {{period}}",
+      "noneIn": "Sin sobre activo en {{currency}}"
     },
     "form": {
-      "newTitle": "Nuevo movimiento",
-      "editTitle": "Editar movimiento",
+      "newTitle": "Anotar",
+      "editTitle": "Editar",
       "kind": "Tipo",
       "currency": "Moneda",
       "total": "Monto total",
@@ -134,7 +155,20 @@
       "deleteTitle": "¿Borrar este movimiento?",
       "deleteMessage": "Dejará de contar para tus presupuestos.",
       "locked": "Este movimiento cuenta en un presupuesto cerrado, por eso no se puede editar ni borrar.",
-      "closedWarning": "Algunas líneas caen en días de un presupuesto cerrado. Se guardan pero no lo afectan."
+      "closedWarning": "Algunas líneas caen en días de un presupuesto cerrado. Se guardan pero no lo afectan.",
+      "dateTime": "Fecha y hora",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "toAssign": "Por repartir",
+      "splitMore": "Dividir en otra categoría",
+      "forEnvelope": "¿Es para un sobre?",
+      "saveExpense": "Guardar gasto",
+      "saveRefund": "Guardar reembolso",
+      "saveIncome": "Guardar ingreso",
+      "notePlaceholder": "Nota (opcional)",
+      "incomeNote": "El sobre pasará de {{from}} a {{to}} de cupo. Quedarán {{left}}.",
+      "chooseCategory": "Elegir categoría",
+      "close": "Cerrar"
     }
   },
   "categories": {
@@ -275,7 +309,8 @@
       "label": "Avisar al (%)",
       "add": "Agregar alerta",
       "remove": "Quitar alerta",
-      "automatic": "Siempre se te avisa al {{percent}} %."
+      "automatic": "Siempre se te avisa al {{percent}} %.",
+      "removeShort": "Quitar"
     }
   }
 }

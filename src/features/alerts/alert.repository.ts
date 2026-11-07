@@ -11,6 +11,9 @@ export interface ThresholdRepository {
   // RN-24: replaces the thresholds the user chose. Those that stay keep their id, and with it
   // their "already sent" record. Returns the thresholds that were added.
   replaceConfigurable(budgetId: string, percentages: readonly number[]): Promise<Threshold[]>;
+  // Percentages of every budget (configured ones and the automatic 100%), lowest first, in one
+  // query: the envelopes draw them as bands (the "ligas" of the visual direction).
+  listPercentagesByBudget(): Promise<Record<string, number[]>>;
   // RN-27: ids of the thresholds of this budget that were already notified.
   listSentIds(budgetId: string): Promise<Set<string>>;
   recordSent(thresholdIds: readonly string[], sentAtIso: string): Promise<void>;
@@ -88,6 +91,19 @@ export function createThresholdRepository(
 
         return added;
       });
+    },
+
+    async listPercentagesByBudget() {
+      const rows = await db
+        .selectFrom('budget_threshold')
+        .select(['budget_id', 'percentage'])
+        .orderBy('percentage')
+        .execute();
+
+      const byBudget: Record<string, number[]> = {};
+      for (const row of rows) (byBudget[row.budget_id] ??= []).push(row.percentage);
+
+      return byBudget;
     },
 
     async listSentIds(budgetId) {
@@ -171,6 +187,14 @@ export function createInMemoryThresholdRepository(generateId: () => string): Thr
       thresholds = [...thresholds, ...added];
 
       return Promise.resolve(added);
+    },
+    listPercentagesByBudget() {
+      const byBudgetId: Record<string, number[]> = {};
+      for (const threshold of [...thresholds].sort((a, b) => a.percentage - b.percentage)) {
+        (byBudgetId[threshold.budgetId] ??= []).push(threshold.percentage);
+      }
+
+      return Promise.resolve(byBudgetId);
     },
     listSentIds: (budgetId) =>
       Promise.resolve(

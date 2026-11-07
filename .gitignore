@@ -58,3 +58,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Screenshots taken while checking the app on the emulator
+validation-screenshots/

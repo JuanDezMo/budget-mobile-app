@@ -76,6 +76,7 @@ export function useBudgetDetail(budgetId: string, refreshKey = 0) {
     budget,
     phase,
     usage,
+    totals,
     state: usage && phase ? getUsageState(usage, phase) : null,
     lines,
     hasMoreLines,

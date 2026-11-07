@@ -6,6 +6,7 @@ import type { LocalDate } from '@/core/shared/dates';
 import { err, ok } from '@/core/shared/result';
 import type { Result } from '@/core/shared/result';
 
+import { calculateUsage } from '../budgets/budget-usage.rules';
 import { getBudgetPhase } from '../budgets/budget.rules';
 import { checkCanReceiveLines } from '../categories/category.rules';
 import type { Category } from '../categories/category.types';
@@ -13,6 +14,7 @@ import { MOVEMENT_KINDS, PAYMENT_METHODS } from './movement.types';
 import type {
   AssignableBudget,
   BudgetAssignmentRules,
+  BudgetUsageSnapshot,
   CurrencyTotals,
   LineForAssignment,
   Movement,
@@ -182,4 +184,36 @@ export function summarizeByCurrency(movements: readonly Movement[]): CurrencyTot
 // Date of a movement as the history groups it (RN-15): the day written in `occurred_at`.
 export function movementDay(occurredAt: string): LocalDate {
   return localDateOf(occurredAt);
+}
+
+export type IncomeImpact = {
+  availableBeforeMinor: number; // what the budget can spend now
+  availableAfterMinor: number; // ...with this income (RN-23)
+  remainingAfterMinor: number; // what would be left to spend
+};
+
+// Sketch 4: "The envelope will go from US$55 to US$70. US$40 will be left." An income that counts
+// for a budget raises its available amount (RN-23). When editing an income, its own previous
+// amount is already inside the budget's totals, so `previousIncomeMinor` takes it out first.
+export function describeIncomeImpact(
+  incomeMinor: number,
+  usage: BudgetUsageSnapshot,
+  previousIncomeMinor = 0,
+): IncomeImpact {
+  const without = {
+    expenseMinor: usage.expenseMinor,
+    refundMinor: usage.refundMinor,
+    incomeMinor: Math.max(0, usage.incomeMinor - previousIncomeMinor),
+  };
+  const before = calculateUsage(usage.amountMinor, without);
+  const after = calculateUsage(usage.amountMinor, {
+    ...without,
+    incomeMinor: without.incomeMinor + incomeMinor,
+  });
+
+  return {
+    availableBeforeMinor: before.availableMinor,
+    availableAfterMinor: after.availableMinor,
+    remainingAfterMinor: after.remainingMinor,
+  };
 }

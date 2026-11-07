@@ -55,6 +55,16 @@ function budgetFor(categoryId: string, startOffset: number, endOffset: number): 
   };
 }
 
+const expense = (usd: number): NewMovement => ({
+  kind: 'EXPENSE',
+  currency: 'USD',
+  totalMinor: usd * 100,
+  occurredAt: at(day(-1)),
+  paymentMethod: 'CASH',
+  note: null,
+  lines: [{ categoryId: FUN, amountMinor: usd * 100 }],
+});
+
 let db: AppDatabase;
 let movements: MovementRepository;
 let budgets: BudgetRepository;
@@ -396,5 +406,38 @@ describe('history pages', () => {
     await movements.softDelete(saved.id);
 
     expect(await movements.summarize()).toEqual([]);
+  });
+});
+
+describe('budget usage for the income note (sqlite)', () => {
+  it('gives the amount of every budget and what its lines add up to, by kind', async () => {
+    const fun = await budgets.create(budgetFor(FUN, -5, 5));
+    const food = await budgets.create(budgetFor(FOOD, -5, 5));
+    await movements.create(expense(30));
+    await movements.create({ ...expense(10), kind: 'REFUND' });
+    await movements.create({ ...expense(15), kind: 'INCOME' });
+
+    const usage = await movements.listBudgetUsage();
+
+    expect(usage[fun.ok ? fun.value.id : '']).toEqual({
+      amountMinor: 5500,
+      expenseMinor: 3000,
+      refundMinor: 1000,
+      incomeMinor: 1500,
+    });
+    expect(usage[food.ok ? food.value.id : '']).toEqual({
+      amountMinor: 5500,
+      expenseMinor: 0,
+      refundMinor: 0,
+      incomeMinor: 0,
+    });
+  });
+
+  it('leaves out deleted movements', async () => {
+    const fun = await budgets.create(budgetFor(FUN, -5, 5));
+    const saved = await movements.create(expense(30));
+    await movements.softDelete(saved.id);
+
+    expect((await movements.listBudgetUsage())[fun.ok ? fun.value.id : '']?.expenseMinor).toBe(0);
   });
 });

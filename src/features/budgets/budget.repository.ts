@@ -258,8 +258,15 @@ export function createBudgetRepository(
           'movement.kind as kind',
           'movement.local_date as local_date',
           'movement.note as note',
+          'movement.payment_method as payment_method',
           'line.category_id as category_id',
           'line.amount_minor as amount_minor',
+          sql<number>`(select count(*) from movement_line as sibling where sibling.movement_id = movement.id)`.as(
+            'movement_line_count',
+          ),
+          sql<number>`(select count(*) from movement_line as sibling where sibling.movement_id = movement.id and sibling.budget_id = line.budget_id)`.as(
+            'budget_line_count',
+          ),
         ])
         .where('line.budget_id', '=', budgetId)
         .where('movement.deleted_at', 'is', null)
@@ -276,8 +283,11 @@ export function createBudgetRepository(
         kind: row.kind,
         localDate: row.local_date,
         note: row.note,
+        paymentMethod: row.payment_method,
         categoryId: row.category_id,
         amountMinor: row.amount_minor,
+        movementLineCount: Number(row.movement_line_count),
+        budgetLineCount: Number(row.budget_line_count),
       }));
     },
   };

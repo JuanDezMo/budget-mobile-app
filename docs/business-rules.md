@@ -70,7 +70,7 @@ Ejemplo, Entretenimiento USD 55: gastos 40, reembolso 10 e ingreso 15 dan gastad
 
 ## Umbrales y notificaciones
 
-- **RN-24 — Configuración.** De 0 a 3 umbrales por presupuesto, enteros entre 1 y 100, sin repetidos.
+- **RN-24 — Configuración.** De 0 a 3 umbrales por presupuesto, enteros entre 1 y 100, sin repetidos. Como el 100% siempre existe por sí solo (RN-25), los umbrales que el usuario elige van del 1 al 99; si escribe 100 la app le avisa que esa alerta ya está activa.
 - **RN-25 — Alerta del 100%.** Siempre existe una alerta automática al llegar al 100%, aunque no se haya configurado.
 - **RN-26 — Cuándo se evalúa.** Al crear, editar o borrar un movimiento y al editar monto o fechas de un presupuesto. No hay procesos en segundo plano.
 - **RN-27 — Un aviso por umbral.** Cada umbral se notifica una sola vez por presupuesto y queda registrado como alerta enviada. Si el uso vuelve a quedar por debajo (reembolso, borrado, aumento de monto o ingreso), se elimina ese registro y el umbral puede volver a notificar.

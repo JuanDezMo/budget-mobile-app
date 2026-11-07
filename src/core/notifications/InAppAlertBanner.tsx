@@ -25,7 +25,7 @@ export function InAppAlertBanner() {
           style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.manila }]}
         >
           <View style={styles.text}>
-            <AppText style={styles.title}>{alert.title}</AppText>
+            <AppText weight="bold">{alert.title}</AppText>
             <AppText variant="muted">{alert.body}</AppText>
           </View>
           <Pressable
@@ -61,6 +61,5 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   text: { flex: 1, gap: 2 },
-  title: { fontWeight: '700' },
   dismiss: { minHeight: 44, minWidth: 64, alignItems: 'center', justifyContent: 'center' },
 });

@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
+import { ThemedStatusBar } from '@/core/theme/ThemedStatusBar';
 import { useTheme } from '@/core/theme/ThemeProvider';
-import { StatusBar } from 'expo-status-bar';
 
 import { AppProviders } from '@/composition/AppProviders';
 import { useAccessStore } from '@/features/profile/useAccess';
@@ -58,7 +58,7 @@ export default function RootLayout() {
   return (
     <AppProviders>
       <RootNavigator />
-      <StatusBar style="auto" />
+      <ThemedStatusBar />
     </AppProviders>
   );
 }

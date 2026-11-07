@@ -33,7 +33,7 @@ Ayudar a no pasarse del presupuesto. El usuario define cuánto quiere gastar por
 ## Capabilities and Constraints
 
 - Fase 1 (MVP): categorías (6 del sistema + personalizadas con ícono y color), presupuestos por categoría y periodo, movimientos (gasto, reembolso, ingreso) con líneas por categoría, cálculo de uso, umbrales y notificaciones locales. Opcional: respaldo exportar/importar.
-- Reglas de negocio completas en `docs/business-rules.md` (RN-01 a RN-41).
+- Reglas de negocio completas en `docs/business-rules.md` (RN-01 a RN-47).
 - Expo + React Native + TypeScript; textos en español e inglés (i18n), nunca escritos en el código.
 - Rendimiento en gama baja es un requisito: listas largas fluidas, pocas dependencias, animaciones livianas.
 - Fuera de alcance: cuentas, sincronización, grupo familiar, conversión de monedas, recurrencia, adjuntos.

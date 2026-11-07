@@ -14,7 +14,7 @@ export default function BudgetFormScreen() {
   const thresholds = useThresholdDraft({ budgetId: id });
 
   return (
-    <Screen>
+    <Screen topInset={false}>
       <BudgetForm
         categories={[...system, ...custom, ...archived]}
         budgetId={id}

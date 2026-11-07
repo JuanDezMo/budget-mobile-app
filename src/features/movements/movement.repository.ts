@@ -17,6 +17,7 @@ import type { LocalDate } from '@/core/shared/dates';
 import type {
   AssignableBudget,
   BudgetAssignmentRules,
+  BudgetUsageSnapshot,
   CurrencyTotals,
   Movement,
   MovementFilter,
@@ -39,6 +40,9 @@ export interface MovementRepository {
   softDelete(id: string): Promise<void>;
   // Budgets as the assignment rules see them (for the form preview and for the closed-budget lock).
   listBudgets(): Promise<AssignableBudget[]>;
+  // What each budget holds (its amount and what its lines add up to), to tell the user what an
+  // income does to it.
+  listBudgetUsage(): Promise<Record<string, BudgetUsageSnapshot>>;
 }
 
 type LineRow = Pick<MovementLineTable, 'id' | 'category_id' | 'budget_id' | 'amount_minor'>;
@@ -354,6 +358,42 @@ export function createMovementRepository(
     },
 
     listBudgets: () => loadBudgets(db),
+
+    async listBudgetUsage() {
+      const budgetRows = await db.selectFrom('budget').select(['id', 'amount_minor']).execute();
+      const sums = await db
+        .selectFrom('movement_line as line')
+        .innerJoin('movement', 'movement.id', 'line.movement_id')
+        .select([
+          'line.budget_id as budget_id',
+          'movement.kind as kind',
+          sql<number>`sum(line.amount_minor)`.as('total'),
+        ])
+        .where('line.budget_id', 'is not', null)
+        .where('movement.deleted_at', 'is', null)
+        .groupBy(['line.budget_id', 'movement.kind'])
+        .execute();
+
+      const usage: Record<string, BudgetUsageSnapshot> = {};
+      for (const row of budgetRows) {
+        usage[row.id] = {
+          amountMinor: row.amount_minor,
+          expenseMinor: 0,
+          refundMinor: 0,
+          incomeMinor: 0,
+        };
+      }
+      for (const row of sums) {
+        const entry = row.budget_id === null ? undefined : usage[row.budget_id];
+        if (!entry) continue;
+        const total = Number(row.total);
+        if (row.kind === 'EXPENSE') entry.expenseMinor = total;
+        else if (row.kind === 'REFUND') entry.refundMinor = total;
+        else entry.incomeMinor = total;
+      }
+
+      return usage;
+    },
   };
 }
 
@@ -364,6 +404,8 @@ export function createInMemoryMovementRepository(
   generateId: () => string,
   rules: BudgetAssignmentRules,
   initial: readonly Movement[] = [],
+  // What each budget holds, to fake (the budgets themselves live in another repository).
+  usageById: Readonly<Record<string, BudgetUsageSnapshot>> = {},
 ): MovementRepository {
   let movements: Movement[] = [...initial];
 
@@ -451,5 +493,6 @@ export function createInMemoryMovementRepository(
       return Promise.resolve();
     },
     listBudgets: () => Promise.resolve([...budgets()]),
+    listBudgetUsage: () => Promise.resolve({ ...usageById }),
   };
 }

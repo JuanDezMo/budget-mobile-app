@@ -1,3 +1,4 @@
+import { loadAsync } from 'expo-font';
 import { getLocales } from 'expo-localization';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -16,6 +17,7 @@ import type { Notifier } from '@/core/notifications/notifier';
 import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
+import { FONT_FILES } from '@/core/theme/typography';
 import {
   createLineReassigner,
   createMovementRepository,
@@ -80,13 +82,22 @@ export function AppProviders({ children }: { children: ReactNode }) {
       try {
         const deviceLanguage = getLocales()[0]?.languageCode;
         await initI18n(); // first, so even a startup error can be shown translated
+        // The typography of the visual direction. If a font fails to load the app still opens,
+        // with the system font.
+        await loadAsync(FONT_FILES).catch((error: unknown) => {
+          console.warn('Fonts failed to load', error);
+        });
         const db = await openDatabase();
         const settingsRepository = createSettingsRepository(db);
         const settings = await loadSettings(settingsRepository, deviceLanguage);
         await setAppLanguage(settings.language);
         const profileRepository = createProfileRepository(db);
         await loadAccess(profileRepository);
-        await configureNotifications(translate('alerts.channelName'));
+        // Setting up notifications must never stop the app from opening: in Expo Go on Android the
+        // channel call can fail. Without it alerts still reach the in-app banner (RN-31).
+        await configureNotifications(translate('alerts.channelName')).catch((error: unknown) => {
+          console.warn('Notification setup failed', error);
+        });
         const notifier = createExpoNotifier();
         const thresholds = createThresholdRepository(db, newId);
 
@@ -125,7 +136,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
           vault: createDevicePinVault(),
         };
         if (!cancelled) setBoot({ status: 'ready', repos });
-      } catch {
+      } catch (error) {
+        // Never swallow a startup failure silently: without this line nobody can tell what broke.
+        console.error('App startup failed', error);
         if (!cancelled) setBoot({ status: 'error' });
       }
     }

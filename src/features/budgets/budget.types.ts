@@ -68,8 +68,13 @@ export type BudgetLine = {
   kind: 'EXPENSE' | 'REFUND' | 'INCOME';
   localDate: LocalDate;
   note: string | null;
+  paymentMethod: 'CASH' | 'DEBIT_CARD' | 'CREDIT_CARD' | 'TRANSFER' | 'OTHER';
   categoryId: string;
   amountMinor: number;
+  // How many lines its movement has: shown as "1 of 3" when a purchase was split.
+  movementLineCount: number;
+  // How many of those lines count for this same budget (the "1 of 3" chip).
+  budgetLineCount: number;
 };
 
 export const BUDGET_LINES_PAGE_SIZE = 20;

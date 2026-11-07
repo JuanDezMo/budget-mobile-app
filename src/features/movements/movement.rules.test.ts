@@ -5,6 +5,7 @@ import { err, ok } from '@/core/shared/result';
 import type { Category } from '../categories/category.types';
 import {
   checkMovementEditable,
+  describeIncomeImpact,
   describeLineAssignment,
   maxAmountMinor,
   pickBudgetIdForLine,
@@ -301,5 +302,49 @@ describe('RN-33 totals per currency', () => {
     expect(
       summarizeByCurrency([make('1', 'EXPENSE', 'USD', 4000, '2026-11-07T00:00:00Z')]),
     ).toEqual([]);
+  });
+});
+
+describe('RN-23 what an income does to the envelope (sketch 4)', () => {
+  // Entretenimiento USD 55 with USD 30 spent.
+  const usage = { amountMinor: 5500, expenseMinor: 3000, refundMinor: 0, incomeMinor: 0 };
+
+  it('RN-23 raises the available amount and says what would be left: US$55 -> US$70, US$40 left', () => {
+    expect(describeIncomeImpact(1500, usage)).toEqual({
+      availableBeforeMinor: 5500,
+      availableAfterMinor: 7000,
+      remainingAfterMinor: 4000,
+    });
+  });
+
+  it('counts the incomes the budget already had', () => {
+    expect(describeIncomeImpact(1000, { ...usage, incomeMinor: 500 })).toEqual({
+      availableBeforeMinor: 6000,
+      availableAfterMinor: 7000,
+      remainingAfterMinor: 4000,
+    });
+  });
+
+  it('RN-22 refunds lower what was spent before the income is counted', () => {
+    expect(describeIncomeImpact(1500, { ...usage, refundMinor: 1000 }).remainingAfterMinor).toBe(
+      5000,
+    );
+  });
+
+  it('editing an income does not count its previous amount twice', () => {
+    // The budget already includes this income (1500); changing it to 2000 gives 55 + 20.
+    const withIt = { ...usage, incomeMinor: 1500 };
+
+    expect(describeIncomeImpact(2000, withIt, 1500)).toEqual({
+      availableBeforeMinor: 5500,
+      availableAfterMinor: 7500,
+      remainingAfterMinor: 4500,
+    });
+  });
+
+  it('a budget already over its limit stays negative after a small income', () => {
+    const over = { amountMinor: 5500, expenseMinor: 8000, refundMinor: 0, incomeMinor: 0 };
+
+    expect(describeIncomeImpact(1000, over).remainingAfterMinor).toBe(-1500);
   });
 });

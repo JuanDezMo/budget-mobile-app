@@ -9,7 +9,7 @@ const NEW_CATEGORY_ROUTE = '/category-new';
 export default function CategoriesScreen() {
   const refreshKey = useRefreshOnFocus();
   return (
-    <Screen>
+    <Screen topInset={false}>
       <CategoryList refreshKey={refreshKey} onCreate={() => router.push(NEW_CATEGORY_ROUTE)} />
     </Screen>
   );

@@ -87,3 +87,12 @@ export interface BudgetAssignmentRules {
   // A line that counts in a closed budget is frozen: reassigning must leave it alone (RN-08).
   isFrozen(current: AssignableBudget | undefined, today: LocalDate): boolean;
 }
+
+// What a budget holds, to tell the user what an income does to it (sketch 4): its amount and what
+// its lines add up to.
+export type BudgetUsageSnapshot = {
+  amountMinor: number;
+  expenseMinor: number;
+  refundMinor: number;
+  incomeMinor: number;
+};

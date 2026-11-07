@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import type { AlertButton } from 'react-native';
 
 import { SEED_SYSTEM_CATEGORIES } from '@/core/db/seed-data';
@@ -9,13 +9,18 @@ import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import { addDaysToLocalDate, todayLocalDate } from '@/core/shared/dates';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import { mockDatePicker } from '@/test-support/date-picker'; // before the components that use the picker
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import type { Category } from '@/features/categories/category.types';
 import { MovementForm } from '@/features/movements/components/MovementForm';
 import { MovementList } from '@/features/movements/components/MovementList';
 import { createInMemoryMovementRepository } from '@/features/movements/movement.repository';
 import type { MovementRepository } from '@/features/movements/movement.repository';
 import { budgetAssignmentRules } from '@/features/movements/movement.rules';
-import type { AssignableBudget, Movement } from '@/features/movements/movement.types';
+import type {
+  AssignableBudget,
+  BudgetUsageSnapshot,
+  Movement,
+} from '@/features/movements/movement.types';
 import { MovementRepositoryProvider } from '@/features/movements/useMovementRepository';
 
 let mockPickedDate = new Date();
@@ -63,7 +68,11 @@ function Providers({ children }: { children: ReactNode }) {
   );
 }
 
-function setup(initial: Movement[] = [], activeBudgets: AssignableBudget[] = []) {
+function setup(
+  initial: Movement[] = [],
+  activeBudgets: AssignableBudget[] = [],
+  usageById: Record<string, BudgetUsageSnapshot> = {},
+) {
   let n = 0;
   budgets = activeBudgets;
   repository = createInMemoryMovementRepository(
@@ -71,6 +80,7 @@ function setup(initial: Movement[] = [], activeBudgets: AssignableBudget[] = [])
     () => `id-${(n += 1)}`,
     budgetAssignmentRules,
     initial,
+    usageById,
   );
 }
 
@@ -89,7 +99,17 @@ const movement = (id: string, overrides: Partial<Movement> = {}): Movement => ({
 });
 
 async function chooseCategory(line: number, label: string) {
+  await fireEvent.press(screen.getByRole('button', { name: `Elegir categoría ${line}` }));
   await fireEvent.press(screen.getByRole('radio', { name: `Categoría ${line}: ${label}` }));
+}
+
+async function chooseCurrency(code: string) {
+  await fireEvent.press(screen.getByRole('button', { name: /^Moneda: / }));
+  await fireEvent.press(screen.getByRole('radio', { name: code }));
+}
+
+async function addLine() {
+  await fireEvent.press(screen.getByRole('button', { name: 'Dividir en otra categoría' }));
 }
 
 beforeEach(async () => {
@@ -108,23 +128,24 @@ describe('movement form', () => {
       wrapper: Providers,
     });
 
-    await fireEvent.press(screen.getByRole('radio', { name: 'USD' }));
+    await chooseCurrency('USD');
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '100');
     await chooseCategory(1, 'Alimentación');
     await fireEvent.changeText(screen.getByLabelText('Monto 1'), '50');
-    await fireEvent.press(screen.getByRole('button', { name: 'Agregar línea' }));
+    await addLine();
     await chooseCategory(2, 'Entretenimiento');
     await fireEvent.changeText(screen.getByLabelText('Monto 2'), '20');
-    await fireEvent.press(screen.getByRole('button', { name: 'Agregar línea' }));
+    await addLine();
     await chooseCategory(3, 'Obligaciones del hogar');
     await fireEvent.changeText(screen.getByLabelText('Monto 3'), '30');
 
     // "Counts for" is shown before saving; the budget is never chosen by hand (RN-17, RN-41).
     expect(screen.getAllByText(/Cuenta para: Alimentación/)).toHaveLength(1);
     expect(screen.getAllByText(/Cuenta para: Entretenimiento/)).toHaveLength(1);
-    expect(screen.getByText('Sin presupuesto activo')).toBeTruthy();
+    expect(screen.getByText('Sin sobre activo en USD')).toBeTruthy();
+    expect(screen.getByText(/USD\s0,00 ✓/)).toBeTruthy(); // nothing left to assign
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     await waitFor(() => expect(saved).toBe(true));
     const [stored] = await repository.list();
@@ -150,7 +171,7 @@ describe('movement form', () => {
     });
 
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '15000');
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     await waitFor(() => expect(saved).toBe(true));
     const [stored] = await repository.list();
@@ -161,6 +182,16 @@ describe('movement form', () => {
     expect(stored?.lines[0]?.categoryId).toBe(unclassified?.id);
   });
 
+  it('a new line starts in "Sin clasificar" even if the categories load after the form opens', async () => {
+    // The first render has no categories yet (they come from the database a moment later).
+    const view = await render(<MovementForm categories={[]} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    await view.rerender(<MovementForm categories={categories} onSaved={() => undefined} />);
+
+    expect(await screen.findByText('Sin clasificar')).toBeTruthy();
+  });
+
   it('RN-14 tells how much is left to share and rejects lines that do not add up', async () => {
     let saved = false;
     await render(<MovementForm categories={categories} onSaved={() => (saved = true)} />, {
@@ -169,15 +200,39 @@ describe('movement form', () => {
 
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '100000');
     await fireEvent.changeText(screen.getByLabelText('Monto 1'), '60000');
-    await fireEvent.press(screen.getByRole('button', { name: 'Agregar línea' }));
+    await addLine(); // takes what is left: 40.000
     await fireEvent.changeText(screen.getByLabelText('Monto 2'), '30000');
 
-    expect(await screen.findByText(/Falta por repartir: COP\s10\.000/)).toBeTruthy();
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    expect(await screen.findByText('Por repartir')).toBeTruthy();
+    expect(screen.getByText(/^COP\s10\.000$/)).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     expect(await screen.findByText('Las líneas deben sumar el total.')).toBeTruthy();
     expect(saved).toBe(false);
     expect(await repository.list()).toEqual([]);
+  });
+
+  it('with one line, its field suggests the total it will take', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    expect(screen.getByLabelText('Monto 1').props.placeholder).toBe('0');
+
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '15000');
+
+    expect(screen.getByLabelText('Monto 1').props.placeholder).toBe('15000');
+  });
+
+  it('a new line takes what is left to assign', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '100000');
+    await fireEvent.changeText(screen.getByLabelText('Monto 1'), '60000');
+    await addLine();
+
+    expect(screen.getByLabelText('Monto 2').props.value).toBe('40000');
   });
 
   it('RN-20 shows the amount error for the currency decimals', async () => {
@@ -186,7 +241,7 @@ describe('movement form', () => {
     });
 
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '10.5'); // COP has no decimals
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     // The single line takes the total, so both fields show the error.
     expect(
@@ -202,8 +257,8 @@ describe('movement form', () => {
 
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '5000');
     mockPickedDate = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000);
-    await fireEvent.press(screen.getByLabelText('Fecha'));
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    await fireEvent.press(screen.getByLabelText('Fecha y hora: Fecha'));
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     expect(await screen.findByText('La fecha y hora no pueden ser futuras.')).toBeTruthy();
     expect(saved).toBe(false);
@@ -216,20 +271,176 @@ describe('movement form', () => {
       wrapper: Providers,
     });
 
-    await fireEvent.press(screen.getByRole('radio', { name: 'USD' }));
+    await chooseCurrency('USD');
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '40');
     await chooseCategory(1, 'Entretenimiento');
-    mockPickedDate = new Date(2000, 0, 1);
     mockPickedDate = new Date(`${day(-25)}T12:00:00`);
-    await fireEvent.press(screen.getByLabelText('Fecha'));
+    await fireEvent.press(screen.getByLabelText('Fecha y hora: Fecha'));
 
-    expect(await screen.findByText(/pertenece a un presupuesto cerrado/)).toBeTruthy();
-    await fireEvent.press(screen.getByRole('button', { name: 'Guardar movimiento' }));
+    expect(await screen.findAllByText(/pertenece a un presupuesto cerrado/)).not.toHaveLength(0);
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     await waitFor(() => expect(saved).toBe(true));
     expect((await repository.list())[0]?.lines[0]?.budgetId).toBeNull();
   });
 
+  it('the kind (expense, refund, income) is picked in one control and names the save button', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    expect(screen.getByRole('radio', { name: 'Gasto', selected: true })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Guardar gasto' })).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Reembolso' }));
+    expect(screen.getByRole('button', { name: 'Guardar reembolso' })).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Ingreso' }));
+    expect(screen.getByRole('button', { name: 'Guardar ingreso' })).toBeTruthy();
+  });
+
+  it('RN-19 the payment method is one of five chips, "Efectivo" by default', async () => {
+    let saved = false;
+    await render(<MovementForm categories={categories} onSaved={() => (saved = true)} />, {
+      wrapper: Providers,
+    });
+    expect(screen.getByRole('radio', { name: 'Efectivo', selected: true })).toBeTruthy();
+    expect(
+      screen.getAllByRole('radio', {
+        name: /Efectivo|Tarjeta débito|Tarjeta de crédito|Transferencia|Otro/,
+      }),
+    ).toHaveLength(5);
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Transferencia' }));
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '5000');
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
+
+    await waitFor(() => expect(saved).toBe(true));
+    expect((await repository.list())[0]?.paymentMethod).toBe('TRANSFER');
+  });
+
+  it('the currency is chosen from the chip next to the amount', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    expect(screen.getByRole('button', { name: 'Moneda: COP' })).toBeTruthy();
+
+    await chooseCurrency('EUR');
+
+    expect(screen.getByRole('button', { name: 'Moneda: EUR' })).toBeTruthy();
+  });
+
+  it('a split line can be removed', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    await addLine();
+    expect(screen.getAllByLabelText(/^Monto \d$/)).toHaveLength(2);
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Quitar línea 2' }));
+
+    expect(screen.getAllByLabelText(/^Monto \d$/)).toHaveLength(1);
+  });
+});
+
+describe('income (sketch 4: "Is it for an envelope?")', () => {
+  async function openIncome(onSaved: () => void = () => undefined) {
+    await render(<MovementForm categories={categories} onSaved={onSaved} />, {
+      wrapper: Providers,
+    });
+    await fireEvent.press(screen.getByRole('radio', { name: 'Ingreso' }));
+  }
+
+  it('RN-41 a general income (salary) has nothing to split and adds to no envelope', async () => {
+    setup([], [budget('b-fun', FUN, -5, 5)]);
+    let saved = false;
+    await openIncome(() => (saved = true));
+
+    expect(screen.queryByLabelText('Monto 1')).toBeNull(); // no lines to show
+    await chooseCurrency('USD');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '15');
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar ingreso' }));
+
+    await waitFor(() => expect(saved).toBe(true));
+    const [stored] = await repository.list();
+    const unclassified = categories.find((c) => c.isSystem && c.code === 'SIN_CLASIFICAR');
+    expect(stored).toMatchObject({ kind: 'INCOME', totalMinor: 1500 });
+    expect(stored?.lines).toEqual([
+      expect.objectContaining({ categoryId: unclassified?.id, amountMinor: 1500, budgetId: null }),
+    ]);
+  });
+
+  it('RN-23 an income for an envelope says what it does to the envelope, and counts for it', async () => {
+    // Entretenimiento USD 55 with USD 30 spent: the income of USD 15 takes it to 70, USD 40 left.
+    setup([], [budget('b-fun', FUN, -5, 5)], {
+      'b-fun': { amountMinor: 5500, expenseMinor: 3000, refundMinor: 0, incomeMinor: 0 },
+    });
+    let saved = false;
+    await openIncome(() => (saved = true));
+
+    await fireEvent(screen.getByLabelText('¿Es para un sobre?'), 'valueChange', true);
+    await chooseCurrency('USD');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '15');
+    await chooseCategory(1, 'Entretenimiento');
+
+    expect(screen.getByText(/Suma al sobre: Entretenimiento/)).toBeTruthy();
+    expect(
+      screen.getByText(
+        /El sobre pasará de USD\s55,00 a USD\s70,00 de cupo\. Quedarán USD\s40,00\./,
+      ),
+    ).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar ingreso' }));
+
+    await waitFor(() => expect(saved).toBe(true));
+    const [stored] = await repository.list();
+    expect(stored?.lines[0]).toMatchObject({
+      categoryId: FUN,
+      amountMinor: 1500,
+      budgetId: 'b-fun',
+    });
+  });
+
+  it('turning "for an envelope" off goes back to a general income', async () => {
+    await openIncome();
+    await fireEvent(screen.getByLabelText('¿Es para un sobre?'), 'valueChange', true);
+    expect(screen.getByLabelText('Monto 1')).toBeTruthy();
+
+    await fireEvent(screen.getByLabelText('¿Es para un sobre?'), 'valueChange', false);
+
+    expect(screen.queryByLabelText('Monto 1')).toBeNull();
+  });
+
+  it('only an income shows the "for an envelope" switch', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+    expect(screen.queryByLabelText('¿Es para un sobre?')).toBeNull();
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Ingreso' }));
+
+    expect(screen.getByLabelText('¿Es para un sobre?')).toBeTruthy();
+  });
+});
+
+describe('date and time chip', () => {
+  it('on Android it shows "Hoy" with the time and opens the system dialogs when pressed', async () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+
+    const chip = screen.getByRole('button', {
+      name: /^Fecha y hora: Hoy \d{1,2}:\d{2} [ap]\. m\.$/,
+    });
+    await fireEvent.press(chip);
+
+    expect(DateTimePickerAndroid.open).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'date' }),
+    );
+  });
+});
+
+describe('editing and deleting a movement', () => {
   it('RN-39 editing the movement changes it and reassigns its budget', async () => {
     setup([movement('m1')], [budget('b-fun', FUN, -5, 5)]);
     let saved = false;

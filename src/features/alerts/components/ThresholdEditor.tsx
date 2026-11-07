@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/core/theme/AppText';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
@@ -28,11 +28,16 @@ export function ThresholdEditor({ draft }: { draft: ThresholdDraft }) {
               maxLength={3}
             />
           </View>
-          <PrimaryButton
-            label={`${t('alerts.thresholds.remove')} ${index + 1}`}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${t('alerts.thresholds.remove')} ${index + 1}`}
             onPress={() => draft.remove(index)}
-            tone="danger"
-          />
+            style={styles.remove}
+          >
+            <AppText weight="semibold" style={{ color: colors.over }}>
+              {t('alerts.thresholds.removeShort')}
+            </AppText>
+          </Pressable>
         </View>
       ))}
       {draft.canAdd ? (
@@ -52,4 +57,5 @@ const styles = StyleSheet.create({
   wrap: { gap: 12 },
   row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   field: { flex: 1 },
+  remove: { minHeight: 48, minWidth: 64, alignItems: 'center', justifyContent: 'center' },
 });

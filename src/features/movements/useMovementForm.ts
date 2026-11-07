@@ -10,14 +10,15 @@ import { UNCLASSIFIED_CODE } from '@/core/shared/system-categories';
 import type { Category } from '../categories/category.types';
 import {
   checkMovementEditable,
+  describeIncomeImpact,
   describeLineAssignment,
   remainingMinor,
   validateMovement,
 } from './movement.rules';
-import type { LineAssignment } from './movement.rules';
+import type { IncomeImpact, LineAssignment } from './movement.rules';
 import { movementFormSchema } from './movement.schemas';
 import type { MovementFormValues } from './movement.schemas';
-import type { AssignableBudget, Movement } from './movement.types';
+import type { AssignableBudget, BudgetUsageSnapshot, Movement } from './movement.types';
 import { useMovementRepository } from './useMovementRepository';
 
 type Options = {
@@ -37,9 +38,13 @@ export function useMovementForm({ categories, movementId, onSaved }: Options) {
   const isEditing = movementId !== undefined;
   const [today] = useState(() => todayLocalDate());
   const [budgets, setBudgets] = useState<readonly AssignableBudget[]>([]);
+  const [budgetUsage, setBudgetUsage] = useState<Readonly<Record<string, BudgetUsageSnapshot>>>({});
   const [movement, setMovement] = useState<Movement | null>(null);
   const [isLoading, setIsLoading] = useState(isEditing);
   const [failure, setFailure] = useState<string | null>(null);
+  // Sketch 4, "Is it for an envelope?": an income can be general (a salary: no envelope gets
+  // more money, RN-41) or for an envelope (it adds to its available amount, RN-23).
+  const [forEnvelope, setForEnvelope] = useState(false);
 
   // RN-14 / RN-40: a line without a chosen category falls in SIN_CLASIFICAR.
   const unclassifiedId =
@@ -62,12 +67,17 @@ export function useMovementForm({ categories, movementId, onSaved }: Options) {
   const { reset, setValue, getValues, control } = form;
   const lines = useFieldArray({ control, name: 'lines' });
 
-  // Budgets are read once: they only feed the "Counts for" preview and the closed-budget lock.
+  // Budgets and what they hold are read once: they feed the "Counts for" preview, the closed-budget
+  // lock and the income note.
   useEffect(() => {
     let active = true;
-    void repository.listBudgets().then((list) => {
-      if (active) setBudgets(list);
-    });
+    void Promise.all([repository.listBudgets(), repository.listBudgetUsage()]).then(
+      ([list, usage]) => {
+        if (!active) return;
+        setBudgets(list);
+        setBudgetUsage(usage);
+      },
+    );
 
     return () => {
       active = false;
@@ -95,37 +105,69 @@ export function useMovementForm({ categories, movementId, onSaved }: Options) {
             amount: formatMinorToText(line.amountMinor, found.currency),
           })),
         });
+        // An income saved on a real category was "for an envelope".
+        setForEnvelope(
+          found.kind === 'INCOME' && found.lines.some((line) => line.categoryId !== unclassifiedId),
+        );
       }
     });
 
     return () => {
       active = false;
     };
-  }, [repository, movementId, reset]);
+  }, [repository, movementId, reset, unclassifiedId]);
 
-  const watched = useWatch({ control });
+  // The categories arrive after the form is created, so a new line cannot know SIN_CLASIFICAR yet:
+  // once it is known, lines still without a category take it (RN-14, RN-40).
+  useEffect(() => {
+    if (isEditing || unclassifiedId === '') return;
+    getValues('lines').forEach((line, index) => {
+      if (line.categoryId === '') setValue(`lines.${index}.categoryId`, unclassifiedId);
+    });
+  }, [isEditing, unclassifiedId, getValues, setValue]);
+
+  const watched = useWatchedForm(control);
   const currency = watched.currency ?? 'COP';
+  const kind = watched.kind ?? 'EXPENSE';
   const lineValues = watched.lines ?? [];
+  // A general income has no lines to show: it is one line in SIN_CLASIFICAR.
+  const showsLines = kind !== 'INCOME' || forEnvelope;
 
   const toMinor = (text: string | undefined) => {
     const parsed = parseAmountToMinor(text ?? '', currency);
     return parsed.ok ? parsed.value : 0;
   };
   const totalMinor = toMinor(watched.total);
-  // What is still to be shared out. With one empty line, that line takes the whole total (below).
-  const remaining = remainingMinor(
-    totalMinor,
-    lineValues.map((line) => toMinor(line?.amount)),
+  // One empty line takes the whole total (that is what saving does), so the preview treats it so.
+  const onlyLineIsEmpty = lineValues.length === 1 && (lineValues[0]?.amount ?? '').trim() === '';
+  const lineAmounts = lineValues.map((line) =>
+    onlyLineIsEmpty ? totalMinor : toMinor(line?.amount),
   );
+  // What is still to be shared out.
+  const remaining = remainingMinor(totalMinor, lineAmounts);
 
   // RN-17 / RN-18 / RN-41: where each line would count, shown before saving.
   const assignments: LineAssignment[] = lineValues.map((line) =>
     describeLineAssignment(
-      { categoryId: line?.categoryId ?? '', currency, localDate: watched.date ?? today },
+      {
+        categoryId: showsLines ? (line?.categoryId ?? '') : unclassifiedId,
+        currency,
+        localDate: watched.date ?? today,
+      },
       budgets,
       today,
     ),
   );
+
+  // Sketch 4: what an income does to the envelope it counts for (RN-23).
+  const incomeImpact = describeIncome({
+    kind,
+    forEnvelope,
+    assignments,
+    lineAmounts,
+    budgetUsage,
+    movement,
+  });
 
   // RN-08 / RN-18: editing or deleting is blocked if a line counts in a closed budget.
   const isLocked = movement ? !checkMovementEditable(movement, budgets, today).ok : false;
@@ -137,23 +179,35 @@ export function useMovementForm({ categories, movementId, onSaved }: Options) {
     });
   }
 
+  function changeForEnvelope(value: boolean) {
+    setForEnvelope(value);
+    if (!value) {
+      // Back to a general income: one line in SIN_CLASIFICAR that takes the whole total.
+      lines.replace([{ categoryId: unclassifiedId, amount: '' }]);
+    }
+  }
+
   const submit = form.handleSubmit(async (values) => {
     setFailure(null);
     try {
       if (isEditing && (!movement || isLocked)) return setFailure('MOVEMENT_LOCKED');
 
       const occurred = parse(`${values.date} ${values.time}`, 'yyyy-MM-dd HH:mm', new Date());
+      const total = toMinor(values.total);
       const input = {
         kind: values.kind,
         currency: values.currency,
-        totalMinor: toMinor(values.total),
+        totalMinor: total,
         occurredAt: toOccurredAt(occurred),
         paymentMethod: values.paymentMethod,
         note: values.note.trim() === '' ? null : values.note.trim(),
-        lines: values.lines.map((line) => ({
-          categoryId: line.categoryId,
-          amountMinor: toMinor(line.amount),
-        })),
+        // A general income is one line, in SIN_CLASIFICAR (RN-41: it adds to no envelope).
+        lines: showsLines
+          ? values.lines.map((line) => ({
+              categoryId: line.categoryId,
+              amountMinor: toMinor(line.amount),
+            }))
+          : [{ categoryId: unclassifiedId, amountMinor: total }],
       };
 
       const valid = validateMovement(input, new Date(), categories);
@@ -203,5 +257,46 @@ export function useMovementForm({ categories, movementId, onSaved }: Options) {
     remainingMinor: remaining,
     hasClosedBudgetWarning: assignments.some((assignment) => assignment.kind === 'CLOSED_BUDGET'),
     budgets,
+    today,
+    showsLines,
+    // With one empty line, the field suggests the total it will take when saving.
+    singleLinePlaceholder:
+      onlyLineIsEmpty && totalMinor > 0 ? formatMinorToText(totalMinor, currency) : '0',
+    forEnvelope,
+    changeForEnvelope,
+    incomeImpact,
   };
+}
+
+// What the form is showing right now, to react to it (kind, currency, amounts...).
+function useWatchedForm(control: ReturnType<typeof useForm<MovementFormValues>>['control']) {
+  return useWatch({ control });
+}
+
+// The income note of sketch 4. Only for an income that counts for an envelope.
+function describeIncome(input: {
+  kind: string;
+  forEnvelope: boolean;
+  assignments: readonly LineAssignment[];
+  lineAmounts: readonly number[];
+  budgetUsage: Readonly<Record<string, BudgetUsageSnapshot>>;
+  movement: Movement | null;
+}): IncomeImpact | null {
+  if (input.kind !== 'INCOME' || !input.forEnvelope) return null;
+
+  const index = input.assignments.findIndex((assignment) => assignment.kind === 'BUDGET');
+  const assignment = input.assignments[index];
+  if (!assignment || assignment.kind !== 'BUDGET') return null;
+  const usage = input.budgetUsage[assignment.budget.id];
+  if (!usage) return null;
+
+  // Editing: this income's own previous lines are already inside the budget's totals.
+  const previous =
+    input.movement?.kind === 'INCOME'
+      ? input.movement.lines
+          .filter((line) => line.budgetId === assignment.budget.id)
+          .reduce((sum, line) => sum + line.amountMinor, 0)
+      : 0;
+
+  return describeIncomeImpact(input.lineAmounts[index] ?? 0, usage, previous);
 }

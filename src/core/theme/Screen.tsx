@@ -5,11 +5,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from './ThemeProvider';
 
 // Base of every screen: themed background and safe areas (notch, status bar).
-export function Screen({ children }: { children: ReactNode }) {
+// `topInset={false}` for screens under a stack header: the header already covers the status bar.
+export function Screen({ children, topInset = true }: { children: ReactNode; topInset?: boolean }) {
   const { colors } = useTheme();
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: colors.ground }]}>
+    <SafeAreaView
+      edges={topInset ? ['top', 'bottom', 'left', 'right'] : ['bottom', 'left', 'right']}
+      style={[styles.screen, { backgroundColor: colors.ground }]}
+    >
       {children}
     </SafeAreaView>
   );

@@ -87,11 +87,15 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
           accessibilityLabel={`${total.currency} ${t('movements.totalsTitle')}`}
           style={[styles.totals, { backgroundColor: colors.surface, borderColor: colors.line }]}
         >
-          <AppText style={styles.currency}>{total.currency}</AppText>
+          <AppText weight="bold" style={styles.currency}>
+            {total.currency}
+          </AppText>
           {TOTAL_KEYS.map((key) => (
             <View key={key} style={styles.totalColumn}>
-              <AppText variant="muted">{t(`movements.totals.${key}`)}</AppText>
-              <AppText>
+              <AppText variant="muted" numberOfLines={1}>
+                {t(`movements.totals.${key}`)}
+              </AppText>
+              <AppText weight="semibold" numberOfLines={1} adjustsFontSizeToFit>
                 {formatMoney({ amountMinor: total[key], currency: total.currency }, language)}
               </AppText>
             </View>
@@ -138,10 +142,8 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
                 </AppText>
               </View>
               <AppText
-                style={[
-                  styles.amount,
-                  { color: item.kind === 'EXPENSE' ? colors.ink : colors.positive },
-                ]}
+                weight="bold"
+                style={{ color: item.kind === 'EXPENSE' ? colors.ink : colors.positive }}
               >
                 {item.kind === 'EXPENSE' ? '−' : '+'}
                 {amount}
@@ -168,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  currency: { fontWeight: '700' },
+  currency: { minWidth: 40 },
   totalColumn: { flex: 1 },
   row: {
     minHeight: 72,
@@ -180,6 +182,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowText: { flex: 1, gap: 2 },
-  amount: { fontWeight: '700' },
+
   separator: { height: 8 },
 });

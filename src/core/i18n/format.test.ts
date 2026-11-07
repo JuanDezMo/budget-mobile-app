@@ -1,6 +1,15 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { formatCountryName, formatLocalDate, formatMoney, formatPercentage } from './format';
+import {
+  formatCountryName,
+  formatDateRange,
+  formatLocalDate,
+  formatMoney,
+  formatPercentage,
+  formatShortDate,
+  formatTime,
+  joinWithAnd,
+} from './format';
 import { resolveInitialLanguage } from '@/core/shared/app-preferences';
 import { COUNTRY_CODES } from '@/core/shared/countries';
 import en from './locales/en.json';
@@ -57,5 +66,30 @@ describe('i18n', () => {
     expect(formatCountryName('US', 'es')).toBe('Estados Unidos');
     expect(formatCountryName('ES', 'en')).toBe('Spain');
     expect(formatCountryName('ZZ', 'en')).toBe('ZZ'); // unknown code: shown as is
+  });
+
+  it('writes a short date range for a card', () => {
+    expect(formatDateRange('2026-11-01', '2026-11-15', 'es')).toMatch(/^1–15 nov\.?$/);
+    expect(formatDateRange('2026-11-01', '2026-11-15', 'en')).toBe('Nov 1–15');
+    expect(formatDateRange('2026-11-28', '2026-12-05', 'es')).toMatch(/^28 nov\.? – 5 dic\.?$/);
+    expect(formatDateRange('2026-11-28', '2026-12-05', 'en')).toBe('Nov 28 – Dec 5');
+  });
+
+  it('writes a day and month', () => {
+    expect(formatShortDate('2026-11-07', 'en')).toBe('Nov 7');
+    expect(formatShortDate('2026-11-07', 'es')).toMatch(/^7 nov\.?$/);
+  });
+
+  it('joins amounts in a sentence', () => {
+    expect(joinWithAnd([], 'y')).toBe('');
+    expect(joinWithAnd(['A'], 'y')).toBe('A');
+    expect(joinWithAnd(['A', 'B'], 'y')).toBe('A y B');
+    expect(joinWithAnd(['A', 'B', 'C'], 'and')).toBe('A, B and C');
+  });
+
+  it('writes a time of day', () => {
+    expect(formatTime('19:42', 'en')).toBe('7:42 PM');
+    expect(formatTime('19:42', 'es')).toMatch(/^7:42 p\.\s?m\.$/);
+    expect(formatTime('00:05', 'en')).toBe('12:05 AM');
   });
 });
