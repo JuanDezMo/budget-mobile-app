@@ -1,0 +1,44 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "comingSoon": "Coming soon"
+  },
+  "navigation": {
+    "home": "Home",
+    "movements": "Movements",
+    "budgets": "Budgets",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "Your envelopes",
+    "empty": "Your envelopes will appear here"
+  },
+  "budgets": {
+    "empty": "Your budgets will appear here"
+  },
+  "movements": {
+    "empty": "Your movements will appear here"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "label": "Language",
+      "es": "Spanish",
+      "en": "English"
+    },
+    "theme": {
+      "label": "Theme",
+      "LIGHT": "Light",
+      "DARK": "Dark",
+      "SYSTEM": "System"
+    }
+  },
+  "errors": {
+    "UNEXPECTED": "Something went wrong. Please try again.",
+    "CURRENCY_MISMATCH": "Amounts in different currencies cannot be combined.",
+    "AMOUNT_INVALID": "Enter a valid amount.",
+    "AMOUNT_TOO_MANY_DECIMALS": "This currency does not allow that many decimals.",
+    "AMOUNT_TOO_LARGE": "The amount is too large."
+  }
+}

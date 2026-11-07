@@ -4,9 +4,9 @@ Nov 6, 2026 · @Natalia
 
 ## Contexto y alcance
 
-La Fase 1 es una app móvil (React Native + Expo) que funciona 100% en el dispositivo con SQLite, sin backend ni cuentas de usuario. Permite crear presupuestos por categoría y periodo, registrar movimientos (gastos, reembolsos e ingresos) que pueden repartirse entre varias categorías, y avisa con notificaciones locales cuando el uso cruza los umbrales definidos.
+La Fase 1 es una app móvil (React Native + Expo) que funciona 100% en el dispositivo con SQLite, sin backend. El usuario se registra una vez en el dispositivo y se protege con un PIN local (RN-42 a RN-47). Permite crear presupuestos por categoría y periodo, registrar movimientos (gastos, reembolsos e ingresos) que pueden repartirse entre varias categorías, y avisa con notificaciones locales cuando el uso cruza los umbrales definidos.
 
-- Un solo usuario por dispositivo.
+- Un solo usuario por dispositivo, con perfil y PIN locales.
 - Idiomas: español e inglés. Tema claro, oscuro o del sistema.
 - El backend (sincronización, grupo familiar) es un proyecto separado, posterior a esta fase.
 
@@ -100,15 +100,25 @@ Ejemplo con Entretenimiento USD 55 y umbrales de 50% y 90%:
 - **RN-40 — Categoría SIN\_CLASIFICAR.** Toda línea tiene categoría; la categoría nunca es nula. Si el usuario no elige una, la línea queda en SIN\_CLASIFICAR, sin presupuesto. No se pueden crear presupuestos para SIN\_CLASIFICAR. El usuario puede reclasificar la línea después, lo que dispara la reasignación (RN-39). En los reportes aparece como el grupo “Sin clasificar”.
 - **RN-41 — Líneas sin presupuesto.** Se permiten: una línea cuya categoría no tiene presupuesto activo para su fecha y moneda se guarda con presupuesto vacío y se ve en el historial y en los reportes por categoría. Ejemplo: de una compra de USD 100, 70 cuentan para Alimentación y 30 quedan en Mascotas sin presupuesto. Un ingreso general, como el salario, es un INCOME sin presupuesto y no aumenta el cupo de ninguno.
 
+## Perfil y seguridad
+
+- **RN-42 — Registro obligatorio.** En el primer arranque el usuario debe registrar nombre, correo electrónico y país antes de usar la app. El nombre no puede estar vacío, el correo debe tener formato válido y el país es un código ISO 3166-1 alfa-2. El perfil se guarda solo en el dispositivo; el correo no se verifica ni se envía nada a él. El país no cambia ninguna regla de la app (no define moneda, RN-37).
+- **RN-43 — PIN obligatorio.** El registro incluye crear un PIN de 4 a 6 dígitos, confirmado dos veces. Se guarda únicamente como hash con sal en el almacenamiento seguro del sistema; nunca en texto plano ni en la base de datos. El PIN bloquea el acceso a la app, pero no cifra la base: quien tenga acceso al archivo del dispositivo podría leerla. Si al registrarse existe un hash de PIN de una instalación anterior sin perfil (en iOS el Keychain puede sobrevivir a una reinstalación), se descarta.
+- **RN-44 — Bloqueo.** La app pide el PIN al abrirse y al volver de segundo plano después de 30 segundos (fijo en esta fase). Mientras esté bloqueada no muestra datos, tampoco en la vista previa del selector de apps.
+- **RN-45 — Intentos fallidos.** Tras 5 PIN incorrectos seguidos se aplica una espera que crece (30 s, 1 min, 2 min…). Un PIN correcto reinicia el contador.
+- **RN-46 — PIN olvidado.** El PIN no se puede recuperar. La opción "Olvidé mi PIN" borra todos los datos de la app (perfil, presupuestos, movimientos) tras una confirmación explícita y devuelve al registro. El usuario recibe este aviso al crear el PIN.
+- **RN-47 — Editar perfil y PIN.** El usuario puede cambiar nombre, correo y país, y cambiar su PIN, siempre pidiendo el PIN actual. No puede quitar el PIN.
+
 ## Fuera de alcance y fases futuras
 
 | Tema | Fase prevista |
 | --- | --- |
 | Respaldo, exportación e importación de datos | Etapa final del MVP |
 | Grupo familiar y presupuestos compartidos | Fase posterior (requiere backend) |
-| Backend, autenticación, sincronización y push remoto | Proyecto separado |
+| Backend, cuentas en línea, verificación del correo, recuperación del PIN, sincronización y push remoto | Proyecto separado |
 | Conversión entre monedas y tasas de cambio | Futuro |
 | Recurrencia automática de presupuestos | Futuro |
 | Trasladar el sobrante a otro presupuesto | Futuro |
+| Biometría y cifrado de la base (SQLCipher) | Futuro |
 | Adjuntos (foto del recibo) y comercio o lugar | Futuro |
 | Historial de cambios de monto | Futuro |

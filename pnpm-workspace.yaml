@@ -5,3 +5,5 @@ nodeLinker: hoisted
 # @parcel/watcher ships prebuilt binaries; its script only builds from source as a fallback.
 allowBuilds:
   '@parcel/watcher': false
+  # better-sqlite3 is a test-only driver (Node) that compiles/downloads its native binary on install.
+  better-sqlite3: true

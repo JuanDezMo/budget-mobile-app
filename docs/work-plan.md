@@ -8,6 +8,7 @@ Avance: contar `[x]` / total de tareas por iteración.
 |---|---|---|---|
 | 0 | Cimientos | La app abre en Android e iOS; CI verde; las reglas de arquitectura se validan solas | — |
 | 1 | Núcleo, base de datos y configuración | Cambiar idioma y tema, y que se recuerde al reabrir | RN-32, RN-37 |
+| 1B | Registro y PIN | Registrarme (nombre, correo, país), crear mi PIN y que la app se bloquee | RN-42–47 |
 | 2 | Categorías | Ver categorías del sistema, crear y archivar las propias | RN-34–36, RN-40 |
 | 3 | Presupuestos | Crear, editar, borrar y ver presupuestos con su estado | RN-01–11, RN-38 |
 | 4 | Movimientos | Registrar gastos/reembolsos/ingresos con líneas y ver a qué presupuesto cuentan | RN-12–21, RN-39–41 |
@@ -16,7 +17,7 @@ Avance: contar `[x]` / total de tareas por iteración.
 | 7 | Pruebas en dispositivos *(opcional)* | Versión candidata probada en gama baja | — |
 | 8 | Respaldo *(opcional)* | Exportar e importar datos | — |
 
-Las iteraciones 0–6 son obligatorias y forman el MVP funcional. Las 7 y 8 son opcionales.
+Las iteraciones 0–6 (incluida la 1B) son obligatorias y forman el MVP funcional. Las 7 y 8 son opcionales.
 
 ---
 
@@ -37,27 +38,51 @@ Las iteraciones 0–6 son obligatorias y forman el MVP funcional. Las 7 y 8 son 
 ## Iteración 1 — Núcleo, base de datos y configuración
 
 Núcleo compartido
-- [ ] T1.1 `Result<T, E>` con `ok` / `err` + pruebas
-- [ ] T1.2 `Money`, `CurrencyCode`, `add`/`subtract` (error si las monedas son distintas) + pruebas
-- [ ] T1.3 Conversión texto ↔ unidad menor según decimales, máx. 12 dígitos enteros (RN-20, RN-32) + pruebas
-- [ ] T1.4 Utilidades de fechas: `occurred_at` con desfase, `local_date`, comparación de `YYYY-MM-DD` + pruebas
-- [ ] T1.5 i18n: i18next + `expo-localization`, `locales/es.json` y `en.json`, formateo de montos y fechas
-- [ ] T1.6 Tema: tokens claro/oscuro, proveedor con `LIGHT | DARK | SYSTEM`
+- [x] T1.1 `Result<T, E>` con `ok` / `err` + pruebas
+- [x] T1.2 `Money`, `CurrencyCode`, `add`/`subtract` (error si las monedas son distintas) + pruebas
+- [x] T1.3 Conversión texto ↔ unidad menor según decimales, máx. 12 dígitos enteros (RN-20, RN-32) + pruebas
+- [x] T1.4 Utilidades de fechas: `occurred_at` con desfase, `local_date`, comparación de `YYYY-MM-DD` + pruebas
+- [x] T1.5 i18n: i18next + `expo-localization`, `locales/es.json` y `en.json`, formateo de montos y fechas
+- [x] T1.6 Tema: tokens claro/oscuro, proveedor con `LIGHT | DARK | SYSTEM`
 
 Base de datos
-- [ ] T1.7 Conexión Kysely + `expo-sqlite` y tipos `Database` de las 8 tablas
-- [ ] T1.8 Migración inicial: tablas, CHECKs, índices y únicos
-- [ ] T1.9 Triggers `BUDGET_OVERLAP` de INSERT y UPDATE (el de UPDATE excluye `NEW.id`)
-- [ ] T1.10 Seeds: monedas (RN-32), categorías del sistema (RN-34), fila de `settings`
-- [ ] T1.11 Decidir e instalar driver SQLite para pruebas en Node; probar migraciones y triggers
-- [ ] T1.12 Contexto de React que entrega repositorios (con implementación en memoria para pruebas)
+- [x] T1.7 Conexión Kysely + `expo-sqlite` y tipos `Database` de las 9 tablas
+- [x] T1.8 Migración inicial (incluye `user_profile`): tablas, CHECKs, índices y únicos
+- [x] T1.9 Triggers `BUDGET_OVERLAP` de INSERT y UPDATE (el de UPDATE excluye `NEW.id`)
+- [x] T1.10 Seeds: monedas (RN-32) y categorías del sistema (RN-34) como migración; la fila de `settings` se crea al arrancar con el idioma del dispositivo (T1.13)
+- [x] T1.11 Decidir e instalar driver SQLite para pruebas en Node; probar migraciones y triggers
+- [x] T1.12 Contexto de React que entrega repositorios (con implementación en memoria para pruebas)
 
 Configuración (feature `settings`)
-- [ ] T1.13 Tipos, schema Zod y repositorio de `settings`
-- [ ] T1.14 `useSettings` (ViewModel) + pantalla de idioma y tema (RN-37)
-- [ ] T1.15 Navegación base (pestañas o stack) con pantallas vacías traducidas
+- [x] T1.13 Tipos, schema Zod y repositorio de `settings`
+- [x] T1.14 `useSettings` (ViewModel) + pantalla de idioma y tema (RN-37)
+- [x] T1.15 Navegación base (pestañas o stack) con pantallas vacías traducidas
 
 **Hecho cuando:** cambio idioma y tema, cierro la app, la abro y se mantienen.
+
+## Iteración 1B — Registro y PIN
+
+Feature `profile`. Depende de T1.7–T1.15. Detalle: RN-42 a RN-47. La app queda tras una puerta: sin perfil → registro; con perfil → bloqueo por PIN.
+
+- [x] T1B.1 Verificar en la documentación del SDK 58 `expo-secure-store`, rutas protegidas y vista previa del selector de apps (hallazgos abajo); falta solo instalar con `npx expo install expo-secure-store expo-screen-capture` al empezar T1B.5
+- [ ] T1B.2 `profile.types.ts` + `profile.schemas.ts` (nombre, correo, país ISO 3166-1 alfa-2, PIN 4–6 dígitos) + pruebas
+- [ ] T1B.3 `profile.rules.ts`: registro obligatorio (RN-42), formato del PIN (RN-43), espera por intentos fallidos (RN-45) + pruebas RN
+- [ ] T1B.4 `profile.repository.ts` (`user_profile`) + mapper + pruebas contra SQLite; implementación en memoria
+- [ ] T1B.5 Servicio de PIN en `core/security`: hash con sal (sal aleatoria con `expo-crypto`), guardado con `setItemAsync` y `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`, verificación; descartar hash huérfano al registrarse; nunca en SQLite (RN-43) + pruebas con almacenamiento falso
+- [ ] T1B.6 `useRegistration` + pantalla de registro (nombre, correo, país, PIN y confirmación) con aviso de que el PIN no se recupera (RN-42, RN-46)
+- [ ] T1B.7 Puerta con `Stack.Protected` y `useAppLock`: pantalla de PIN al abrir y al volver de segundo plano tras 30 s; ocultar vista previa con `expo-screen-capture` (RN-44)
+- [ ] T1B.8 Intentos fallidos con espera creciente y opción "Olvidé mi PIN" que borra todos los datos con confirmación (RN-45, RN-46)
+- [ ] T1B.9 Editar perfil y cambiar PIN desde Ajustes, pidiendo el PIN actual (RN-47)
+- [ ] T1B.10 Textos es/en (incluye nombres de país con `Intl.DisplayNames`) y modo oscuro
+
+Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
+- `expo-secure-store` (~58.0.2): `getItemAsync`, `setItemAsync`, `deleteItemAsync`; usar las asíncronas, las síncronas bloquean el hilo de JS. Claves solo con letras, números, `.`, `-` y `_`. Funciona en Expo Go.
+- Android guarda en SharedPreferences cifradas con Keystore y se borra al desinstalar; el plugin excluye el dato del Auto Backup por defecto. iOS usa Keychain y **puede sobrevivir a una reinstalación**: por eso el hash huérfano se descarta al registrarse.
+- No usar `requireAuthentication` (es para biometría y no entra en esta fase).
+- Rutas protegidas: `<Stack.Protected guard={...}>` en el layout raíz de Expo Router (reemplaza las redirecciones antiguas). Hay que esperar a leer el estado (perfil y PIN) antes de renderizar, manteniendo el splash con `SplashScreen.preventAutoHideAsync()` y `hide()`.
+- Vista previa del selector de apps: en iOS, `enableAppSwitcherProtectionAsync()` (desenfoque); en Android no hay equivalente, `preventScreenCaptureAsync()` / `usePreventScreenCapture()` usa FLAG_SECURE, que además bloquea capturas de pantalla.
+
+**Hecho cuando:** instalo la app limpia, me registro con PIN, la cierro, la abro y me pide el PIN; con PIN erróneo no entro; con "Olvidé mi PIN" se borran los datos y vuelve el registro.
 
 ## Iteración 2 — Categorías
 
@@ -156,8 +181,19 @@ Configuración (feature `settings`)
 
 **Entre features (decidido 2026-11-07):** una feature solo puede importar `*.types.ts` y `*.rules.ts` de otra feature; nunca su repositorio, ViewModel ni componentes.
 
+## Decisiones tomadas en la implementación
+
+- Kysely 0.29 exporta `Migrator` desde `kysely/migration`, que incluye un `import()` dinámico que Hermes no compila. `metro.config.js` apunta ese import al archivo `migrator.js` en el dispositivo (2026-11-07). Revisar al actualizar Kysely.
+- Las migraciones usan SQL crudo con `STRICT` explícito para que el esquema sea idéntico en el teléfono y en las pruebas.
+- `src/composition/AppProviders.tsx` es la raíz de composición: abre la base, carga ajustes e inyecta repositorios; es el único lugar que conoce la base y las features.
+- Repositorios por contexto: `createRepositoryContext` en `core/shared`, un contexto por repositorio.
+- Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
+
 ## Decisiones pendientes
 
-- Driver SQLite para pruebas en Node (T1.11).
+- Cifrado de la base de datos con SQLCipher: no entra en Fase 1; el PIN solo bloquea la pantalla (ver riesgo en RN-43).
+- Verificación del correo y recuperación del PIN: requieren backend (proyecto separado).
+- Respaldo (T8.1): decidir si incluye `user_profile`; nunca incluye el PIN.
+- ~~Driver SQLite para pruebas en Node (T1.11)~~: decidido `better-sqlite3` + `SqliteDialect` de Kysely (2026-11-07). `kysely-expo` 56 declara `expo-sqlite ^56` pero solo usa APIs públicas que existen en el 58; las pruebas lo confirman a nivel SQL, falta verificarlo en un dispositivo (T7).
 - Diseño de pantallas y navegación: no hay maquetas; se definirán al llegar a cada pantalla.
 - Formato del respaldo (T8.1).

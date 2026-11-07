@@ -43,7 +43,8 @@ src/
     ├── movements/
     ├── categories/
     ├── alerts/                   # thresholds + alert evaluation
-    └── settings/
+    ├── settings/
+    └── profile/                  # registration, user_profile, PIN lock
 ```
 
 | Archivo | Responsabilidad | No puede |
@@ -68,6 +69,7 @@ src/
 | Multi-idioma | `i18next` + `react-i18next` + `expo-localization` | Español e inglés |
 | Tema | `useColorScheme` + tokens propios | Claro, oscuro o del sistema |
 | Notificaciones | `expo-notifications` | Solo locales |
+| Seguridad | `expo-secure-store` | Hash con sal del PIN (RN-43); verificar API en la documentación del SDK |
 | Fechas | `date-fns` |  |
 | IDs | `expo-crypto` (`randomUUID`) |  |
 | Listas | FlashList | Rendimiento en gama baja |
@@ -151,8 +153,9 @@ Cada paso es un PR pequeño y revisable. Dentro de cada feature se avanza de ade
 
 1. **Proyecto base.** Expo + pnpm + TypeScript estricto + ESLint + Prettier + Husky + CI.
 2. **Núcleo compartido.** `Result`, `Money`, utilidades de fechas, i18n (es/en) y tema claro/oscuro.
-3. **Base de datos.** Conexión Kysely, tipos `Database`, migración inicial con las 8 tablas, triggers y datos precargados (monedas y categorías del sistema).
+3. **Base de datos.** Conexión Kysely, tipos `Database`, migración inicial con las 9 tablas, triggers y datos precargados (monedas y categorías del sistema).
 4. **Configuración.** Pantalla de idioma y tema (RN-37).
+4B. **Registro y PIN.** Perfil, PIN con hash, puerta de navegación y bloqueo (RN-42 a RN-47).
 5. **Categorías.** Listar, crear, archivar (RN-34 a RN-36, RN-40).
 6. **Presupuestos.** Crear, editar, borrar, estados y cierre con gracia (RN-01 a RN-11, RN-38).
 7. **Movimientos.** Cabecera con líneas, asignación y reasignación de presupuesto (RN-12 a RN-21, RN-39, RN-41).

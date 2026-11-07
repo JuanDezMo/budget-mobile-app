@@ -2,7 +2,7 @@
 
 Contexto para Claude Code. Resume las decisiones tomadas en la sesión de planeación del 2026-11-06.
 Documentos completos:
-- `docs/business-rules.md` — Reglas de negocio MVP (RN-01 a RN-41)
+- `docs/business-rules.md` — Reglas de negocio MVP (RN-01 a RN-47)
 - `docs/data-model.md` — Modelo entidad-relación MVP
 - `docs/architecture.md` — Arquitectura MVP
 
@@ -19,12 +19,12 @@ Documentos completos:
 ## Pruebas
 - Reglas (`*.rules.test.ts`): obligatorias, una o más por RN-XX.
 - Jest se importa explícito: `import { describe, expect, it, jest } from '@jest/globals'` (TypeScript 6 no carga tipos globales de `@types/*`). Las pruebas no van en `src/app/` (Expo Router trata cada archivo como ruta); las de pantallas van en `src/__tests__/`.
-- Repositorios: contra SQLite en memoria (migraciones, triggers, mappers). `expo-sqlite` es nativo y no corre en Jest/Node: usar un driver Node (p. ej. `better-sqlite3` + `SqliteDialect` de Kysely) como devDependency. Decisión pendiente de confirmar al llegar al paso 3.
+- Repositorios: contra SQLite en memoria (migraciones, triggers, mappers). `expo-sqlite` es nativo y no corre en Jest/Node: usar un driver Node (p. ej. `better-sqlite3` + `SqliteDialect` de Kysely) como devDependency. Decidido en T1.11: `better-sqlite3` (devDependency, aprobado en `allowBuilds`).
 - Componentes: solo pantallas con lógica de interacción (formulario de movimiento con líneas).
 - Rendimiento: Android físico de gama baja (2–3 GB RAM) en modo release antes de cada entrega.
 
 ## Alcance
-- App móvil Android + iOS, 100% local (SQLite en el dispositivo). Sin backend, sin cuentas, un usuario por dispositivo.
+- App móvil Android + iOS, 100% local (SQLite en el dispositivo). Sin backend ni cuentas en línea; un usuario por dispositivo con registro local (nombre, correo, país) y PIN obligatorios (RN-42 a RN-47).
 - Fuera de alcance en Fase 1: backend (proyecto separado), grupo familiar, conversión de monedas, recurrencia automática, adjuntos, push remoto. Respaldo/exportación = etapa final del MVP.
 
 ## Stack
@@ -59,7 +59,7 @@ src/
 - i18n: claves por feature en inglés (`budgets.form.amountLabel`); categorías del sistema con `t('categories.<CODE>')`; montos con `Intl.NumberFormat` y fechas con date-fns según idioma; notificaciones en el idioma vigente al enviarlas.
 - Nombres: tablas/columnas snake_case, propiedades TS camelCase (el mapper convierte), componentes PascalCase, hooks `useX`, archivos `feature.role.ts`. Conventional Commits en inglés.
 
-## Modelo de datos (8 tablas, IDs UUID texto, montos enteros en unidad menor)
+## Modelo de datos (9 tablas, IDs UUID texto, montos enteros en unidad menor)
 - `currency(code PK, name, decimals)` — COP 0, USD 2, EUR 2.
 - `category(id, code UK nullable [sistema], name nullable [personalizadas, único lower()], icon, color, is_system, archived_at, created_at, updated_at)`.
   Sistema: ALIMENTACION, TRANSPORTE, ENTRETENIMIENTO, URGENCIAS, OBLIGACIONES_HOGAR, SIN_CLASIFICAR.
@@ -69,6 +69,7 @@ src/
 - `movement(id, kind EXPENSE|REFUND|INCOME, currency_code FK, total_minor>0, occurred_at [ISO local con desfase], local_date [YYYY-MM-DD], payment_method CASH|DEBIT_CARD|CREDIT_CARD|TRANSFER|OTHER, note, created_at, updated_at, deleted_at)`.
 - `movement_line(id, movement_id FK, category_id FK NOT NULL, budget_id FK nullable [lo asigna la app], amount_minor>0)`.
 - `settings(id=1, language es|en, theme LIGHT|DARK|SYSTEM, updated_at)`.
+- `user_profile(id=1, full_name, email, country_code, created_at, updated_at)`. El PIN (hash con sal) va en `expo-secure-store`, nunca en SQLite.
 - Triggers `BEFORE INSERT` y `BEFORE UPDATE ON budget` que abortan con `BUDGET_OVERLAP` si se cruza con otro presupuesto no borrado de la misma categoría. **El de UPDATE debe excluir `id = NEW.id`** (si no, choca consigo mismo).
 - Únicos: `budget_threshold(budget_id, percentage)`, `alert_sent(threshold_id)`, `category(lower(name)) WHERE name IS NOT NULL`.
 - Solo en dominio (misma transacción del guardado): suma de líneas = total, máx. 3 umbrales configurables, fecha no futura, 12 dígitos enteros, bloqueo por presupuesto cerrado, reasignación RN-39.
@@ -108,9 +109,15 @@ Monedas, categorías y configuración
 - RN-40 Categoría nunca nula; SIN_CLASIFICAR no admite presupuestos; reclasificar dispara RN-39.
 - RN-41 Se permiten líneas sin presupuesto (budget_id nulo); un ingreso general no aumenta ningún cupo.
 
+Perfil y seguridad
+- RN-42 Registro obligatorio al primer arranque (nombre, correo sin verificar, país ISO). El país no cambia reglas.
+- RN-43 PIN obligatorio de 4–6 dígitos, solo hash con sal en secure-store; bloquea la pantalla pero no cifra la base.
+- RN-44 Bloqueo al abrir y tras 30 s en segundo plano; sin datos en la vista previa. RN-45 5 fallos → espera creciente.
+- RN-46 PIN olvidado = borrar todos los datos con confirmación; no hay recuperación. RN-47 Editar perfil/PIN pidiendo el PIN actual.
+
 ## Orden de implementación
 1. Proyecto base (Expo, pnpm, TS estricto, ESLint, Prettier, Husky, CI)
 2. core/shared (Result, Money, fechas), i18n es/en, tema
 3. DB: conexión Kysely, tipos `Database`, migración inicial, triggers, seeds (monedas y categorías del sistema). Verificar compatibilidad de `kysely-expo` con la versión de `expo-sqlite` del SDK.
-4. Settings → 5. Categorías → 6. Presupuestos → 7. Movimientos (+ asignación RN-17/RN-39) → 8. Cálculo de uso → 9. Umbrales y notificaciones
+4. Settings → 4B. Registro y PIN (iteración 1B) → 5. Categorías → 6. Presupuestos → 7. Movimientos (+ asignación RN-17/RN-39) → 8. Cálculo de uso → 9. Umbrales y notificaciones
 10. *(Opcional)* Pruebas en dispositivos (APK interno Android, Expo Go iOS, gama baja) → 11. *(Opcional)* Respaldo

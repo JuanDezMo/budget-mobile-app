@@ -69,6 +69,8 @@ module.exports = defineConfig([
               'key',
               'id',
               'testID',
+              'accessibilityRole',
+              'role',
               'nativeID',
               'name',
               'href',
