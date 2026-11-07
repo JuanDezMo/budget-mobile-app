@@ -34,6 +34,14 @@ function RootNavigator() {
         <Stack.Screen name="profile" options={{ ...withHeader, title: t('profile.title') }} />
         <Stack.Screen name="categories" options={{ ...withHeader, title: t('categories.title') }} />
         <Stack.Screen
+          name="budget/[id]"
+          options={{ ...withHeader, title: t('budgets.detail.title') }}
+        />
+        <Stack.Screen
+          name="budget-form"
+          options={{ ...withHeader, title: t('budgets.form.newTitle') }}
+        />
+        <Stack.Screen
           name="category-new"
           options={{ ...withHeader, title: t('categories.form.title') }}
         />

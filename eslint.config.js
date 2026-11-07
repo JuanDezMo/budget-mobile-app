@@ -87,6 +87,11 @@ module.exports = defineConfig([
       ],
     },
   },
+  {
+    // Tests use ids and test data in JSX props; they are not user-facing text.
+    files: ['src/**/*.test.tsx', 'src/__tests__/**/*.tsx'],
+    rules: { 'i18next/no-literal-string': 'off' },
+  },
   // Last: turn off any rule that would fight with Prettier's formatting.
   prettierConfig,
 ]);

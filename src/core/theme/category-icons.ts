@@ -1,8 +1,7 @@
-import type { CategoryIconKey } from '../category.types';
-
 // Icon key (stored in the database) -> emoji drawn on screen. Emojis need no icon font,
-// which keeps the app light on low-end phones. Built-in categories use the first six keys.
-export const ICON_EMOJI: Readonly<Record<CategoryIconKey, string>> = {
+// which keeps the app light on low-end phones. The keys a user can choose are listed in
+// categories/category.types.ts; an unknown key falls back to a question mark.
+export const ICON_EMOJI: Readonly<Record<string, string>> = {
   utensils: '🍽️',
   bus: '🚌',
   film: '🎬',
@@ -22,5 +21,5 @@ export const ICON_EMOJI: Readonly<Record<CategoryIconKey, string>> = {
 };
 
 export function iconToEmoji(icon: string): string {
-  return icon in ICON_EMOJI ? ICON_EMOJI[icon as CategoryIconKey] : ICON_EMOJI['help-circle'];
+  return ICON_EMOJI[icon] ?? '❓';
 }

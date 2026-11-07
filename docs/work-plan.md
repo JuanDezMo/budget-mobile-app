@@ -97,15 +97,15 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 
 ## Iteración 3 — Presupuestos
 
-- [ ] T3.1 `budget.types.ts` + `budget.schemas.ts`
-- [ ] T3.2 Reglas: datos obligatorios (RN-01), moneda fija (RN-02), solapamiento (RN-03) + pruebas
-- [ ] T3.3 Reglas: estado activo / en gracia / cerrado con 5 días (RN-05, RN-38) + pruebas de bordes de fecha
-- [ ] T3.4 Reglas: editar monto y fechas solo activo, aviso si monto < gastado (RN-06, RN-07, RN-08) + pruebas
-- [ ] T3.5 Repositorio: crear, editar, borrado lógico (RN-10), listar con filtros + pruebas (incluye trigger)
-- [ ] T3.6 Cierre perezoso al abrir la app: pasa a `CLOSED` y congela `spent_final_minor` (RN-05)
-- [ ] T3.7 `useBudgets` + lista agrupada por estado
-- [ ] T3.8 Formulario crear/editar (categoría, moneda, monto, fechas) con errores traducidos
-- [ ] T3.9 Detalle de presupuesto con acción de borrar
+- [x] T3.1 `budget.types.ts` + `budget.schemas.ts`
+- [x] T3.2 Reglas: datos obligatorios (RN-01), moneda fija (RN-02), solapamiento (RN-03) + pruebas
+- [x] T3.3 Reglas: estado activo / en gracia / cerrado con 5 días (RN-05, RN-38) + pruebas de bordes de fecha
+- [x] T3.4 Reglas: editar monto y fechas solo activo, aviso si monto < gastado (RN-06, RN-07, RN-08) + pruebas
+- [x] T3.5 Repositorio: crear, editar, borrado lógico (RN-10), listar con filtros + pruebas (incluye trigger)
+- [x] T3.6 Cierre perezoso al abrir la app: pasa a `CLOSED` y congela `spent_final_minor` (RN-05)
+- [x] T3.7 `useBudgets` + lista agrupada por estado
+- [x] T3.8 Formulario crear/editar (categoría, moneda, monto, fechas) con errores traducidos
+- [x] T3.9 Detalle de presupuesto con acción de borrar
 
 **Hecho cuando:** creo "Entretenimiento USD 55, 1–15 nov", un segundo presupuesto cruzado se rechaza con mensaje claro, y uno vencido hace más de 5 días aparece cerrado.
 
@@ -191,6 +191,8 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - La puerta de acceso usa `Stack.Protected` en `src/app/_layout.tsx` y el formulario de registro vive en `useRegistration` (las capas no dejan que un componente importe un schema).
 - Categorías (it. 2): los íconos se guardan como clave (`paw`, `bus`…) y se dibujan como emoji (sin fuente de íconos, más liviano); el color es uno de 12 fijos. Quitar una personalizada la archiva si tiene presupuestos o líneas y la elimina si no (RN-36). Renombrar existe en reglas, repositorio y ViewModel (RN-34/RN-35) pero aún no tiene pantalla. El nombre de una personalizada no se compara con los nombres traducidos de las del sistema.
 - Los ids los genera `newId` (expo-crypto) desde la raíz de composición; en Jest `randomUUID` devuelve `undefined`, por eso los repositorios reciben el generador.
+- Presupuestos (it. 3): fechas con `@react-native-community/datetimepicker` (incluido en Expo Go; diálogo en Android, selector compacto en iOS), guardadas como `YYYY-MM-DD`. Solo se edita monto y fechas; categoría y moneda quedan fijas al editar. El borrado (RN-10) solo marca `deleted_at`: la reasignación de las líneas a "sin presupuesto" llega con T4.5. El gastado ya se calcula en el repositorio (`getSpentMinor`, gastos − reembolsos, mín. 0) porque lo necesitan el cierre y el aviso de RN-06; el uso completo (disponible, %, sobrante) es la Iteración 5. El cierre perezoso corre al abrir la app (arranque), no al volver de segundo plano.
+- Los componentes y pantallas de una feature no pueden usar los de otra: `OptionGroup`, `CategoryAvatar` y los emojis de íconos se movieron a `core/theme`. Las pantallas combinan ViewModels de varias features (p. ej. presupuestos + categorías) y pasan los datos por props.
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes

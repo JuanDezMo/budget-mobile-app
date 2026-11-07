@@ -1,16 +1,22 @@
-import { useTranslation } from 'react-i18next';
+import { router } from 'expo-router';
 
-import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
+import { BudgetList } from '@/features/budgets/components/BudgetList';
+import { useCategories } from '@/features/categories/useCategories';
 
-// Placeholder until budgets exist (iteration 3).
+const NEW_BUDGET_ROUTE = '/budget-form';
+const BUDGET_DETAIL_ROUTE = '/budget/[id]';
+
 export default function BudgetsScreen() {
-  const { t } = useTranslation();
+  const { system, custom, archived } = useCategories();
 
   return (
     <Screen>
-      <AppText variant="title">{t('navigation.budgets')}</AppText>
-      <AppText variant="muted">{t('budgets.empty')}</AppText>
+      <BudgetList
+        categories={[...system, ...custom, ...archived]}
+        onCreate={() => router.push(NEW_BUDGET_ROUTE)}
+        onOpen={(id) => router.push({ pathname: BUDGET_DETAIL_ROUTE, params: { id } })}
+      />
     </Screen>
   );
 }

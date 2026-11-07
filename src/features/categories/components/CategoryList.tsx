@@ -8,7 +8,7 @@ import { useTheme } from '@/core/theme/ThemeProvider';
 import { getCategoryLabel } from '../category.rules';
 import type { Category } from '../category.types';
 import { useCategories } from '../useCategories';
-import { CategoryAvatar } from './CategoryAvatar';
+import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
 
 type Props = { onCreate: () => void };
 

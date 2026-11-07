@@ -14,8 +14,50 @@
     "title": "Your envelopes",
     "empty": "Your envelopes will appear here"
   },
+  "currencies": {
+    "COP": "Colombian peso (COP)",
+    "USD": "US dollar (USD)",
+    "EUR": "Euro (EUR)"
+  },
   "budgets": {
-    "empty": "Your budgets will appear here"
+    "empty": "You have no budgets yet.",
+    "new": "New budget",
+    "sectionActive": "Active",
+    "sectionGrace": "In grace period",
+    "sectionClosed": "Closed",
+    "phase": {
+      "ACTIVE": "Active",
+      "GRACE": "In grace period",
+      "CLOSED": "Closed"
+    },
+    "period": "{{start}} to {{end}}",
+    "form": {
+      "newTitle": "New budget",
+      "editTitle": "Edit budget",
+      "category": "Category",
+      "noCategories": "Create a category first.",
+      "currency": "Currency",
+      "amount": "Amount",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "create": "Create budget",
+      "save": "Save changes",
+      "saveAnyway": "Save anyway",
+      "lowAmount": "The new amount is lower than what you have already spent ({{spent}}). You can still save it.",
+      "readOnly": "A budget can only be edited while it is active.",
+      "currencyLocked": "The currency cannot be changed."
+    },
+    "detail": {
+      "title": "Budget",
+      "amount": "Amount",
+      "period": "Period",
+      "status": "Status",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete this budget?",
+      "deleteMessage": "Its movements are kept but stop counting towards it. This cannot be undone.",
+      "notFound": "This budget no longer exists."
+    }
   },
   "movements": {
     "empty": "Your movements will appear here"
@@ -121,6 +163,14 @@
     "CATEGORY_SYSTEM_PROTECTED": "Built-in categories cannot be changed or removed.",
     "CATEGORY_ALREADY_ARCHIVED": "This category is already archived.",
     "CATEGORY_ARCHIVED": "Archived categories cannot be used for new items.",
-    "CATEGORY_NO_BUDGET_ALLOWED": "This category cannot have a budget."
+    "CATEGORY_NO_BUDGET_ALLOWED": "This category cannot have a budget.",
+    "BUDGET_CATEGORY_REQUIRED": "Choose a category.",
+    "BUDGET_CURRENCY_REQUIRED": "Choose a currency.",
+    "BUDGET_DATE_INVALID": "Choose a valid date.",
+    "BUDGET_AMOUNT_INVALID": "The amount must be greater than 0.",
+    "BUDGET_DATES_INVALID": "The start date cannot be after the end date.",
+    "BUDGET_OVERLAP": "This category already has a budget that overlaps these dates.",
+    "BUDGET_CURRENCY_LOCKED": "The currency of a budget cannot be changed.",
+    "BUDGET_NOT_EDITABLE": "This budget can no longer be edited."
   }
 }

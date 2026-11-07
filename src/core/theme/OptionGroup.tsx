@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText } from '@/core/theme/AppText';
-import { useTheme } from '@/core/theme/ThemeProvider';
+import { AppText } from './AppText';
+import { useTheme } from './ThemeProvider';
 
 type Option<T extends string> = { value: T; label: string };
 
@@ -11,11 +11,13 @@ export function OptionGroup<T extends string>({
   options,
   selected,
   onSelect,
+  disabled,
 }: {
   label: string;
   options: readonly Option<T>[];
   selected: T;
   onSelect: (value: T) => void;
+  disabled?: boolean;
 }) {
   const { colors } = useTheme();
 
@@ -31,12 +33,14 @@ export function OptionGroup<T extends string>({
               key={option.value}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}
+              disabled={disabled}
               onPress={() => onSelect(option.value)}
               style={[
                 styles.option,
                 {
                   backgroundColor: isSelected ? colors.manila : colors.surface,
                   borderColor: isSelected ? colors.manila : colors.line,
+                  opacity: disabled && !isSelected ? 0.4 : 1,
                 },
               ]}
             >

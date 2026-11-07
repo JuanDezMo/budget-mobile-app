@@ -14,8 +14,50 @@
     "title": "Tus sobres",
     "empty": "Aquí aparecerán tus sobres"
   },
+  "currencies": {
+    "COP": "Peso colombiano (COP)",
+    "USD": "Dólar estadounidense (USD)",
+    "EUR": "Euro (EUR)"
+  },
   "budgets": {
-    "empty": "Aquí aparecerán tus presupuestos"
+    "empty": "Aún no tienes presupuestos.",
+    "new": "Nuevo presupuesto",
+    "sectionActive": "Activos",
+    "sectionGrace": "En periodo de gracia",
+    "sectionClosed": "Cerrados",
+    "phase": {
+      "ACTIVE": "Activo",
+      "GRACE": "En gracia",
+      "CLOSED": "Cerrado"
+    },
+    "period": "Del {{start}} al {{end}}",
+    "form": {
+      "newTitle": "Nuevo presupuesto",
+      "editTitle": "Editar presupuesto",
+      "category": "Categoría",
+      "noCategories": "Crea una categoría primero.",
+      "currency": "Moneda",
+      "amount": "Monto",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "create": "Crear presupuesto",
+      "save": "Guardar cambios",
+      "saveAnyway": "Guardar de todos modos",
+      "lowAmount": "El monto nuevo es menor que lo que ya gastaste ({{spent}}). Aun así puedes guardarlo.",
+      "readOnly": "Un presupuesto solo se puede editar mientras está activo.",
+      "currencyLocked": "La moneda no se puede cambiar."
+    },
+    "detail": {
+      "title": "Presupuesto",
+      "amount": "Monto",
+      "period": "Periodo",
+      "status": "Estado",
+      "edit": "Editar",
+      "delete": "Borrar",
+      "deleteTitle": "¿Borrar este presupuesto?",
+      "deleteMessage": "Sus movimientos se conservan pero dejan de contar para él. No se puede deshacer.",
+      "notFound": "Este presupuesto ya no existe."
+    }
   },
   "movements": {
     "empty": "Aquí aparecerán tus movimientos"
@@ -121,6 +163,14 @@
     "CATEGORY_SYSTEM_PROTECTED": "Las categorías del sistema no se pueden cambiar ni quitar.",
     "CATEGORY_ALREADY_ARCHIVED": "Esta categoría ya está archivada.",
     "CATEGORY_ARCHIVED": "Las categorías archivadas no se pueden usar en nuevos registros.",
-    "CATEGORY_NO_BUDGET_ALLOWED": "Esta categoría no puede tener presupuesto."
+    "CATEGORY_NO_BUDGET_ALLOWED": "Esta categoría no puede tener presupuesto.",
+    "BUDGET_CATEGORY_REQUIRED": "Elige una categoría.",
+    "BUDGET_CURRENCY_REQUIRED": "Elige una moneda.",
+    "BUDGET_DATE_INVALID": "Elige una fecha válida.",
+    "BUDGET_AMOUNT_INVALID": "El monto debe ser mayor que 0.",
+    "BUDGET_DATES_INVALID": "La fecha de inicio no puede ser posterior a la de fin.",
+    "BUDGET_OVERLAP": "Esta categoría ya tiene un presupuesto que se cruza con esas fechas.",
+    "BUDGET_CURRENCY_LOCKED": "La moneda de un presupuesto no se puede cambiar.",
+    "BUDGET_NOT_EDITABLE": "Este presupuesto ya no se puede editar."
   }
 }

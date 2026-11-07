@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { APP_LANGUAGES, THEME_MODES } from '@/core/shared/app-preferences';
+import { OptionGroup } from '@/core/theme/OptionGroup';
 
 import { useSettings } from '../useSettings';
-import { OptionGroup } from './OptionGroup';
 
 // Language and theme choosers (RN-37). Changes are saved and applied right away.
 export function SettingsForm() {

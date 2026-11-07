@@ -9,8 +9,8 @@ import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { CATEGORY_COLORS, CATEGORY_ICON_KEYS } from '../category.types';
 import { useCreateCategory } from '../useCreateCategory';
-import { CategoryAvatar } from './CategoryAvatar';
-import { ICON_EMOJI } from './category-icons';
+import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
+import { iconToEmoji } from '@/core/theme/category-icons';
 
 // Create a custom category with name, icon and color (RN-35).
 export function CategoryForm({ onCreated }: { onCreated: () => void }) {
@@ -68,7 +68,7 @@ export function CategoryForm({ onCreated }: { onCreated: () => void }) {
                   },
                 ]}
               >
-                <Text style={styles.emoji}>{ICON_EMOJI[key]}</Text>
+                <Text style={styles.emoji}>{iconToEmoji(key)}</Text>
               </Pressable>
             ))}
           </View>
