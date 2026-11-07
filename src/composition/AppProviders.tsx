@@ -13,6 +13,13 @@ import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
 import { Screen } from '@/core/theme/Screen';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
+import {
+  createLineReassigner,
+  createMovementRepository,
+} from '@/features/movements/movement.repository';
+import type { MovementRepository } from '@/features/movements/movement.repository';
+import { budgetAssignmentRules } from '@/features/movements/movement.rules';
+import { MovementRepositoryProvider } from '@/features/movements/useMovementRepository';
 import { createBudgetRepository } from '@/features/budgets/budget.repository';
 import type { BudgetRepository } from '@/features/budgets/budget.repository';
 import { closeExpiredBudgets } from '@/features/budgets/useBudgets';
@@ -40,6 +47,7 @@ type Repositories = {
   profile: ProfileRepository;
   categories: CategoryRepository;
   budgets: BudgetRepository;
+  movements: MovementRepository;
   vault: PinVault;
 };
 type Boot = { status: 'loading' } | { status: 'error' } | { status: 'ready'; repos: Repositories };
@@ -64,13 +72,18 @@ export function AppProviders({ children }: { children: ReactNode }) {
         const profileRepository = createProfileRepository(db);
         await loadAccess(profileRepository);
         // RN-05: lazy close, applied every time the app opens.
-        const budgetRepository = createBudgetRepository(db, newId);
+        const budgetRepository = createBudgetRepository(
+          db,
+          newId,
+          createLineReassigner(budgetAssignmentRules),
+        );
         await closeExpiredBudgets(budgetRepository);
         const repos = {
           settings: settingsRepository,
           profile: profileRepository,
           categories: createCategoryRepository(db, newId),
           budgets: budgetRepository,
+          movements: createMovementRepository(db, newId, budgetAssignmentRules),
           vault: createDevicePinVault(),
         };
         if (!cancelled) setBoot({ status: 'ready', repos });
@@ -94,7 +107,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <PinVaultProvider value={boot.repos.vault}>
           <CategoryRepositoryProvider value={boot.repos.categories}>
             <BudgetRepositoryProvider value={boot.repos.budgets}>
-              <ThemedRoot>{children}</ThemedRoot>
+              <MovementRepositoryProvider value={boot.repos.movements}>
+                <ThemedRoot>{children}</ThemedRoot>
+              </MovementRepositoryProvider>
             </BudgetRepositoryProvider>
           </CategoryRepositoryProvider>
         </PinVaultProvider>

@@ -111,16 +111,16 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 
 ## Iteración 4 — Movimientos
 
-- [ ] T4.1 `movement.types.ts` + schemas (cabecera + líneas)
-- [ ] T4.2 Reglas de cabecera y líneas: tipo único, ≥1 línea, suma = total, medio de pago, sin fechas futuras, montos válidos (RN-12–16, RN-19, RN-20) + pruebas
-- [ ] T4.3 Regla de asignación de presupuesto por línea (RN-17, RN-18, RN-41) + pruebas
-- [ ] T4.4 Repositorio: guardar cabecera + líneas en una transacción, borrado lógico (RN-21) + pruebas
-- [ ] T4.5 Reasignación RN-39 al editar movimiento y al crear / editar fechas / borrar presupuesto (en la misma transacción) + pruebas
-- [ ] T4.6 Bloqueo de edición y borrado si afecta un presupuesto cerrado (RN-08, RN-18)
-- [ ] T4.7 `useMovementForm` con React Hook Form: líneas dinámicas, total restante, "Cuenta para: …"
-- [ ] T4.8 Pantalla de formulario de movimiento + prueba de componente
-- [ ] T4.9 Historial de movimientos con FlashList, filtros básicos y totales por moneda (RN-33)
-- [ ] T4.10 Editar y borrar movimiento desde el historial
+- [x] T4.1 `movement.types.ts` + schemas (cabecera + líneas)
+- [x] T4.2 Reglas de cabecera y líneas: tipo único, ≥1 línea, suma = total, medio de pago, sin fechas futuras, montos válidos (RN-12–16, RN-19, RN-20) + pruebas
+- [x] T4.3 Regla de asignación de presupuesto por línea (RN-17, RN-18, RN-41) + pruebas
+- [x] T4.4 Repositorio: guardar cabecera + líneas en una transacción, borrado lógico (RN-21) + pruebas
+- [x] T4.5 Reasignación RN-39 al editar movimiento y al crear / editar fechas / borrar presupuesto (en la misma transacción) + pruebas
+- [x] T4.6 Bloqueo de edición y borrado si afecta un presupuesto cerrado (RN-08, RN-18)
+- [x] T4.7 `useMovementForm` con React Hook Form: líneas dinámicas, total restante, "Cuenta para: …"
+- [x] T4.8 Pantalla de formulario de movimiento + prueba de componente
+- [x] T4.9 Historial de movimientos con FlashList, filtros básicos y totales por moneda (RN-33)
+- [x] T4.10 Editar y borrar movimiento desde el historial
 
 **Hecho cuando:** registro un mercado USD 100 repartido en 3 categorías, cada línea muestra a qué presupuesto cuenta, y al crear después un presupuesto que lo cubre la línea se asigna sola.
 
@@ -193,6 +193,10 @@ Hallazgos de T1B.1 (documentación del SDK 58, 2026-11-07):
 - Los ids los genera `newId` (expo-crypto) desde la raíz de composición; en Jest `randomUUID` devuelve `undefined`, por eso los repositorios reciben el generador.
 - Presupuestos (it. 3): fechas con `@react-native-community/datetimepicker` (incluido en Expo Go; diálogo en Android, selector compacto en iOS), guardadas como `YYYY-MM-DD`. Solo se edita monto y fechas; categoría y moneda quedan fijas al editar. El borrado (RN-10) solo marca `deleted_at`: la reasignación de las líneas a "sin presupuesto" llega con T4.5. El gastado ya se calcula en el repositorio (`getSpentMinor`, gastos − reembolsos, mín. 0) porque lo necesitan el cierre y el aviso de RN-06; el uso completo (disponible, %, sobrante) es la Iteración 5. El cierre perezoso corre al abrir la app (arranque), no al volver de segundo plano.
 - Los componentes y pantallas de una feature no pueden usar los de otra: `OptionGroup`, `CategoryAvatar` y los emojis de íconos se movieron a `core/theme`. Las pantallas combinan ViewModels de varias features (p. ej. presupuestos + categorías) y pasan los datos por props.
+- Movimientos (it. 4): la asignación RN-17 y la reasignación RN-39 usan funciones puras de `movement.rules.ts` que la raíz de composición inyecta a los repositorios (`BudgetAssignmentRules`), porque un repositorio no puede importar reglas. `createBudgetRepository` recibe un `LineReassigner` y lo ejecuta dentro de la misma transacción que crear / editar fechas / borrar el presupuesto. El reasignador deja intactas las líneas de presupuestos cerrados (RN-08) y devuelve los ids de presupuestos afectados para la Iteración 6.
+- Un presupuesto solo recibe líneas mientras está activo o en gracia **hoy** (RN-17): un movimiento con fecha vieja dentro de un presupuesto ya cerrado queda sin presupuesto (RN-18).
+- Las listas se recargan al volver a la pantalla (`useRefreshOnFocus` + `refreshKey`); sin eso mostraban datos viejos tras cerrar un formulario.
+- El historial usa FlashList 2 (`@shopify/flash-list`, incluido en Expo Go); Jest necesita `setupFiles` y transformar el paquete. Paginado de 20 en 20 (`MOVEMENT_PAGE_SIZE`): el repositorio elige primero los movimientos de la página y luego sus líneas, para no partir un movimiento; los totales por moneda (RN-33) salen de una consulta aparte sobre todo el historial filtrado, no de la página cargada. Medir igual con 1 000+ en T7.2.
 - Estado de ajustes en un store Zustand (`useSettingsStore`) para que la raíz y la pantalla compartan idioma y tema.
 
 ## Decisiones pendientes

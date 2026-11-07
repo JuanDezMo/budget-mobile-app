@@ -13,6 +13,7 @@ import type { Category } from '../../categories/category.types';
 import { useBudgetDetail } from '../useBudgetDetail';
 
 type Props = {
+  refreshKey?: number;
   budgetId: string;
   categories: readonly Category[];
   onEdit: () => void;
@@ -20,9 +21,9 @@ type Props = {
 };
 
 // Budget detail with edit (only while active, RN-06/07/08) and delete (RN-10).
-export function BudgetDetail({ budgetId, categories, onEdit, onDeleted }: Props) {
+export function BudgetDetail({ refreshKey, budgetId, categories, onEdit, onDeleted }: Props) {
   const { t } = useTranslation();
-  const { budget, phase, canEdit, isLoading, remove } = useBudgetDetail(budgetId);
+  const { budget, phase, canEdit, isLoading, remove } = useBudgetDetail(budgetId, refreshKey);
   const { colors } = useTheme();
   const language = getAppLanguage();
   if (isLoading) return null;

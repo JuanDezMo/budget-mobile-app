@@ -1,8 +1,10 @@
 import { sql } from 'kysely';
 
 import type { AppDatabase, BudgetTable } from '@/core/db/database.types';
+import { noReassign } from '@/core/db/line-reassigner';
+import type { LineReassigner } from '@/core/db/line-reassigner';
 import { isCurrencyCode } from '@/core/shared/currency';
-import { rangesOverlap } from '@/core/shared/dates';
+import { rangesOverlap, todayLocalDate } from '@/core/shared/dates';
 import { err, ok } from '@/core/shared/result';
 import type { Result } from '@/core/shared/result';
 
@@ -47,9 +49,12 @@ function isOverlapError(error: unknown): boolean {
   return error instanceof Error && error.message.includes('BUDGET_OVERLAP');
 }
 
+// `reassignLines` keeps movement lines in step with the budget (RN-39). It runs inside the same
+// transaction as the budget write, so either both happen or neither does.
 export function createBudgetRepository(
   db: AppDatabase,
   generateId: () => string,
+  reassignLines: LineReassigner = noReassign,
 ): BudgetRepository {
   async function get(id: string): Promise<Budget | null> {
     const row = await db.selectFrom('budget').selectAll().where('id', '=', id).executeTakeFirst();
@@ -80,23 +85,27 @@ export function createBudgetRepository(
       const id = generateId();
       const now = new Date().toISOString();
       try {
-        await db
-          .insertInto('budget')
-          .values({
-            id,
-            category_id: input.categoryId,
-            currency_code: input.currency,
-            amount_minor: input.amountMinor,
-            start_date: input.startDate,
-            end_date: input.endDate,
-            status: 'ACTIVE',
-            spent_final_minor: null,
-            closed_at: null,
-            created_at: now,
-            updated_at: now,
-            deleted_at: null,
-          })
-          .execute();
+        await db.transaction().execute(async (trx) => {
+          await trx
+            .insertInto('budget')
+            .values({
+              id,
+              category_id: input.categoryId,
+              currency_code: input.currency,
+              amount_minor: input.amountMinor,
+              start_date: input.startDate,
+              end_date: input.endDate,
+              status: 'ACTIVE',
+              spent_final_minor: null,
+              closed_at: null,
+              created_at: now,
+              updated_at: now,
+              deleted_at: null,
+            })
+            .execute();
+          // RN-39 (2): the new budget takes the unassigned lines that fit it.
+          await reassignLines(trx, { categoryId: input.categoryId, today: todayLocalDate() });
+        });
       } catch (error) {
         if (isOverlapError(error)) return err('BUDGET_OVERLAP');
         throw error;
@@ -106,17 +115,24 @@ export function createBudgetRepository(
     },
 
     async update(id, change) {
+      const current = await required(id);
       try {
-        await db
-          .updateTable('budget')
-          .set({
-            ...(change.amountMinor !== undefined ? { amount_minor: change.amountMinor } : {}),
-            ...(change.startDate !== undefined ? { start_date: change.startDate } : {}),
-            ...(change.endDate !== undefined ? { end_date: change.endDate } : {}),
-            updated_at: new Date().toISOString(),
-          })
-          .where('id', '=', id)
-          .execute();
+        await db.transaction().execute(async (trx) => {
+          await trx
+            .updateTable('budget')
+            .set({
+              ...(change.amountMinor !== undefined ? { amount_minor: change.amountMinor } : {}),
+              ...(change.startDate !== undefined ? { start_date: change.startDate } : {}),
+              ...(change.endDate !== undefined ? { end_date: change.endDate } : {}),
+              updated_at: new Date().toISOString(),
+            })
+            .where('id', '=', id)
+            .execute();
+          // RN-39 (3): new dates may free some lines and cover others.
+          if (change.startDate !== undefined || change.endDate !== undefined) {
+            await reassignLines(trx, { categoryId: current.categoryId, today: todayLocalDate() });
+          }
+        });
       } catch (error) {
         if (isOverlapError(error)) return err('BUDGET_OVERLAP');
         throw error;
@@ -126,12 +142,17 @@ export function createBudgetRepository(
     },
 
     async softDelete(id) {
+      const current = await required(id);
       const now = new Date().toISOString();
-      await db
-        .updateTable('budget')
-        .set({ deleted_at: now, updated_at: now })
-        .where('id', '=', id)
-        .execute();
+      await db.transaction().execute(async (trx) => {
+        await trx
+          .updateTable('budget')
+          .set({ deleted_at: now, updated_at: now })
+          .where('id', '=', id)
+          .execute();
+        // RN-39 (4): its lines stay, but no longer count for it.
+        await reassignLines(trx, { categoryId: current.categoryId, today: todayLocalDate() });
+      });
     },
 
     async close(id, spentFinalMinor) {

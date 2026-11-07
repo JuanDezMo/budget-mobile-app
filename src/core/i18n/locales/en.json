@@ -2,7 +2,8 @@
   "common": {
     "save": "Save",
     "cancel": "Cancel",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "loading": "Loading"
   },
   "navigation": {
     "home": "Home",
@@ -60,7 +61,61 @@
     }
   },
   "movements": {
-    "empty": "Your movements will appear here"
+    "empty": "You have no movements yet.",
+    "new": "New movement",
+    "filterAll": "All",
+    "sectionKind": "Type",
+    "sectionCurrency": "Currency",
+    "totalsTitle": "Totals",
+    "lineCount_one": "{{count}} line",
+    "lineCount_other": "{{count}} lines",
+    "kind": {
+      "EXPENSE": "Expense",
+      "REFUND": "Refund",
+      "INCOME": "Income"
+    },
+    "payment": {
+      "CASH": "Cash",
+      "DEBIT_CARD": "Debit card",
+      "CREDIT_CARD": "Credit card",
+      "TRANSFER": "Transfer",
+      "OTHER": "Other"
+    },
+    "totals": {
+      "expense": "Expenses",
+      "refund": "Refunds",
+      "income": "Income"
+    },
+    "assignment": {
+      "counts": "Counts for: {{category}} · {{start}} – {{end}}",
+      "none": "No active budget",
+      "closed": "That date belongs to a closed budget: this line will not affect it."
+    },
+    "form": {
+      "newTitle": "New movement",
+      "editTitle": "Edit movement",
+      "kind": "Type",
+      "currency": "Currency",
+      "total": "Total amount",
+      "date": "Date",
+      "time": "Time",
+      "paymentMethod": "Payment method",
+      "note": "Note (optional)",
+      "lines": "Split by category",
+      "category": "Category",
+      "lineAmount": "Amount",
+      "addLine": "Add line",
+      "removeLine": "Remove line",
+      "remaining": "Left to assign: {{amount}}",
+      "over": "The lines add up to {{amount}} more than the total.",
+      "save": "Save movement",
+      "saveChanges": "Save changes",
+      "delete": "Delete",
+      "deleteTitle": "Delete this movement?",
+      "deleteMessage": "It will stop counting towards your budgets.",
+      "locked": "This movement counts in a closed budget, so it cannot be edited or deleted.",
+      "closedWarning": "Some lines fall on days of a closed budget. They are saved but will not affect it."
+    }
   },
   "categories": {
     "ALIMENTACION": "Food",
@@ -171,6 +226,17 @@
     "BUDGET_DATES_INVALID": "The start date cannot be after the end date.",
     "BUDGET_OVERLAP": "This category already has a budget that overlaps these dates.",
     "BUDGET_CURRENCY_LOCKED": "The currency of a budget cannot be changed.",
-    "BUDGET_NOT_EDITABLE": "This budget can no longer be edited."
+    "BUDGET_NOT_EDITABLE": "This budget can no longer be edited.",
+    "MOVEMENT_KIND_INVALID": "Choose the type of movement.",
+    "PAYMENT_METHOD_REQUIRED": "Choose a payment method.",
+    "MOVEMENT_TOTAL_INVALID": "The total must be greater than 0.",
+    "MOVEMENT_NO_LINES": "Add at least one line.",
+    "MOVEMENT_LINE_AMOUNT_INVALID": "Each line must be greater than 0.",
+    "MOVEMENT_LINE_CATEGORY_INVALID": "Choose a category for every line.",
+    "MOVEMENT_TOTAL_MISMATCH": "The lines must add up to the total.",
+    "MOVEMENT_DATE_INVALID": "Choose a valid date and time.",
+    "MOVEMENT_FUTURE_DATE": "The date and time cannot be in the future.",
+    "MOVEMENT_NOTE_TOO_LONG": "The note is too long.",
+    "MOVEMENT_LOCKED": "This movement counts in a closed budget and cannot be changed."
   }
 }

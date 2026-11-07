@@ -26,7 +26,7 @@ export async function closeExpiredBudgets(
 }
 
 // Budgets grouped by what the user sees: active, in grace and closed (RN-05, RN-38).
-export function useBudgets() {
+export function useBudgets(refreshKey = 0) {
   const repository = useBudgetRepository();
   const [budgets, setBudgets] = useState<Budget[] | null>(null);
   const [today] = useState(() => todayLocalDate());
@@ -40,7 +40,7 @@ export function useBudgets() {
     return () => {
       active = false;
     };
-  }, [repository]);
+  }, [repository, refreshKey]);
 
   const list = budgets ?? [];
   const inPhase = (phase: 'ACTIVE' | 'GRACE' | 'CLOSED') =>

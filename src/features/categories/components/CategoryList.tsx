@@ -10,13 +10,16 @@ import type { Category } from '../category.types';
 import { useCategories } from '../useCategories';
 import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
 
-type Props = { onCreate: () => void };
+type Props = {
+  refreshKey?: number; // changes when the screen regains focus, to load again
+  onCreate: () => void;
+};
 
 // Categories grouped as built-in, yours and archived (RN-34, RN-35, RN-36).
-export function CategoryList({ onCreate }: Props) {
+export function CategoryList({ refreshKey, onCreate }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const { system, custom, archived, remove, isLoading } = useCategories();
+  const { system, custom, archived, remove, isLoading } = useCategories(refreshKey);
 
   async function removeCategory(category: Category) {
     const result = await remove(category.id);

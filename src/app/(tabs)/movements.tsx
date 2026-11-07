@@ -1,16 +1,24 @@
-import { useTranslation } from 'react-i18next';
+import { router } from 'expo-router';
 
-import { AppText } from '@/core/theme/AppText';
+import { useRefreshOnFocus } from '@/core/shared/use-refresh-on-focus';
 import { Screen } from '@/core/theme/Screen';
+import { useCategories } from '@/features/categories/useCategories';
+import { MovementList } from '@/features/movements/components/MovementList';
 
-// Placeholder until movements exist (iteration 4).
+const NEW_MOVEMENT_ROUTE = '/movement-form';
+
 export default function MovementsScreen() {
-  const { t } = useTranslation();
+  const refreshKey = useRefreshOnFocus();
+  const { system, custom, archived } = useCategories(refreshKey);
 
   return (
     <Screen>
-      <AppText variant="title">{t('navigation.movements')}</AppText>
-      <AppText variant="muted">{t('movements.empty')}</AppText>
+      <MovementList
+        refreshKey={refreshKey}
+        categories={[...system, ...custom, ...archived]}
+        onCreate={() => router.push(NEW_MOVEMENT_ROUTE)}
+        onOpen={(id) => router.push({ pathname: NEW_MOVEMENT_ROUTE, params: { id } })}
+      />
     </Screen>
   );
 }

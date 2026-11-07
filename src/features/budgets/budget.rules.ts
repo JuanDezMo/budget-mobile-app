@@ -13,7 +13,10 @@ export const GRACE_DAYS = 5;
 
 // RN-05: ACTIVE while today <= end; in GRACE while end < today <= end + 5; CLOSED after that.
 // A budget already stored as CLOSED stays closed.
-export function getBudgetPhase(budget: Budget, today: LocalDate): BudgetPhase {
+export function getBudgetPhase(
+  budget: Pick<Budget, 'status' | 'endDate'>,
+  today: LocalDate,
+): BudgetPhase {
   if (budget.status === 'CLOSED') return 'CLOSED';
   if (compareLocalDates(today, budget.endDate) <= 0) return 'ACTIVE';
 

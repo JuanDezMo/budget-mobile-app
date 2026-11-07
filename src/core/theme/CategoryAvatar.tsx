@@ -3,10 +3,29 @@ import { StyleSheet, Text, View } from 'react-native';
 import { iconToEmoji } from './category-icons';
 
 // Round badge with the category icon over its color.
-export function CategoryAvatar({ icon, color }: { icon: string; color: string }) {
+export function CategoryAvatar({
+  icon,
+  color,
+  size = 44,
+}: {
+  icon: string;
+  color: string;
+  size?: number;
+}) {
   return (
-    <View style={[styles.avatar, { backgroundColor: `${color}33`, borderColor: color }]}>
-      <Text style={styles.emoji} importantForAccessibility="no">
+    <View
+      style={[
+        styles.avatar,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: `${color}33`,
+          borderColor: color,
+        },
+      ]}
+    >
+      <Text style={[styles.emoji, { fontSize: size / 2 }]} importantForAccessibility="no">
         {iconToEmoji(icon)}
       </Text>
     </View>

@@ -11,15 +11,16 @@ import { useBudgets } from '../useBudgets';
 import { BudgetCard } from './BudgetCard';
 
 type Props = {
+  refreshKey?: number; // changes when the screen regains focus, to load again
   categories: readonly Category[];
   onCreate: () => void;
   onOpen: (budgetId: string) => void;
 };
 
 // Budgets grouped by phase: active, in grace and closed (RN-05).
-export function BudgetList({ categories, onCreate, onOpen }: Props) {
+export function BudgetList({ refreshKey, categories, onCreate, onOpen }: Props) {
   const { t } = useTranslation();
-  const { active, grace, closed, today, isLoading } = useBudgets();
+  const { active, grace, closed, today, isLoading } = useBudgets(refreshKey);
   if (isLoading) return null;
 
   const sections = [

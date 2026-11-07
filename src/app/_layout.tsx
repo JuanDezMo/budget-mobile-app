@@ -42,6 +42,10 @@ function RootNavigator() {
           options={{ ...withHeader, title: t('budgets.form.newTitle') }}
         />
         <Stack.Screen
+          name="movement-form"
+          options={{ ...withHeader, title: t('movements.form.newTitle') }}
+        />
+        <Stack.Screen
           name="category-new"
           options={{ ...withHeader, title: t('categories.form.title') }}
         />

@@ -172,6 +172,9 @@ importers:
       '@react-native-community/datetimepicker':
         specifier: 9.2.1
         version: 9.2.1(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)
+      '@shopify/flash-list':
+        specifier: 2.3.2
+        version: 2.3.2(@babel/runtime@7.29.13)(react-native@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1707,6 +1710,13 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@shopify/flash-list@2.3.2':
+    resolution: {integrity: sha512-vQnd0y0Ag11yzS30llaeCrtIU3xYTMe7KEOP3dveLImnVjQEUw6BEg1+Ztja6aODlVNz1BpvxtlQ5eZGxiLwKw==}
+    peerDependencies:
+      '@babel/runtime': '*'
+      react: '*'
+      react-native: '*'
 
   '@sinclair/typebox@0.27.12':
     resolution: {integrity: sha512-hhyNJ+nbR6ZR7pToHvllEFun9TL0sbL+tk/ON75lo+Xas054uez98qRbsuNt7MBCyZKK4+8Yli/OAGZhmfBZ/g==}
@@ -6974,6 +6984,12 @@ snapshots:
       '@types/react': 19.3.0
 
   '@rtsao/scc@1.1.0': {}
+
+  '@shopify/flash-list@2.3.2(@babel/runtime@7.29.13)(react-native@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)':
+    dependencies:
+      '@babel/runtime': 7.29.13
+      react: 19.3.0
+      react-native: 0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(@react-native/metro-config@0.88.1(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1)
 
   '@sinclair/typebox@0.27.12': {}
 

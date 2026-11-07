@@ -9,7 +9,7 @@ import type { Budget } from './budget.types';
 import { useBudgetRepository } from './useBudgetRepository';
 
 // One budget with its phase, and the delete action (RN-10).
-export function useBudgetDetail(budgetId: string) {
+export function useBudgetDetail(budgetId: string, refreshKey = 0) {
   const repository = useBudgetRepository();
   const [budget, setBudget] = useState<Budget | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +26,7 @@ export function useBudgetDetail(budgetId: string) {
     return () => {
       active = false;
     };
-  }, [repository, budgetId]);
+  }, [repository, budgetId, refreshKey]);
 
   // RN-10: logical delete, allowed in any phase.
   async function remove(): Promise<Result<void, 'UNEXPECTED'>> {

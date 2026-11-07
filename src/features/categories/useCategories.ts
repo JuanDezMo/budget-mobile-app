@@ -18,7 +18,7 @@ export type CategoryError =
   | 'UNEXPECTED';
 
 // List and manage categories (RN-34, RN-35, RN-36).
-export function useCategories() {
+export function useCategories(refreshKey = 0) {
   const repository = useCategoryRepository();
   const [categories, setCategories] = useState<Category[] | null>(null);
 
@@ -31,7 +31,7 @@ export function useCategories() {
     return () => {
       active = false;
     };
-  }, [repository]);
+  }, [repository, refreshKey]);
 
   async function reload() {
     setCategories(await repository.list());
