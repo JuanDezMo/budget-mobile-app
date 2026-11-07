@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sobres — pantallas</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{--manila:#D9A441;--manila-2:#F0D9A6;--ink:#1F1A14;--mute:#7A6A55;--red:#E0442E;--green:#2E9E5B;--blue:#2F6FD6;--violet:#7A4FD0;--ground:#F7F1E6;--line:#E6DAC4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#2A241C;font-family:Archivo,system-ui,sans-serif;color:var(--ink);padding:32px 16px}
+h1.page{color:#F7F1E6;font-size:22px;font-weight:700;max-width:1700px;margin:0 auto 6px}
+p.page{color:#CBB994;font-size:14px;max-width:1700px;margin:0 auto 24px}
+.wall{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;max-width:1700px;margin:0 auto}
+figure{display:flex;flex-direction:column;gap:10px}
+figcaption{color:#F7F1E6;font-size:14px;font-weight:600}
+figcaption span{display:block;color:#CBB994;font-weight:400;font-size:12px;margin-top:2px;max-width:390px}
+.phone{width:390px;height:844px;border-radius:36px;overflow:hidden;position:relative;background:var(--ground);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.num{font-variant-numeric:tabular-nums}
+.status{height:44px}
+.appbar{display:flex;align-items:center;gap:12px;padding:6px 16px 10px;font-size:17px;font-weight:700}
+.appbar .back{font-size:22px;width:32px}
+.appbar .act{margin-left:auto;font-size:14px;font-weight:600;color:var(--mute)}
+nav{position:absolute;bottom:0;left:0;right:0;height:80px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:12px;font-size:12px;font-weight:600;color:var(--mute)}
+nav div{text-align:center}nav i{display:block;width:24px;height:24px;margin:0 auto 4px;border-radius:6px;border:2px solid currentColor}
+nav .on{color:var(--ink)}nav .on i{background:var(--ink)}
+.fab{position:absolute;right:16px;bottom:96px;background:var(--ink);color:#fff;border-radius:16px;padding:16px 20px;font-weight:700;font-size:16px}
+/* home */
+.h-head{padding:6px 20px 12px}.h-head small{font-size:13px;font-weight:600;color:var(--mute)}
+.h-head h2{font-size:30px;font-weight:800;font-stretch:85%;margin-top:6px}.h-head p{font-size:15px;color:var(--mute);margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
+.env{position:relative;height:200px;border-radius:10px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.fill{position:absolute;left:0;right:0;bottom:0;background:var(--manila)}
+.flap{position:absolute;top:0;left:0;right:0;height:46px;background:linear-gradient(160deg,transparent 49%,var(--line) 50%,transparent 51%),linear-gradient(20deg,transparent 49%,var(--line) 50%,transparent 51%)}
+.band{position:absolute;top:0;bottom:0;left:22px;width:8px}
+.lab{position:absolute;left:40px;right:10px;top:54px;font-weight:700;font-size:15px}.lab small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:2px}
+.amt{position:absolute;left:40px;bottom:12px;font-weight:800;font-stretch:80%;font-size:26px}.amt small{display:block;font-size:12px;font-weight:600;font-stretch:100%}
+.over .amt{color:var(--red)}
+/* detail */
+.d-env{position:relative;margin:4px 16px 0;height:250px;border-radius:14px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.d-env .fill{height:11%}
+.d-env .band{left:28px;width:10px;background:var(--red)}
+.liga{position:absolute;left:0;right:0;height:0;border-top:2px dashed var(--ink)}
+.liga span{position:absolute;right:10px;top:-20px;font-size:11px;font-weight:700;background:#fff;padding:1px 6px;border-radius:8px;border:1px solid var(--ink)}
+.liga.hit{border-top-style:solid}.liga.hit span{background:var(--ink);color:#fff}
+.d-lab{position:absolute;left:52px;top:58px;font-size:13px;font-weight:600;color:var(--mute)}
+.d-big{position:absolute;left:52px;top:76px;font-size:56px;font-weight:800;font-stretch:72%;line-height:1}
+.d-of{position:absolute;left:52px;top:136px;font-size:14px;color:var(--mute)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:12px 16px 0;background:#fff;border:1px solid var(--line);border-radius:12px}
+.stats div{padding:10px 12px;font-size:12px;color:var(--mute)}.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:16px;color:var(--ink);margin-top:2px}
+.sec{display:flex;justify-content:space-between;padding:16px 20px 6px;font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.mv{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--line);background:#fff;font-size:15px}
+.mv .ic{width:34px;height:34px;border-radius:50%;background:var(--ground);display:grid;place-items:center;font-size:15px;font-weight:700}
+.mv .t small{display:block;font-size:12px;color:var(--mute);margin-top:1px}
+.mv .a{margin-left:auto;font-weight:700}.mv .a.pos{color:var(--green)}
+.split{display:inline-block;font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:4px;color:var(--mute)}
+/* form */
+.sheet{position:absolute;inset:0;background:var(--ground)}
+.seg{display:flex;margin:4px 16px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg div{flex:1;text-align:center;padding:9px 0;font-size:14px;font-weight:600;color:var(--mute);border-radius:9px}
+.seg .on{background:var(--ink);color:#fff}
+.amount{padding:18px 20px 6px;display:flex;align-items:baseline;gap:8px}
+.amount .cur{font-size:15px;font-weight:700;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 8px}
+.amount .v{font-size:58px;font-weight:800;font-stretch:72%;line-height:1}
+.meta{display:flex;gap:8px;padding:6px 16px;flex-wrap:wrap}
+.chip{font-size:13px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:18px;padding:7px 12px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lines{margin:10px 16px 0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ln{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ln .bd{width:8px;height:36px;border-radius:3px}
+.ln .t{font-size:15px;font-weight:700}.ln .t small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:2px}
+.ln .t small.ok::before{content:"✉ ";}
+.ln .t small.none{color:var(--red)}
+.ln .a{margin-left:auto;font-size:17px;font-weight:700}
+.add{padding:12px 14px;font-size:14px;font-weight:700;color:var(--blue)}
+.rest{display:flex;justify-content:space-between;margin:10px 20px 0;font-size:14px;color:var(--mute)}.rest b{color:var(--green)}
+.save{position:absolute;left:16px;right:16px;bottom:30px;background:var(--ink);color:#fff;text-align:center;border-radius:16px;padding:17px;font-size:17px;font-weight:700}
+.note{margin:10px 16px 0;padding:10px 12px;border-radius:12px;background:#fff;border:1px dashed var(--mute);font-size:13px;color:var(--mute)}
+.toggle{display:flex;align-items:center;justify-content:space-between;margin:10px 16px 0;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;font-size:15px;font-weight:600}
+.sw{width:46px;height:28px;border-radius:14px;background:var(--ink);position:relative}.sw::after{content:"";position:absolute;right:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff}
+</style></head><body>
+<h1 class="page">Adjusting My Money — dirección "Sobres de la quincena"</h1>
+<p class="page">Bocetos de baja fidelidad con datos sintéticos. Fecha de referencia: 7 nov 2026.</p>
+<div class="wall">
+
+<figure><figcaption>1 · Inicio<span>Rejilla de sobres; el nivel de llenado es lo que queda.</span></figcaption>
+<div class="phone"><div class="status"></div>
+<div class="h-head"><small>Adjusting My Money · 7 nov</small><h2>Tus sobres</h2><p class="num">Quedan $215.000 COP y US$25,00</p></div>
+<div class="grid">
+<div class="env"><div class="fill" style="height:11%"></div><div class="flap"></div><div class="band" style="background:var(--red)"></div><p class="lab">Alimentación<small>1–15 nov</small></p><p class="amt num"><small>Queda</small>$85.000</p></div>
+<div class="env"><div class="fill" style="height:52%"></div><div class="flap"></div><div class="band" style="background:var(--blue)"></div><p class="lab">Transporte<small>1–30 nov</small></p><p class="amt num"><small>Queda</small>$130.000</p></div>
+<div class="env"><div class="fill" style="height:45%"></div><div class="flap"></div><div class="band" style="background:var(--green)"></div><p class="lab">Entretenimiento<small>USD · 1–15 nov</small></p><p class="amt num"><small>Queda</small>US$25,00</p></div>
+<div class="env over"><div class="fill" style="height:0"></div><div class="flap"></div><div class="band" style="background:var(--violet)"></div><p class="lab">Obligaciones hogar<small>Excedido</small></p><p class="amt num"><small>Te pasaste</small>$50.000</p></div>
+</div>
+<div class="fab">＋ Anotar gasto</div>
+<nav><div class="on"><i></i>Inicio</div><div><i></i>Movimientos</div><div><i></i>Presupuestos</div><div><i></i>Ajustes</div></nav></div></figure>
+
+<figure><figcaption>2 · Detalle del sobre<span>Las ligas son los umbrales (50 %, 90 %, 100 %). La que ya se cruzó va rellena. Debajo, cada línea que cuenta para este sobre.</span></figcaption>
+<div class="phone"><div class="status"></div>
+<div class="appbar"><span class="back">‹</span>Alimentación<span class="act">Editar</span></div>
+<div class="d-env"><div class="fill"></div><div class="flap"></div><div class="band"></div>
+<div class="liga hit" style="bottom:50%"><span>50 %</span></div>
+<div class="liga hit" style="bottom:10%"><span>90 %</span></div>
+<p class="d-lab">Queda en el sobre</p><p class="d-big num">$85.000</p><p class="d-of num">de $800.000 · 1–15 nov · activo</p></div>
+<div class="stats num"><div>Gastado<b>$735.000</b></div><div>Reembolsos<b>−$20.000</b></div><div>Usado<b>89 %</b></div></div>
+<div class="sec"><span>Movimientos</span><span>COP</span></div>
+<div class="mv"><span class="ic">🛒</span><div class="t">Mercado Éxito<small>6 nov · Débito</small></div><span class="a num">−$250.000<span class="split">1 de 3</span></span></div>
+<div class="mv"><span class="ic">🥖</span><div class="t">Panadería<small>6 nov · Efectivo</small></div><span class="a num">−$18.000</span></div>
+<div class="mv"><span class="ic">↩</span><div class="t">Devolución leche<small>5 nov · Débito · reembolso</small></div><span class="a num pos">+$20.000</span></div>
+<div class="mv"><span class="ic">🥩</span><div class="t">Carnicería<small>3 nov · Transferencia</small></div><span class="a num">−$96.000</span></div>
+<div class="mv"><span class="ic">🛒</span><div class="t">Mercado D1<small>1 nov · Crédito</small></div><span class="a num">−$371.000</span></div>
+<nav><div><i></i>Inicio</div><div><i></i>Movimientos</div><div class="on"><i></i>Presupuestos</div><div><i></i>Ajustes</div></nav></div></figure>
+
+<figure><figcaption>3 · Anotar gasto dividido<span>Una compra repartida en 3 categorías. Cada línea dice a qué sobre cuenta; la app lo asigna sola.</span></figcaption>
+<div class="phone"><div class="sheet"><div class="status"></div>
+<div class="appbar"><span class="back">✕</span>Anotar<span class="act">Hoy 7:42 p. m.</span></div>
+<div class="seg"><div class="on">Gasto</div><div>Reembolso</div><div>Ingreso</div></div>
+<div class="amount num"><span class="cur">COP ▾</span><span class="v">$100.000</span></div>
+<div class="meta"><span class="chip on">Débito</span><span class="chip">Efectivo</span><span class="chip">Crédito</span><span class="chip">Transferencia</span><span class="chip">Otro</span></div>
+<div class="lines num">
+<div class="ln"><span class="bd" style="background:var(--red)"></span><div class="t">Alimentación<small class="ok">Cuenta para: Alimentación · 1–15 nov</small></div><span class="a">$50.000</span></div>
+<div class="ln"><span class="bd" style="background:var(--green)"></span><div class="t">Entretenimiento<small class="none">Sin sobre activo en COP</small></div><span class="a">$20.000</span></div>
+<div class="ln"><span class="bd" style="background:var(--violet)"></span><div class="t">Obligaciones hogar<small class="ok">Cuenta para: Obligaciones hogar · nov</small></div><span class="a">$30.000</span></div>
+<div class="add">＋ Dividir en otra categoría</div>
+</div>
+<div class="rest num"><span>Por repartir</span><b>$0 ✓</b></div>
+<div class="note">Nota (opcional): Mercado Éxito</div>
+<div class="save">Guardar gasto</div></div></div></figure>
+
+<figure><figcaption>4 · Anotar ingreso<span>Si es para un sobre, suma a su cupo. Un ingreso general (salario) no suma a ningún sobre.</span></figcaption>
+<div class="phone"><div class="sheet"><div class="status"></div>
+<div class="appbar"><span class="back">✕</span>Anotar<span class="act">Hoy 9:15 a. m.</span></div>
+<div class="seg"><div>Gasto</div><div>Reembolso</div><div class="on">Ingreso</div></div>
+<div class="amount num"><span class="cur">USD ▾</span><span class="v">US$15,00</span></div>
+<div class="meta"><span class="chip">Efectivo</span><span class="chip on">Transferencia</span><span class="chip">Otro</span></div>
+<div class="toggle">¿Es para un sobre?<span class="sw"></span></div>
+<div class="lines num">
+<div class="ln"><span class="bd" style="background:var(--green)"></span><div class="t">Entretenimiento<small class="ok">Suma al sobre: Entretenimiento · 1–15 nov</small></div><span class="a">US$15,00</span></div>
+</div>
+<div class="note num">El sobre pasará de US$55,00 a US$70,00 de cupo. Quedarán US$40,00.</div>
+<div class="note">Nota (opcional): Me pagaron la boleta del cine</div>
+<div class="save">Guardar ingreso</div></div></div></figure>
+
+</div></body></html>

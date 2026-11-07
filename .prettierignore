@@ -1,0 +1,9 @@
+node_modules
+.expo
+dist
+android
+ios
+pnpm-lock.yaml
+# Design and product documents are written by hand; keep their formatting.
+docs
+.impeccable

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sobres — paletas</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#55595F;font-family:Archivo,system-ui,sans-serif;padding:28px 16px}
+.block{max-width:1720px;margin:0 auto 44px}
+.block h2{color:#fff;font-size:22px;font-weight:800}
+.block p.d{color:#E3E6EA;font-size:14px;margin:4px 0 12px;max-width:900px}
+.sw{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.sw span{display:flex;align-items:center;gap:6px;font-size:12px;color:#fff;background:rgba(0,0,0,.25);padding:4px 8px 4px 4px;border-radius:8px}
+.sw i{width:22px;height:22px;border-radius:5px;border:1px solid rgba(255,255,255,.3)}
+.wall{display:flex;flex-wrap:wrap;gap:28px}
+figure{display:flex;flex-direction:column;gap:8px}
+figcaption{color:#fff;font-size:13px;font-weight:600}
+.phone{width:390px;height:844px;border-radius:36px;overflow:hidden;position:relative;background:var(--ground);color:var(--ink);box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.num{font-variant-numeric:tabular-nums}
+.head{background:var(--head);color:var(--onhead);padding:50px 20px 18px}
+.head small{font-size:13px;font-weight:600;opacity:.8}
+.head h3{font-size:30px;font-weight:800;font-stretch:85%;margin-top:4px}
+.head p{font-size:15px;margin-top:4px;opacity:.85}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px}
+.env{position:relative;height:196px;border-radius:12px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.fill{position:absolute;left:0;right:0;bottom:0}
+.flap{position:absolute;top:0;left:0;right:0;height:46px;background:linear-gradient(160deg,transparent 49%,var(--line) 50%,transparent 51%),linear-gradient(20deg,transparent 49%,var(--line) 50%,transparent 51%)}
+.band{position:absolute;top:0;bottom:0;left:20px;width:8px}
+.lab{position:absolute;left:38px;right:10px;top:54px;font-weight:700;font-size:15px}
+.lab small{display:block;font-size:12px;font-weight:500;color:var(--mute);margin-top:2px}
+.amt{position:absolute;left:38px;bottom:12px;font-weight:800;font-stretch:80%;font-size:26px;color:var(--amtc,var(--ink))}
+.amt small{display:block;font-size:12px;font-weight:600;font-stretch:100%}
+.env.over{border:2px solid var(--over)}.env.over .amt{color:var(--over)}
+.fab{position:absolute;right:16px;bottom:96px;background:var(--cta);color:var(--oncta);border-radius:16px;padding:16px 20px;font-weight:700;font-size:16px}
+nav{position:absolute;bottom:0;left:0;right:0;height:80px;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:12px;font-size:12px;font-weight:600;color:var(--mute)}
+nav div{text-align:center}nav i{display:block;width:24px;height:24px;margin:0 auto 4px;border-radius:6px;border:2px solid currentColor}
+nav .on{color:var(--ink)}nav .on i{background:var(--brand);border-color:var(--brand)}
+.bar{display:flex;align-items:center;gap:12px;padding:50px 16px 10px;font-size:17px;font-weight:700}
+.bar .r{margin-left:auto;font-size:14px;color:var(--mute);font-weight:600}
+.denv{position:relative;margin:4px 16px 0;height:320px;border-radius:14px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.liga{position:absolute;left:0;right:0;border-top:2px dashed var(--ink)}
+.liga span{position:absolute;right:10px;top:-20px;font-size:11px;font-weight:700;background:var(--surface);padding:1px 6px;border-radius:8px;border:1px solid var(--ink)}
+.liga.hit{border-top-style:solid}.liga.hit span{background:var(--ink);color:var(--surface)}
+.dl{position:absolute;left:50px;top:50px;font-size:13px;font-weight:600;color:var(--mute)}
+.db{position:absolute;left:50px;top:66px;font-size:56px;font-weight:800;font-stretch:72%;line-height:1}
+.do{position:absolute;left:50px;top:124px;font-size:14px;color:var(--mute)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:12px 16px 0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.stats div{padding:10px 12px;font-size:12px;color:var(--mute)}.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:16px;color:var(--ink);margin-top:2px}
+.sec{padding:16px 20px 6px;font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.mv{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--line);background:var(--surface);font-size:15px}
+.mv .ic{width:34px;height:34px;border-radius:50%;background:var(--ground);display:grid;place-items:center;font-size:15px}
+.mv small{display:block;font-size:12px;color:var(--mute)}
+.mv .a{margin-left:auto;font-weight:700}.mv .a.pos{color:var(--pos)}
+.seg{display:flex;margin:4px 16px 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg div{flex:1;text-align:center;padding:9px 0;font-size:14px;font-weight:600;color:var(--mute);border-radius:9px}
+.seg .on{background:var(--ink);color:var(--surface)}
+.amount{padding:18px 20px 6px;display:flex;align-items:baseline;gap:8px}
+.cur{font-size:15px;font-weight:700;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px}
+.v{font-size:58px;font-weight:800;font-stretch:72%;line-height:1}
+.meta{display:flex;gap:8px;padding:6px 16px;flex-wrap:wrap}
+.chip{font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:7px 12px}
+.chip.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.lines{margin:10px 16px 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ln{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ln .bd{width:8px;height:36px;border-radius:3px}
+.ln b{font-size:15px}.ln small{display:block;font-size:12px;color:var(--mute);margin-top:2px}.ln small.none{color:var(--over)}
+.ln .a{margin-left:auto;font-size:17px;font-weight:700}
+.add{padding:12px 14px;font-size:14px;font-weight:700;color:var(--link)}
+.rest{display:flex;justify-content:space-between;margin:10px 20px 0;font-size:14px;color:var(--mute)}.rest b{color:var(--pos)}
+.save{position:absolute;left:16px;right:16px;bottom:30px;background:var(--cta);color:var(--oncta);text-align:center;border-radius:16px;padding:17px;font-size:17px;font-weight:700}
+</style></head><body>
+<div id="root"></div>
+<script>
+const P = {
+ A:{name:"A · Manila intenso",
+  desc:"El manila deja de ser fondo y pasa a ser el color fuerte: cabecera completa, relleno de los sobres y botón principal. El fondo es un gris neutro frío, sin crema. Las categorías conservan sus ligas de color.",
+  light:{ground:"#ECEEF1",surface:"#FFFFFF",line:"#D8DCE1",ink:"#14161A",mute:"#5C6570",brand:"#E3A21A",head:"#E3A21A",onhead:"#14161A",fill:"#E3A21A",cta:"#14161A",oncta:"#FFFFFF",over:"#C8331B",pos:"#1E8A52",link:"#2558C9"},
+  dark:{ground:"#0E1013",surface:"#191C20",line:"#2A2F36",ink:"#F1F2F4",mute:"#9AA3AE",brand:"#F2B33D",head:"#191C20",onhead:"#F2B33D",fill:"#F2B33D",cta:"#F2B33D",oncta:"#14161A",over:"#FF7A5C",pos:"#4CC98A",link:"#7FA6FF"},
+  cats:{light:["#D9452A","#2F66D8","#23955E","#7A4FD0"],dark:["#FF7A5C","#7FA6FF","#4CC98A","#A98BFF"]}},
+ B:{name:"B · Sobres de color",
+  desc:"Cada sobre se llena con el color de su categoría; el manila queda solo como color de marca (pestaña activa y detalles). Más color en pantalla y cada sobre se reconoce sin leer el nombre. Fondo gris neutro, cabecera en tinta.",
+  light:{ground:"#F1F2F4",surface:"#FFFFFF",line:"#DDE0E5",ink:"#121417",mute:"#5E6670",brand:"#E3A21A",head:"#121417",onhead:"#FFFFFF",fill:null,cta:"#121417",oncta:"#FFFFFF",over:"#C8331B",pos:"#1E8A52",link:"#2558C9"},
+  dark:{ground:"#0D0F12",surface:"#181B1F",line:"#2A2E35",ink:"#F0F1F3",mute:"#9AA3AE",brand:"#F2B33D",head:"#0D0F12",onhead:"#F0F1F3",fill:null,cta:"#F2B33D",oncta:"#121417",over:"#FF7A5C",pos:"#4CC98A",link:"#7FA6FF"},
+  cats:{light:["#E4572E","#3A6FE0","#2FA36B","#7B5BD6"],dark:["#F07A55","#6F97F2","#4FC28A","#9C82EE"]}}
+};
+const envs=[["Alimentación","1–15 nov","Queda","$85.000",11,0],["Transporte","1–30 nov","Queda","$130.000",52,1],["Entretenimiento","USD · 1–15 nov","Queda","US$25,00",45,2],["Obligaciones hogar","Excedido","Te pasaste","$50.000",0,3]];
+function vars(t){return Object.entries(t).filter(([k,v])=>v).map(([k,v])=>`--${k}:${v}`).join(";")}
+function nav(i){return `<nav>${["Inicio","Movimientos","Presupuestos","Ajustes"].map((n,j)=>`<div class="${j==i?'on':''}"><i></i>${n}</div>`).join("")}</nav>`}
+function home(p,m){const t=p[m],c=p.cats[m];return `<div class="phone" style="${vars(t)}"><div class="head"><small>Adjusting My Money · 7 nov</small><h3>Tus sobres</h3><p class="num">Quedan $215.000 COP y US$25,00</p></div><div class="grid">${envs.map(e=>`<div class="env ${e[5]==3?'over':''}"><div class="fill" style="height:${e[4]}%;background:${t.fill||c[e[5]]}${t.fill?'':';opacity:.9'}"></div><div class="flap"></div><div class="band" style="background:${c[e[5]]}"></div><p class="lab">${e[0]}<small>${e[1]}</small></p><p class="amt num"><small>${e[2]}</small>${e[3]}</p></div>`).join("")}</div><div class="fab">＋ Anotar gasto</div>${nav(0)}</div>`}
+function detail(p,m){const t=p[m],c=p.cats[m];return `<div class="phone" style="${vars(t)}"><div class="bar">‹ Alimentación<span class="r">Editar</span></div><div class="denv"><div class="fill" style="height:11%;background:${t.fill||c[0]}"></div><div class="flap"></div><div class="band" style="left:26px;width:10px;background:${c[0]}"></div><div class="liga hit" style="bottom:50%"><span>50 %</span></div><div class="liga hit" style="bottom:10%"><span>90 %</span></div><p class="dl">Queda en el sobre</p><p class="db num">$85.000</p><p class="do num">de $800.000 · 1–15 nov · activo</p></div><div class="stats num"><div>Gastado<b>$735.000</b></div><div>Reembolsos<b>−$20.000</b></div><div>Usado<b>89 %</b></div></div><p class="sec">Movimientos</p>${[["🛒","Mercado Éxito","6 nov · Débito","−$250.000",""],["🥖","Panadería","6 nov · Efectivo","−$18.000",""],["↩","Devolución leche","5 nov · reembolso","+$20.000","pos"],["🥩","Carnicería","3 nov · Transferencia","−$96.000",""]].map(r=>`<div class="mv"><span class="ic">${r[0]}</span><div>${r[1]}<small>${r[2]}</small></div><span class="a num ${r[4]}">${r[3]}</span></div>`).join("")}${nav(2)}</div>`}
+function form(p,m){const t=p[m],c=p.cats[m];return `<div class="phone" style="${vars(t)}"><div class="bar">✕ Anotar<span class="r">Hoy 7:42 p. m.</span></div><div class="seg"><div class="on">Gasto</div><div>Reembolso</div><div>Ingreso</div></div><div class="amount num"><span class="cur">COP ▾</span><span class="v">$100.000</span></div><div class="meta">${["Débito","Efectivo","Crédito","Transferencia","Otro"].map((x,i)=>`<span class="chip ${i==0?'on':''}">${x}</span>`).join("")}</div><div class="lines num">${[[0,"Alimentación","Cuenta para: Alimentación · 1–15 nov","$50.000",""],[2,"Entretenimiento","Sin sobre activo en COP","$20.000","none"],[3,"Obligaciones hogar","Cuenta para: Obligaciones hogar · nov","$30.000",""]].map(l=>`<div class="ln"><span class="bd" style="background:${c[l[0]]}"></span><div><b>${l[1]}</b><small class="${l[4]}">${l[2]}</small></div><span class="a">${l[3]}</span></div>`).join("")}<div class="add">＋ Dividir en otra categoría</div></div><div class="rest num"><span>Por repartir</span><b>$0 ✓</b></div><div class="save">Guardar gasto</div></div>`}
+document.getElementById("root").innerHTML=Object.values(P).map(p=>`<section class="block"><h2>${p.name}</h2><p class="d">${p.desc}</p><div class="sw">${["light","dark"].map(m=>Object.entries(p[m]).filter(([k,v])=>v&&["ground","surface","ink","brand","over","pos"].includes(k)).map(([k,v])=>`<span><i style="background:${v}"></i>${m=="light"?"claro":"oscuro"} · ${k}</span>`).join("")).join("")}</div><div class="wall"><figure><figcaption>Inicio · claro</figcaption>${home(p,"light")}</figure><figure><figcaption>Inicio · oscuro</figcaption>${home(p,"dark")}</figure><figure><figcaption>Detalle · oscuro</figcaption>${detail(p,"dark")}</figure><figure><figcaption>Anotar gasto · oscuro</figcaption>${form(p,"dark")}</figure></div></section>`).join("");
+</script>
+</body></html>

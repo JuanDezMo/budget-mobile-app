@@ -1,0 +1,7 @@
+# Metro (React Native bundler) needs a flat node_modules.
+nodeLinker: hoisted
+
+# Dependency build scripts must be approved explicitly.
+# @parcel/watcher ships prebuilt binaries; its script only builds from source as a fallback.
+allowBuilds:
+  '@parcel/watcher': false
