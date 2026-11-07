@@ -3,6 +3,7 @@ import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { amountInputProps } from '@/core/i18n/amount-input';
 import { formatMoney } from '@/core/i18n/format';
 import { getAppLanguage } from '@/core/i18n/i18n';
 import { CURRENCY_CODES } from '@/core/shared/currency';
@@ -135,8 +136,7 @@ export function BudgetForm({
         render={({ field }) => (
           <TextField
             label={t('budgets.form.amount')}
-            value={field.value}
-            onChangeText={field.onChange}
+            {...amountInputProps(field.value, field.onChange, getAppLanguage())}
             onBlur={field.onBlur}
             keyboardType="decimal-pad"
             error={message(errors.amount?.message)}

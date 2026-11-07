@@ -197,7 +197,7 @@ describe('budget form', () => {
     );
 
     const amount = await screen.findByLabelText('Monto');
-    expect(amount.props.value).toBe('55.00');
+    expect(amount.props.value).toBe('55,00'); // grouped for the Spanish screen
     await fireEvent.changeText(amount, '80');
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar cambios' }));
 
@@ -253,6 +253,29 @@ describe('budget form', () => {
       await screen.findByText('Un presupuesto solo se puede editar mientras está activo.'),
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeDisabled();
+  });
+});
+
+describe('budget form amount', () => {
+  it('shows the thousands separator while typing and saves the plain number', async () => {
+    let saved = false;
+    await render(
+      <BudgetForm
+        categories={categories}
+        onSaved={() => {
+          saved = true;
+        }}
+      />,
+      { wrapper: Providers },
+    );
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Entretenimiento' }));
+    await fireEvent.changeText(screen.getByLabelText('Monto'), '800000');
+    expect(screen.getByLabelText('Monto').props.value).toBe('800.000');
+    await fireEvent.press(screen.getByRole('button', { name: 'Crear presupuesto' }));
+
+    await waitFor(() => expect(saved).toBe(true));
+    expect((await repository.list())[0]?.amountMinor).toBe(800000);
   });
 });
 

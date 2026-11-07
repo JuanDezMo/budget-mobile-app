@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { amountInputProps, formatAmountText } from '@/core/i18n/amount-input';
+import { getAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
 import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
 import { useTheme } from '@/core/theme/ThemeProvider';
@@ -66,11 +68,10 @@ export function LineRow({
         </Pressable>
         <TextInput
           accessibilityLabel={`${t('movements.form.lineAmount')} ${position}`}
-          value={amount}
-          onChangeText={onChangeAmount}
+          {...amountInputProps(amount, onChangeAmount, getAppLanguage())}
           onBlur={onBlurAmount}
           keyboardType="decimal-pad"
-          placeholder={placeholder}
+          placeholder={formatAmountText(placeholder, getAppLanguage())}
           placeholderTextColor={colors.mute}
           style={[styles.amount, { color: colors.ink, fontFamily: FONT_FAMILY.bold }]}
         />

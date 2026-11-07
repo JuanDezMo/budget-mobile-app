@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { amountInputProps } from '@/core/i18n/amount-input';
+import { getAppLanguage } from '@/core/i18n/i18n';
 import { CURRENCY_CODES } from '@/core/shared/currency';
 import type { CurrencyCode } from '@/core/shared/currency';
 import { AppText } from '@/core/theme/AppText';
@@ -51,8 +53,7 @@ export function AmountInput({
         </Pressable>
         <TextInput
           accessibilityLabel={label}
-          value={value}
-          onChangeText={onChangeText}
+          {...amountInputProps(value, onChangeText, getAppLanguage())}
           onBlur={onBlur}
           keyboardType="decimal-pad"
           placeholder="0"

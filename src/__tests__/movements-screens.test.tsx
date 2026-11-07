@@ -220,7 +220,42 @@ describe('movement form', () => {
 
     await fireEvent.changeText(screen.getByLabelText('Monto total'), '15000');
 
-    expect(screen.getByLabelText('Monto 1').props.placeholder).toBe('15000');
+    expect(screen.getByLabelText('Monto 1').props.placeholder).toBe('15.000');
+  });
+
+  it('shows the thousands separator while typing, and saves the plain number', async () => {
+    let saved = false;
+    await render(<MovementForm categories={categories} onSaved={() => (saved = true)} />, {
+      wrapper: Providers,
+    });
+
+    const total = screen.getByLabelText('Monto total');
+    await fireEvent.changeText(total, '1');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '15');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '150');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '1500');
+    expect(screen.getByLabelText('Monto total').props.value).toBe('1.500');
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '1.5000');
+    expect(screen.getByLabelText('Monto total').props.value).toBe('15.000');
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
+
+    await waitFor(() => expect(saved).toBe(true));
+    expect((await repository.list())[0]?.totalMinor).toBe(15000);
+  });
+
+  it('a line amount is grouped too, and the left to assign is worked out from the plain numbers', async () => {
+    await render(<MovementForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '1250000');
+    await fireEvent.changeText(screen.getByLabelText('Monto 1'), '1000000');
+
+    expect(screen.getByLabelText('Monto total').props.value).toBe('1.250.000');
+    expect(screen.getByLabelText('Monto 1').props.value).toBe('1.000.000');
+    await addLine();
+    expect(screen.getByLabelText('Monto 2').props.value).toBe('250.000');
   });
 
   it('a new line takes what is left to assign', async () => {
@@ -232,7 +267,7 @@ describe('movement form', () => {
     await fireEvent.changeText(screen.getByLabelText('Monto 1'), '60000');
     await addLine();
 
-    expect(screen.getByLabelText('Monto 2').props.value).toBe('40000');
+    expect(screen.getByLabelText('Monto 2').props.value).toBe('40.000');
   });
 
   it('RN-20 shows the amount error for the currency decimals', async () => {
@@ -240,7 +275,7 @@ describe('movement form', () => {
       wrapper: Providers,
     });
 
-    await fireEvent.changeText(screen.getByLabelText('Monto total'), '10.5'); // COP has no decimals
+    await fireEvent.changeText(screen.getByLabelText('Monto total'), '10,5'); // COP has no decimals
     await fireEvent.press(screen.getByRole('button', { name: 'Guardar gasto' }));
 
     // The single line takes the total, so both fields show the error.
