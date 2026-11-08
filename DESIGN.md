@@ -86,6 +86,13 @@ already saved with it keep it).
 - **Settings (no sketch; chosen 2026-11-07):** title, then PREFERENCIAS (one block: language and theme as
   `SegmentedControl`, so manila stays for actions) and TU CUENTA (rows "Categorías" and "Perfil y
   seguridad", each with a one-line hint and "›").
+- **Lock and registration (no sketch; chosen 2026-11-07):** they open with `BrandEnvelope`, a closed manila
+  envelope with the app name (the brand fills the header). Lock: "Ingresa tu PIN", the PIN as boxes, the dark
+  "Desbloquear", and "Olvidé mi PIN" as a quiet link in `over` (it erases everything, so it never weighs as
+  much as unlocking; it still asks first, RN-46). Registration: TUS DATOS (name, email, country) and TU PIN
+  (two PIN boxes and the "cannot be recovered" note in a dashed box), dark button pinned.
+- **Profile:** TUS DATOS (fields + current PIN, RN-47) and CAMBIAR PIN, each with its dark button; the result
+  shows in `positive` ("Guardado") or `over` (the error).
 - **Budgets:** envelopes grouped Activos / En periodo de gracia / Cerrados; full-width "Nuevo presupuesto"
   pinned at the bottom.
 - **Detail:** big envelope, three figures (Gastado, Reembolsos, Usado), "MOVIMIENTOS · {currency}" with a
@@ -106,6 +113,11 @@ already saved with it keep it).
 - `SectionHeading`: small uppercase heading over a block of rows (history days, category sections,
   settings); announced as a heading.
 - `EnvelopeFrame`: the envelope itself (paper, fill, flap, band); used by budgets and the category preview.
+- `PinInput`: a PIN as 6 boxes (4 solid = required, 2 dashed = optional, RN-43), a dot per digit; the real
+  field is an invisible number input over the boxes, so keyboard, paste and screen readers work.
+- `BrandEnvelope`: the closed manila envelope with the app name at the door of the app.
+- `PinnedFooter`: the save button pinned at the bottom of a form; it hides while the keyboard is open so it
+  never covers the field being typed in.
 - `AmountInput`: big condensed amount with the currency chip beside it; used by the movement and budget
   forms (`currencyLocked` for a budget being edited).
 - `SegmentedControl`, `ChoiceChips`, `OptionGroup` (compact = one row of chips that scrolls sideways),
@@ -124,6 +136,6 @@ already saved with it keep it).
 
 ## Known gaps
 
-- Screens without a sketch (Profile, Registration, Lock) only share the colors and the font; they have not been redesigned.
+- All screens follow the envelope language now (U8); no screen is left with only colors and font.
 - iOS has not been run. Release build and low-end phone performance are pending (iteration 7).
 - Notifications of the system cannot be tested in Expo Go on Android.

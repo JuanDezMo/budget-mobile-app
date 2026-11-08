@@ -3,31 +3,41 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import { AppText } from '@/core/theme/AppText';
+import { PinInput } from '@/core/theme/PinInput';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
+import { SectionHeading } from '@/core/theme/SectionHeading';
 import { TextField } from '@/core/theme/TextField';
+import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { useProfileSettings } from '../useProfileSettings';
 import { CountryPicker } from './CountryPicker';
 
-// Edit profile and change PIN (RN-47). Both need the current PIN.
+type Feedback = { ok: boolean; text: string };
+
+// Edit profile and change PIN (RN-47), as two sections. Both need the current PIN.
 export function ProfileEditor() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const { profile, updateProfile, changePin } = useProfileSettings();
   const [fullName, setFullName] = useState(profile?.fullName ?? '');
   const [email, setEmail] = useState(profile?.email ?? '');
   const [countryCode, setCountryCode] = useState(profile?.countryCode ?? '');
   const [currentPin, setCurrentPin] = useState('');
-  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileMessage, setProfileMessage] = useState<Feedback | null>(null);
 
   const [pinCurrent, setPinCurrent] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmation, setConfirmation] = useState('');
-  const [pinMessage, setPinMessage] = useState<string | null>(null);
+  const [pinMessage, setPinMessage] = useState<Feedback | null>(null);
 
   async function saveProfile() {
     const result = await updateProfile({ fullName, email, countryCode }, currentPin);
     setCurrentPin('');
-    setProfileMessage(result.ok ? t('profile.saved') : t(`errors.${result.error}`));
+    setProfileMessage(
+      result.ok
+        ? { ok: true, text: t('profile.saved') }
+        : { ok: false, text: t(`errors.${result.error}`) },
+    );
   }
 
   async function submitPin() {
@@ -37,11 +47,24 @@ export function ProfileEditor() {
       setNewPin('');
       setConfirmation('');
     }
-    setPinMessage(result.ok ? t('profile.saved') : t(`errors.${result.error}`));
+    setPinMessage(
+      result.ok
+        ? { ok: true, text: t('profile.saved') }
+        : { ok: false, text: t(`errors.${result.error}`) },
+    );
   }
+
+  // Green when it worked, the "over" color when it did not.
+  const feedback = (value: Feedback | null) =>
+    value ? (
+      <AppText weight="semibold" style={{ color: value.ok ? colors.positive : colors.over }}>
+        {value.text}
+      </AppText>
+    ) : null;
 
   return (
     <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+      <SectionHeading title={t('profile.sections.data')} />
       <TextField
         label={t('registration.fullName')}
         value={fullName}
@@ -60,48 +83,27 @@ export function ProfileEditor() {
         value={countryCode}
         onChange={setCountryCode}
       />
-      <TextField
-        label={t('profile.currentPin')}
-        value={currentPin}
-        onChangeText={setCurrentPin}
-        secureTextEntry
-        keyboardType="number-pad"
-        maxLength={6}
-      />
-      {profileMessage ? <AppText variant="muted">{profileMessage}</AppText> : null}
+      {/* RN-47: any change asks for the current PIN. */}
+      <PinInput label={t('profile.currentPin')} value={currentPin} onChangeText={setCurrentPin} />
+      {feedback(profileMessage)}
       <PrimaryButton
+        tone="ink"
         label={t('profile.save')}
         onPress={() => void saveProfile()}
         disabled={currentPin.length < 4}
       />
 
-      <AppText variant="title">{t('profile.changePin')}</AppText>
-      <TextField
-        label={t('profile.currentPin')}
-        value={pinCurrent}
-        onChangeText={setPinCurrent}
-        secureTextEntry
-        keyboardType="number-pad"
-        maxLength={6}
-      />
-      <TextField
-        label={t('profile.newPin')}
-        value={newPin}
-        onChangeText={setNewPin}
-        secureTextEntry
-        keyboardType="number-pad"
-        maxLength={6}
-      />
-      <TextField
+      <SectionHeading title={t('profile.changePin')} style={styles.second} />
+      <PinInput label={t('profile.currentPin')} value={pinCurrent} onChangeText={setPinCurrent} />
+      <PinInput label={t('profile.newPin')} value={newPin} onChangeText={setNewPin} />
+      <PinInput
         label={t('profile.newPinConfirmation')}
         value={confirmation}
         onChangeText={setConfirmation}
-        secureTextEntry
-        keyboardType="number-pad"
-        maxLength={6}
       />
-      {pinMessage ? <AppText variant="muted">{pinMessage}</AppText> : null}
+      {feedback(pinMessage)}
       <PrimaryButton
+        tone="ink"
         label={t('profile.changePinSubmit')}
         onPress={() => void submitPin()}
         disabled={pinCurrent.length < 4}
@@ -110,4 +112,7 @@ export function ProfileEditor() {
   );
 }
 
-const styles = StyleSheet.create({ form: { gap: 16, paddingBottom: 32 } });
+const styles = StyleSheet.create({
+  form: { gap: 14, paddingTop: 4, paddingBottom: 32 },
+  second: { marginTop: 20 },
+});

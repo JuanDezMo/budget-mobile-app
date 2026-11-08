@@ -9,6 +9,7 @@ import { AmountInput } from '@/core/theme/AmountInput';
 import { AppText } from '@/core/theme/AppText';
 import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
 import { DateField } from '@/core/theme/DateField';
+import { PINNED_FOOTER_SPACE, PinnedFooter } from '@/core/theme/PinnedFooter';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
@@ -206,21 +207,21 @@ export function BudgetForm({
           <AppText style={{ color: colors.over }}>{t(`errors.${failure}`)}</AppText>
         ) : null}
       </ScrollView>
-      <View style={styles.save} pointerEvents="box-none">
+      <PinnedFooter>
         <PrimaryButton
           tone="ink"
           label={submitLabel}
           onPress={() => void submit()}
           disabled={isSubmitting || !extraValid || (isEditing && !isEditable)}
         />
-      </View>
+      </PinnedFooter>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  form: { gap: 16, paddingTop: 4, paddingBottom: 120 },
+  form: { gap: 16, paddingTop: 4, paddingBottom: PINNED_FOOTER_SPACE },
   section: { gap: 8 },
   chips: { gap: 8, paddingRight: 16 },
   chip: {
@@ -234,5 +235,4 @@ const styles = StyleSheet.create({
   },
   dates: { flexDirection: 'row', gap: 12 },
   date: { flex: 1 },
-  save: { position: 'absolute', left: 0, right: 0, bottom: 16 },
 });

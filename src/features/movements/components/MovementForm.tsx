@@ -8,6 +8,7 @@ import { AppText } from '@/core/theme/AppText';
 import { AmountInput } from '@/core/theme/AmountInput';
 import { ChoiceChips } from '@/core/theme/ChoiceChips';
 import { DateTimeChip } from '@/core/theme/DateTimeChip';
+import { PINNED_FOOTER_SPACE, PinnedFooter } from '@/core/theme/PinnedFooter';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
 import { SegmentedControl } from '@/core/theme/SegmentedControl';
 import { useTheme } from '@/core/theme/ThemeProvider';
@@ -296,14 +297,14 @@ export function MovementForm({ categories, movementId, onSaved }: Props) {
         ) : null}
       </ScrollView>
 
-      <View style={styles.save} pointerEvents="box-none">
+      <PinnedFooter>
         <PrimaryButton
           tone="ink"
           label={isEditing ? t('movements.form.saveChanges') : t(SAVE_LABEL[kind])}
           onPress={() => void submit()}
           disabled={isSubmitting || isLocked}
         />
-      </View>
+      </PinnedFooter>
     </View>
   );
 }
@@ -336,7 +337,7 @@ function assignmentNoneNote(
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  form: { gap: 14, paddingTop: 4, paddingBottom: 120 },
+  form: { gap: 14, paddingTop: 4, paddingBottom: PINNED_FOOTER_SPACE },
   when: { alignItems: 'flex-end', marginTop: -6 },
   toggle: {
     minHeight: 56,
@@ -358,5 +359,4 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     gap: 4,
   },
-  save: { position: 'absolute', left: 0, right: 0, bottom: 16 },
 });

@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AppText } from '@/core/theme/AppText';
 import { iconToEmoji } from '@/core/theme/category-icons';
 import { EnvelopeFrame } from '@/core/theme/EnvelopeFrame';
+import { PINNED_FOOTER_SPACE, PinnedFooter } from '@/core/theme/PinnedFooter';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
 import { TextField } from '@/core/theme/TextField';
 import { useTheme } from '@/core/theme/ThemeProvider';
@@ -132,14 +133,14 @@ export function CategoryForm({ onCreated }: { onCreated: () => void }) {
 
         {failed ? <AppText>{t('errors.UNEXPECTED')}</AppText> : null}
       </ScrollView>
-      <View style={styles.save} pointerEvents="box-none">
+      <PinnedFooter>
         <PrimaryButton
           tone="ink"
           label={t('categories.form.submit')}
           onPress={() => void submit()}
           disabled={isSubmitting}
         />
-      </View>
+      </PinnedFooter>
     </View>
   );
 }
@@ -148,7 +149,7 @@ const PREVIEW_HEIGHT = 140;
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  form: { gap: 14, paddingTop: 4, paddingBottom: 120 },
+  form: { gap: 14, paddingTop: 4, paddingBottom: PINNED_FOOTER_SPACE },
   preview: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   envelope: { width: 150 },
   envelopeText: { position: 'absolute', left: 34, right: 10, bottom: 12, gap: 6 },
@@ -179,5 +180,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   swatch: { width: 36, height: 36, borderRadius: 18 },
-  save: { position: 'absolute', left: 0, right: 0, bottom: 16 },
 });

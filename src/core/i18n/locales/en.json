@@ -241,7 +241,11 @@
     "pin": "PIN (4 to 6 digits)",
     "pinConfirmation": "Repeat your PIN",
     "pinWarning": "If you forget your PIN it cannot be recovered. The only way back in is to erase all the data on this phone.",
-    "submit": "Create profile"
+    "submit": "Create profile",
+    "sections": {
+      "data": "Your details",
+      "pin": "Your PIN"
+    }
   },
   "country": {
     "search": "Search country",
@@ -267,7 +271,10 @@
     "changePin": "Change PIN",
     "newPin": "New PIN (4 to 6 digits)",
     "newPinConfirmation": "Repeat the new PIN",
-    "changePinSubmit": "Change PIN"
+    "changePinSubmit": "Change PIN",
+    "sections": {
+      "data": "Your details"
+    }
   },
   "errors": {
     "UNEXPECTED": "Something went wrong. Please try again.",

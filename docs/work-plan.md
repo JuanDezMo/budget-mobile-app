@@ -157,12 +157,12 @@ Se aplicó la dirección visual de `.impeccable/surfaces/src-app.md` y los bocet
 - [x] U5 Barra de pestañas con íconos (activo relleno, inactivo contorno)
 - [x] U6 Formulario de movimiento según bocetos 3 y 4: control Gasto/Reembolso/Ingreso, fecha y hora en la esquina, monto grande con moneda, chips de pago, líneas con liga de color y "Cuenta para…", "Por repartir ✓", nota punteada, botón "Guardar gasto/reembolso/ingreso"; ingreso con "¿Es para un sobre?" y nota del cupo nuevo (RN-23, RN-41)
 - [x] U7 Modo oscuro de los sobres (relleno translúcido con borde manila) y barra de estado que sigue el tema de la app
-- [ ] U8 Pantallas sin boceto (historial de Movimientos, formulario de presupuesto, Categorías, Ajustes, Perfil, Registro, Bloqueo): hoy solo usan tipografía y colores nuevos; decidir si se alinean con el lenguaje de sobres
+- [x] U8 Pantallas sin boceto (historial de Movimientos, formulario de presupuesto, Categorías, Ajustes, Perfil, Registro, Bloqueo): hoy solo usan tipografía y colores nuevos; decidir si se alinean con el lenguaje de sobres
   - [x] U8.1 Historial de Movimientos: agrupado por día (Hoy / Ayer / fecha), un bloque continuo por día, fila igual a la del detalle del sobre con liga de color partida según lo que se llevó cada categoría y chip "N partes"; totales por moneda en una línea (RN-33)
   - [x] U8.2 Formulario de presupuesto: sobre en vivo arriba (liga de la categoría, periodo, cupo y alertas como ligas punteadas), categorías en chips horizontales, monto grande con chip de moneda (bloqueado al editar, RN-02), fechas lado a lado, alertas como chips (RN-24/RN-25) y botón oscuro fijo abajo
   - [x] U8.3 Categorías: secciones en mayúsculas con un bloque continuo cada una y la liga del color en cada fila (archivadas atenuadas, RN-36; "Quitar" solo en las tuyas, RN-34); formulario con sobre pequeño en vivo, colores en círculos y botón oscuro fijo; el amarillo `#E3A21A` (igual al manila) se cambió por índigo `#283593` en la paleta (RN-35)
   - [x] U8.4 Ajustes: secciones PREFERENCIAS y TU CUENTA como bloques; idioma y tema con control segmentado (RN-37); Categorías y Perfil como filas con descripción y "›"; encabezado de sección compartido (`SectionHeading`) también en historial y Categorías
-  - [ ] U8.5 Registro, Bloqueo y Perfil
+  - [x] U8.5 Registro, Bloqueo y Perfil: sobre de marca manila con el nombre de la app (registro y bloqueo), PIN en casillas (4 obligatorias + 2 opcionales, RN-43), "Desbloquear" oscuro y "Olvidé mi PIN" como enlace discreto que sigue pidiendo confirmación (RN-46); secciones TUS DATOS / TU PIN y CAMBIAR PIN (RN-47) con "Guardado" en verde; el botón fijo de los formularios se oculta con el teclado abierto (`PinnedFooter`)
 - [x] U9 Montos con separador de miles mientras se escriben
 
 ## Iteración 7 — Pruebas en dispositivos (opcional)

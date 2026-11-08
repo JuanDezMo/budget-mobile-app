@@ -1,16 +1,22 @@
+import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { AppText } from '@/core/theme/AppText';
+import { BrandEnvelope } from '@/core/theme/BrandEnvelope';
+import { PinInput } from '@/core/theme/PinInput';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
-import { TextField } from '@/core/theme/TextField';
+import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { useUnlock } from '../useUnlock';
 
-// Lock screen (RN-44): PIN, wait after failed attempts (RN-45) and "forgot PIN" (RN-46).
+// Lock screen (RN-44): the brand envelope, the PIN as boxes, the wait after failed attempts (RN-45)
+// and "forgot PIN" (RN-46). Forgetting erases everything, so it is a quiet link that still asks
+// first, never a button as big as "Unlock".
 export function UnlockForm() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const { unlock, eraseEverything, waitSeconds } = useUnlock();
   const [pin, setPin] = useState('');
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -34,26 +40,45 @@ export function UnlockForm() {
   }
 
   return (
-    <View style={styles.form}>
-      <AppText variant="title">{t('unlock.title')}</AppText>
-      <TextField
+    <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+      <BrandEnvelope title={Constants.expoConfig?.name ?? ''} />
+      <AppText weight="bold" style={styles.heading}>
+        {t('unlock.title')}
+      </AppText>
+      <PinInput
         label={t('unlock.pin')}
         value={pin}
         onChangeText={setPin}
-        secureTextEntry
-        keyboardType="number-pad"
-        maxLength={6}
+        autoFocus
         error={errorCode && !waiting ? t(`errors.${errorCode}`) : undefined}
       />
-      {waiting ? <AppText>{t('unlock.wait', { seconds: waitSeconds })}</AppText> : null}
+      {waiting ? (
+        <AppText style={{ color: colors.over }}>
+          {t('unlock.wait', { seconds: waitSeconds })}
+        </AppText>
+      ) : null}
       <PrimaryButton
+        tone="ink"
         label={t('unlock.submit')}
         onPress={() => void submit()}
         disabled={waiting || pin.length < 4}
       />
-      <PrimaryButton label={t('unlock.forgot')} onPress={confirmErase} tone="danger" />
-    </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('unlock.forgot')}
+        onPress={confirmErase}
+        style={styles.forgot}
+      >
+        <AppText weight="semibold" style={{ color: colors.over }}>
+          {t('unlock.forgot')}
+        </AppText>
+      </Pressable>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({ form: { gap: 16 } });
+const styles = StyleSheet.create({
+  form: { gap: 16, paddingBottom: 32 },
+  heading: { fontSize: 22, marginTop: 8 },
+  forgot: { minHeight: 44, alignSelf: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+});

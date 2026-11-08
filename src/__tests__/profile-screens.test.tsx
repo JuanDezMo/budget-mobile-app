@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
+import { Alert } from 'react-native';
 
 import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import {
@@ -97,6 +98,26 @@ describe('lock screen', () => {
     await repository.create(profile);
     await vault.setPin('4821');
     useAccessStore.setState({ status: 'locked', profile });
+  });
+
+  it('RN-43 the PIN boxes show one dot per digit and take digits only', async () => {
+    await render(<UnlockForm />, { wrapper: Providers });
+
+    await fireEvent.changeText(screen.getByLabelText('PIN'), '48a2');
+
+    expect(screen.getByLabelText('PIN').props.value).toBe('482');
+    expect(screen.getAllByText('●')).toHaveLength(3);
+  });
+
+  it('RN-46 "Olvidé mi PIN" is a quiet link that still asks before erasing', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    await render(<UnlockForm />, { wrapper: Providers });
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Olvidé mi PIN' }));
+
+    expect(alert).toHaveBeenCalledTimes(1);
+    expect(await repository.get()).not.toBeNull(); // nothing erased without confirming
+    alert.mockRestore();
   });
 
   it('RN-44 a wrong PIN shows an error and keeps the app locked', async () => {

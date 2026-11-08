@@ -241,7 +241,11 @@
     "pin": "PIN (de 4 a 6 dígitos)",
     "pinConfirmation": "Repite tu PIN",
     "pinWarning": "Si olvidas tu PIN no se puede recuperar. La única forma de volver a entrar es borrar todos los datos de este teléfono.",
-    "submit": "Crear perfil"
+    "submit": "Crear perfil",
+    "sections": {
+      "data": "Tus datos",
+      "pin": "Tu PIN"
+    }
   },
   "country": {
     "search": "Buscar país",
@@ -267,7 +271,10 @@
     "changePin": "Cambiar PIN",
     "newPin": "PIN nuevo (de 4 a 6 dígitos)",
     "newPinConfirmation": "Repite el PIN nuevo",
-    "changePinSubmit": "Cambiar PIN"
+    "changePinSubmit": "Cambiar PIN",
+    "sections": {
+      "data": "Tus datos"
+    }
   },
   "errors": {
     "UNEXPECTED": "Algo salió mal. Inténtalo de nuevo.",
