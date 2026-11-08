@@ -5,6 +5,7 @@ import { Alert, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-na
 import { formatMoney } from '@/core/i18n/format';
 import { getAppLanguage } from '@/core/i18n/i18n';
 import { AppText } from '@/core/theme/AppText';
+import { AmountInput } from '@/core/theme/AmountInput';
 import { ChoiceChips } from '@/core/theme/ChoiceChips';
 import { DateTimeChip } from '@/core/theme/DateTimeChip';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
@@ -15,7 +16,6 @@ import { FONT_FAMILY } from '@/core/theme/typography';
 import type { Category } from '../../categories/category.types';
 import { MOVEMENT_KINDS, PAYMENT_METHODS } from '../movement.types';
 import { useMovementForm } from '../useMovementForm';
-import { AmountInput } from './AmountInput';
 import { LineAssignmentText } from './LineAssignmentText';
 import { LineRow } from './LineRow';
 

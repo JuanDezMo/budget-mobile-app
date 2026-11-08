@@ -50,7 +50,12 @@
       "saveAnyway": "Guardar de todos modos",
       "lowAmount": "El monto nuevo es menor que lo que ya gastaste ({{spent}}). Aun así puedes guardarlo.",
       "readOnly": "Un presupuesto solo se puede editar mientras está activo.",
-      "currencyLocked": "La moneda no se puede cambiar."
+      "currencyLocked": "La moneda no se puede cambiar.",
+      "preview": {
+        "pickCategory": "Elige una categoría",
+        "caption": "Cupo del sobre",
+        "label": "Vista previa del sobre: {{name}}, {{period}}, {{amount}}"
+      }
     },
     "detail": {
       "title": "Presupuesto",
@@ -314,7 +319,7 @@
       "add": "Agregar alerta",
       "remove": "Quitar alerta",
       "automatic": "Siempre se te avisa al {{percent}} %.",
-      "removeShort": "Quitar"
+      "addShort": "Alerta"
     }
   }
 }

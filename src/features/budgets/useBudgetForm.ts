@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 
 import { formatMinorToText, parseAmountToMinor } from '@/core/shared/amount';
+import type { CurrencyCode } from '@/core/shared/currency';
 import { addDaysToLocalDate, todayLocalDate } from '@/core/shared/dates';
+import type { LocalDate } from '@/core/shared/dates';
 
 import { checkCanHaveBudget } from '../categories/category.rules';
 import type { Category } from '../categories/category.types';
@@ -18,6 +20,15 @@ import { budgetFormSchema } from './budget.schemas';
 import type { BudgetFormValues } from './budget.schemas';
 import type { Budget } from './budget.types';
 import { useBudgetRepository } from './useBudgetRepository';
+
+// What the envelope preview at the top of the form draws, live while the user fills the form.
+export type BudgetPreview = {
+  category: Category | undefined; // undefined until one is chosen
+  currency: CurrencyCode;
+  amountMinor: number; // 0 while the amount is empty or not valid yet
+  startDate: LocalDate;
+  endDate: LocalDate;
+};
 
 const DEFAULT_LENGTH_DAYS = 14;
 
@@ -52,7 +63,8 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
       endDate: addDaysToLocalDate(today, DEFAULT_LENGTH_DAYS),
     },
   });
-  const { reset } = form;
+  const { reset, control } = form;
+  const watched = useWatch({ control });
 
   useEffect(() => {
     if (budgetId === undefined) return;
@@ -82,6 +94,16 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
   const isEditable = !isEditing || (budget !== null && checkCanEditBudget(budget, today).ok);
   // RN-36 / RN-40: only categories that can have a budget are offered when creating.
   const categoryOptions = categories.filter((category) => checkCanHaveBudget(category).ok);
+
+  const currency = watched.currency ?? 'COP';
+  const parsedAmount = parseAmountToMinor(watched.amount ?? '', currency);
+  const preview: BudgetPreview = {
+    category: categories.find((candidate) => candidate.id === watched.categoryId),
+    currency,
+    amountMinor: parsedAmount.ok ? parsedAmount.value : 0,
+    startDate: watched.startDate ?? today,
+    endDate: watched.endDate ?? today,
+  };
 
   const submit = form.handleSubmit(async (values) => {
     setFailure(null);
@@ -151,5 +173,6 @@ export function useBudgetForm({ categories, budgetId, onSaved }: Options) {
     isLoading,
     budget,
     categoryOptions,
+    preview,
   };
 }

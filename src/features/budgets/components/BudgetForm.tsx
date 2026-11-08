@@ -3,21 +3,19 @@ import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { amountInputProps } from '@/core/i18n/amount-input';
 import { formatMoney } from '@/core/i18n/format';
 import { getAppLanguage } from '@/core/i18n/i18n';
-import { CURRENCY_CODES } from '@/core/shared/currency';
+import { AmountInput } from '@/core/theme/AmountInput';
 import { AppText } from '@/core/theme/AppText';
 import { CategoryAvatar } from '@/core/theme/CategoryAvatar';
 import { DateField } from '@/core/theme/DateField';
-import { OptionGroup } from '@/core/theme/OptionGroup';
 import { PrimaryButton } from '@/core/theme/PrimaryButton';
-import { TextField } from '@/core/theme/TextField';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { getCategoryLabel } from '../../categories/category.rules';
 import type { Category } from '../../categories/category.types';
 import { useBudgetForm } from '../useBudgetForm';
+import { EnvelopePreview } from './EnvelopePreview';
 
 type Props = {
   categories: readonly Category[];
@@ -27,15 +25,19 @@ type Props = {
   // places them; `extraValid` false blocks saving.
   extraSection?: ReactNode;
   extraValid?: boolean;
+  // Alert percentages from that extra section, drawn as bands on the envelope preview.
+  previewThresholds?: readonly number[];
 };
 
 // Create or edit a budget (RN-01 to RN-03, RN-06, RN-07). Errors arrive as codes translated here.
+// At the top, the envelope being made (live preview); the save button stays pinned at the bottom.
 export function BudgetForm({
   categories,
   budgetId,
   onSaved,
   extraSection,
   extraValid = true,
+  previewThresholds = [],
 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -49,9 +51,11 @@ export function BudgetForm({
     isLoading,
     budget,
     categoryOptions,
+    preview,
   } = useBudgetForm({ categories, budgetId, onSaved });
   const {
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = form;
   const message = (code: string | undefined) => (code ? t(`errors.${code}`) : undefined);
@@ -67,142 +71,168 @@ export function BudgetForm({
       : t('budgets.form.create');
 
   return (
-    <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-      {isEditing && !isEditable ? (
-        <AppText style={{ color: colors.over }}>{t('budgets.form.readOnly')}</AppText>
-      ) : null}
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+        {isEditing && !isEditable ? (
+          <AppText style={{ color: colors.over }}>{t('budgets.form.readOnly')}</AppText>
+        ) : null}
 
-      <AppText variant="muted">{t('budgets.form.category')}</AppText>
-      <Controller
-        control={control}
-        name="categoryId"
-        render={({ field }) => (
-          <View style={styles.options} accessibilityRole="radiogroup">
-            {options.length === 0 ? (
-              <AppText variant="muted">{t('budgets.form.noCategories')}</AppText>
-            ) : null}
-            {options.map((category) => {
-              const label = getCategoryLabel(category, t);
-              const selected = field.value === category.id;
+        <EnvelopePreview preview={preview} thresholds={previewThresholds} />
 
-              return (
-                <Pressable
-                  key={category.id}
-                  accessibilityRole="radio"
-                  accessibilityLabel={label}
-                  accessibilityState={{ selected }}
-                  disabled={isEditing}
-                  onPress={() => field.onChange(category.id)}
-                  style={[
-                    styles.category,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: selected ? colors.ink : colors.line,
-                    },
-                  ]}
-                >
-                  <CategoryAvatar icon={category.icon} color={category.color} />
-                  <AppText>{label}</AppText>
-                </Pressable>
-              );
-            })}
-            {errors.categoryId ? (
-              <AppText variant="muted" style={{ color: colors.over }}>
-                {message(errors.categoryId.message)}
-              </AppText>
-            ) : null}
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <View style={styles.section}>
+              <AppText variant="muted">{t('budgets.form.category')}</AppText>
+              {options.length === 0 ? (
+                <AppText variant="muted">{t('budgets.form.noCategories')}</AppText>
+              ) : null}
+              {/* One row of chips that scrolls sideways, so the list never pushes the form down. */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                accessibilityRole="radiogroup"
+                contentContainerStyle={styles.chips}
+              >
+                {options.map((category) => {
+                  const label = getCategoryLabel(category, t);
+                  const selected = field.value === category.id;
+
+                  return (
+                    <Pressable
+                      key={category.id}
+                      accessibilityRole="radio"
+                      accessibilityLabel={label}
+                      accessibilityState={{ selected, disabled: isEditing }}
+                      disabled={isEditing}
+                      onPress={() => field.onChange(category.id)}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: selected ? colors.ink : colors.line,
+                          borderWidth: selected ? 2 : 1,
+                        },
+                      ]}
+                    >
+                      <CategoryAvatar icon={category.icon} color={category.color} size={28} />
+                      <AppText weight={selected ? 'bold' : 'regular'}>{label}</AppText>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+              {errors.categoryId ? (
+                <AppText variant="muted" style={{ color: colors.over }}>
+                  {message(errors.categoryId.message)}
+                </AppText>
+              ) : null}
+            </View>
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="amount"
+          render={({ field }) => (
+            <AmountInput
+              label={t('budgets.form.amount')}
+              currencyLabel={t('budgets.form.currency')}
+              currency={preview.currency}
+              onCurrencyChange={(code) => setValue('currency', code, { shouldDirty: true })}
+              currencyLocked={isEditing}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              error={message(errors.amount?.message)}
+            />
+          )}
+        />
+        {isEditing ? <AppText variant="muted">{t('budgets.form.currencyLocked')}</AppText> : null}
+
+        <View style={styles.dates}>
+          <View style={styles.date}>
+            <Controller
+              control={control}
+              name="startDate"
+              render={({ field }) => (
+                <DateField
+                  label={t('budgets.form.startDate')}
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isEditing && !isEditable}
+                />
+              )}
+            />
           </View>
+          <View style={styles.date}>
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field }) => (
+                <DateField
+                  label={t('budgets.form.endDate')}
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isEditing && !isEditable}
+                />
+              )}
+            />
+          </View>
+        </View>
+        {/* Under both dates: an overlap (RN-03) or a reversed range is about the period. */}
+        {[...new Set([errors.startDate?.message, errors.endDate?.message])].map((code) =>
+          code ? (
+            <AppText key={code} variant="muted" style={{ color: colors.over }}>
+              {message(code)}
+            </AppText>
+          ) : null,
         )}
-      />
 
-      <Controller
-        control={control}
-        name="currency"
-        render={({ field }) => (
-          <OptionGroup
-            label={t('budgets.form.currency')}
-            options={CURRENCY_CODES.map((code) => ({ value: code, label: code }))}
-            selected={field.value}
-            onSelect={field.onChange}
-            disabled={isEditing}
-          />
-        )}
-      />
-      {isEditing ? <AppText variant="muted">{t('budgets.form.currencyLocked')}</AppText> : null}
+        {extraSection}
 
-      <Controller
-        control={control}
-        name="amount"
-        render={({ field }) => (
-          <TextField
-            label={t('budgets.form.amount')}
-            {...amountInputProps(field.value, field.onChange, getAppLanguage())}
-            onBlur={field.onBlur}
-            keyboardType="decimal-pad"
-            error={message(errors.amount?.message)}
-          />
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="startDate"
-        render={({ field }) => (
-          <DateField
-            label={t('budgets.form.startDate')}
-            value={field.value}
-            onChange={field.onChange}
-            error={message(errors.startDate?.message)}
-            disabled={isEditing && !isEditable}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="endDate"
-        render={({ field }) => (
-          <DateField
-            label={t('budgets.form.endDate')}
-            value={field.value}
-            onChange={field.onChange}
-            error={message(errors.endDate?.message)}
-            disabled={isEditing && !isEditable}
-          />
-        )}
-      />
-
-      {extraSection}
-
-      {lowAmount && budget ? (
-        <AppText style={{ color: colors.over }}>
-          {t('budgets.form.lowAmount', {
-            spent: formatMoney(
-              { amountMinor: lowAmount.spentMinor, currency: budget.currency },
-              getAppLanguage(),
-            ),
-          })}
-        </AppText>
-      ) : null}
-      {failure ? <AppText style={{ color: colors.over }}>{t(`errors.${failure}`)}</AppText> : null}
-      <PrimaryButton
-        label={submitLabel}
-        onPress={() => void submit()}
-        disabled={isSubmitting || !extraValid || (isEditing && !isEditable)}
-      />
-    </ScrollView>
+        {lowAmount && budget ? (
+          <AppText style={{ color: colors.over }}>
+            {t('budgets.form.lowAmount', {
+              spent: formatMoney(
+                { amountMinor: lowAmount.spentMinor, currency: budget.currency },
+                getAppLanguage(),
+              ),
+            })}
+          </AppText>
+        ) : null}
+        {failure ? (
+          <AppText style={{ color: colors.over }}>{t(`errors.${failure}`)}</AppText>
+        ) : null}
+      </ScrollView>
+      <View style={styles.save} pointerEvents="box-none">
+        <PrimaryButton
+          tone="ink"
+          label={submitLabel}
+          onPress={() => void submit()}
+          disabled={isSubmitting || !extraValid || (isEditing && !isEditable)}
+        />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  form: { gap: 16, paddingBottom: 32 },
-  options: { gap: 8 },
-  category: {
-    minHeight: 56,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 2,
+  screen: { flex: 1 },
+  form: { gap: 16, paddingTop: 4, paddingBottom: 120 },
+  section: { gap: 8 },
+  chips: { gap: 8, paddingRight: 16 },
+  chip: {
+    minHeight: 44,
+    paddingLeft: 6,
+    paddingRight: 14,
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
+  dates: { flexDirection: 'row', gap: 12 },
+  date: { flex: 1 },
+  save: { position: 'absolute', left: 0, right: 0, bottom: 16 },
 });

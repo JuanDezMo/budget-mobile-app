@@ -61,6 +61,8 @@ export function useThresholdDraft({ budgetId }: { budgetId?: string }) {
     remove: (index: number) => setTexts((current) => current.filter((_, i) => i !== index)),
     setText: (index: number, text: string) =>
       setTexts((current) => current.map((value, i) => (i === index ? text : value))),
+    // The valid percentages typed so far, for the bands of the envelope preview.
+    percentages: parsed.flatMap((result) => (result.ok ? [result.value] : [])),
     isValid: validation.ok,
     error: validation.ok ? null : validation.error,
     save,

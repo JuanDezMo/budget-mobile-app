@@ -50,7 +50,12 @@
       "saveAnyway": "Save anyway",
       "lowAmount": "The new amount is lower than what you have already spent ({{spent}}). You can still save it.",
       "readOnly": "A budget can only be edited while it is active.",
-      "currencyLocked": "The currency cannot be changed."
+      "currencyLocked": "The currency cannot be changed.",
+      "preview": {
+        "pickCategory": "Choose a category",
+        "caption": "Envelope amount",
+        "label": "Envelope preview: {{name}}, {{period}}, {{amount}}"
+      }
     },
     "detail": {
       "title": "Budget",
@@ -314,7 +319,7 @@
       "add": "Add alert",
       "remove": "Remove alert",
       "automatic": "You are always alerted at {{percent}}%.",
-      "removeShort": "Remove"
+      "addShort": "Alert"
     }
   }
 }

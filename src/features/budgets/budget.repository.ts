@@ -61,8 +61,12 @@ function toBudget(row: BudgetTable): Budget {
   };
 }
 
+// Reads the message without `instanceof Error`: an error thrown by the native SQLite driver can
+// come from another JavaScript realm (as with better-sqlite3 under Jest), where `instanceof` fails.
 function isOverlapError(error: unknown): boolean {
-  return error instanceof Error && error.message.includes('BUDGET_OVERLAP');
+  if (typeof error !== 'object' || error === null || !('message' in error)) return false;
+  const { message } = error;
+  return typeof message === 'string' && message.includes('BUDGET_OVERLAP');
 }
 
 // `reassignLines` keeps movement lines in step with the budget (RN-39). It runs inside the same

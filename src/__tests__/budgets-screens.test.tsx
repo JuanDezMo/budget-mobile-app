@@ -82,6 +82,8 @@ beforeEach(async () => {
 describe('budget form', () => {
   async function fillEntertainment() {
     await fireEvent.press(screen.getByRole('radio', { name: 'Entretenimiento' }));
+    // The currency is the chip next to the amount, as when adding a movement.
+    await fireEvent.press(screen.getByRole('button', { name: 'Moneda: COP' }));
     await fireEvent.press(screen.getByRole('radio', { name: 'USD' }));
     await fireEvent.changeText(screen.getByLabelText('Monto'), '55');
     await pickDate('Fecha de inicio', new Date(2026, 10, 1));
@@ -213,7 +215,9 @@ describe('budget form', () => {
 
     await screen.findByLabelText('Monto');
 
-    expect(screen.getByRole('radio', { name: 'EUR' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Moneda: USD' })).toBeDisabled();
+    await fireEvent.press(screen.getByRole('button', { name: 'Moneda: USD' }));
+    expect(screen.queryByRole('radio', { name: 'EUR' })).toBeNull();
     expect(screen.getByText('La moneda no se puede cambiar.')).toBeTruthy();
   });
 
@@ -309,5 +313,37 @@ describe('budget form with extra fields (alert thresholds)', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Crear presupuesto' })).toBeDisabled();
+  });
+});
+
+describe('envelope preview at the top of the form', () => {
+  it('draws the envelope being made: category, period and amount update while typing', async () => {
+    await render(<BudgetForm categories={categories} onSaved={() => undefined} />, {
+      wrapper: Providers,
+    });
+
+    expect(screen.getByLabelText(/^Vista previa del sobre: Elige una categoría, /)).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('radio', { name: 'Entretenimiento' }));
+    await fireEvent.changeText(screen.getByLabelText('Monto'), '800000');
+    await pickDate('Fecha de inicio', new Date(2026, 10, 1));
+    await pickDate('Fecha de fin', new Date(2026, 10, 15));
+
+    expect(
+      screen.getByLabelText(/^Vista previa del sobre: Entretenimiento, 1–15 nov, COP\s800\.000$/),
+    ).toBeTruthy();
+  });
+
+  it('RN-24 / RN-25 shows the typed alerts as bands, always with the 100 %', async () => {
+    await render(
+      <BudgetForm categories={categories} previewThresholds={[90, 50]} onSaved={() => undefined} />,
+      { wrapper: Providers },
+    );
+
+    expect(screen.getByTestId('liga-50')).toBeTruthy();
+    expect(screen.getByTestId('liga-90')).toBeTruthy();
+    expect(screen.getByTestId('liga-100')).toBeTruthy();
+    // Nothing is spent yet, so no band is crossed: they are all dashed.
+    expect(screen.getByTestId('liga-line-90')).toHaveStyle({ borderStyle: 'dashed' });
   });
 });

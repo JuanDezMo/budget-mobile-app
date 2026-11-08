@@ -12,10 +12,9 @@ import { getCategoryLabel } from '../../categories/category.rules';
 import type { Category } from '../../categories/category.types';
 import type { Budget, BudgetPhase, BudgetUsage, UsageState } from '../budget.types';
 import { EnvelopeFrame, leftPercentage } from './EnvelopeFrame';
+import { ThresholdBands } from './ThresholdBands';
 
 export const ENVELOPE_HERO_HEIGHT = 250;
-// A band label too close to the top edge would be cut off, so it goes under its line instead.
-const LABEL_BELOW_FROM = 88;
 
 type Props = {
   budget: Budget;
@@ -58,46 +57,12 @@ export function EnvelopeHero({ budget, phase, usage, state, category, thresholds
       exceeded={exceeded}
       accessibilityLabel={`${label}, ${caption} ${amount}`}
     >
-      {bands.map((percentage) => {
-        const crossed = hasReachedThreshold(usage.spentMinor, usage.availableMinor, percentage);
-        const bottomPercent = 100 - percentage; // 90% used = 10% left = near the bottom
-        const below = bottomPercent >= LABEL_BELOW_FROM;
-
-        return (
-          <View
-            key={percentage}
-            testID={`liga-${percentage}`}
-            style={[styles.liga, { bottom: `${bottomPercent}%` }]}
-          >
-            {/* The line is the top edge of a taller box: dashed borders only draw well on Android
-                when the border goes all around, so the rest of the box is cut off. */}
-            <View
-              testID={`liga-line-${percentage}`}
-              style={[
-                styles.ligaLine,
-                { borderColor: colors.ink, borderStyle: crossed ? 'solid' : 'dashed' },
-              ]}
-            />
-            <View
-              style={[
-                styles.chip,
-                below ? styles.chipBelow : styles.chipAbove,
-                {
-                  borderColor: colors.ink,
-                  backgroundColor: crossed ? colors.ink : colors.surface,
-                },
-              ]}
-            >
-              <AppText
-                weight="bold"
-                style={[styles.chipText, { color: crossed ? colors.surface : colors.ink }]}
-              >
-                {`${percentage} %`}
-              </AppText>
-            </View>
-          </View>
-        );
-      })}
+      <ThresholdBands
+        bands={bands.map((percentage) => ({
+          percentage,
+          crossed: hasReachedThreshold(usage.spentMinor, usage.availableMinor, percentage),
+        }))}
+      />
 
       <View style={styles.texts} pointerEvents="none">
         <AppText weight="semibold" style={[styles.caption, { color: colors.ink }]}>
@@ -124,19 +89,6 @@ export function EnvelopeHero({ budget, phase, usage, state, category, thresholds
 }
 
 const styles = StyleSheet.create({
-  liga: { position: 'absolute', left: 0, right: 0, height: 2, overflow: 'visible' },
-  ligaLine: { height: 12, borderWidth: 2, borderRadius: 0, marginHorizontal: -2 },
-  chip: {
-    position: 'absolute',
-    right: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  chipAbove: { top: -22 },
-  chipBelow: { top: 4 },
-  chipText: { fontSize: 11 },
   // Room on the right for the labels of the bands, so the big amount never goes under them.
   texts: { position: 'absolute', left: 52, right: 80, top: 58, gap: 2 },
   caption: { fontSize: 13 },

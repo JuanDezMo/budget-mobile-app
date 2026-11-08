@@ -107,6 +107,17 @@ describe('threshold editor', () => {
     expect(await screen.findByText(/La alerta del 100 % siempre está activa/)).toBeTruthy();
   });
 
+  it('hands the valid percentages to the envelope preview, leaving out what is not valid yet', async () => {
+    await render(<Harness />, { wrapper: Providers });
+    await fireEvent.press(screen.getByRole('button', { name: 'Agregar alerta' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Agregar alerta' }));
+
+    await fireEvent.changeText(screen.getByLabelText('Avisar al (%) 1'), '50');
+    await fireEvent.changeText(screen.getByLabelText('Avisar al (%) 2'), 'abc');
+
+    await waitFor(() => expect(draft?.percentages).toEqual([50]));
+  });
+
   it('an empty box is simply not used', async () => {
     await render(<Harness />, { wrapper: Providers });
     await fireEvent.press(screen.getByRole('button', { name: 'Agregar alerta' }));

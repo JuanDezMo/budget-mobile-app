@@ -47,6 +47,9 @@ Category colors are fixed hex values (12 choices) stored with the category.
 - **Card (200 px high, 2 columns, 12 px gap):** name (bold 15) and short period (12) at the top;
   caption ("Queda" / "Te pasaste" / "Ahorrado") and the amount at the bottom left. Text over the fill is
   `ink` (never `mute`: not enough contrast on manila).
+- **Bands (`ThresholdBands`, shared by the detail and the form preview):** each line is the top edge of a
+  12 px dashed box clipped to 2 px (Android only dashes a border that goes all around); the label sits
+  outside the clip.
 - **Detail (250 px):** caption, big amount, "de {available} · {period} · {phase}". The **alert
   thresholds are bands across the envelope** at the height of what would be left (90 % used = 10 %
   left). Dashed while not reached, solid with a dark label once crossed. The automatic 100 % is always
@@ -66,6 +69,12 @@ Category colors are fixed hex values (12 choices) stored with the category.
   "payment · categories" — payment first so it is never cut —, signed amount, chip "3 partes" when
   split) plus the **band** on the left edge (6 px) in the category color; a split movement splits the
   band by what each category took.
+- **Budget form (no sketch; chosen 2026-11-07):** a live **envelope preview** at the top (190 px, full —
+  nothing is spent yet —, band in the category color, name, period, "Cupo del sobre" and the amount,
+  the alerts as dashed bands with the automatic 100 %). Below: categories as one row of chips that
+  scrolls sideways, the big amount with its currency chip (shared `AmountInput`; locked when editing,
+  RN-02), start and end dates side by side, alerts as chips ("50 % ✕", dashed "＋ Alerta", up to 3),
+  and the dark save button pinned at the bottom.
 - **Budgets:** envelopes grouped Activos / En periodo de gracia / Cerrados; full-width "Nuevo presupuesto"
   pinned at the bottom.
 - **Detail:** big envelope, three figures (Gastado, Reembolsos, Usado), "MOVIMIENTOS · {currency}" with a
@@ -83,6 +92,8 @@ Category colors are fixed hex values (12 choices) stored with the category.
 
 - `PrimaryButton`: manila (primary), ink (dark call to action; manila with dark text in dark mode), danger.
 - `FloatingAction`: `wide` (bottom, full width) and `pill` (bottom right).
+- `AmountInput`: big condensed amount with the currency chip beside it; used by the movement and budget
+  forms (`currencyLocked` for a budget being edited).
 - `SegmentedControl`, `ChoiceChips`, `OptionGroup` (compact = one row of chips that scrolls sideways),
   `TextField`, `DateField`, `TimeField`, `DateTimeChip` (system pickers; value kept as text).
 - `CategoryAvatar`: emoji over the category color (no icon font, light on low-end phones).
@@ -99,7 +110,7 @@ Category colors are fixed hex values (12 choices) stored with the category.
 
 ## Known gaps
 
-- Screens without a sketch (budget form, Categories, Settings, Profile, Registration,
+- Screens without a sketch (Categories, Settings, Profile, Registration,
   Lock) only share the colors and the font; they have not been redesigned.
 - iOS has not been run. Release build and low-end phone performance are pending (iteration 7).
 - Notifications of the system cannot be tested in Expo Go on Android.

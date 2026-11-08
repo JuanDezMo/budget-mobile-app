@@ -159,7 +159,7 @@ Se aplicó la dirección visual de `.impeccable/surfaces/src-app.md` y los bocet
 - [x] U7 Modo oscuro de los sobres (relleno translúcido con borde manila) y barra de estado que sigue el tema de la app
 - [ ] U8 Pantallas sin boceto (historial de Movimientos, formulario de presupuesto, Categorías, Ajustes, Perfil, Registro, Bloqueo): hoy solo usan tipografía y colores nuevos; decidir si se alinean con el lenguaje de sobres
   - [x] U8.1 Historial de Movimientos: agrupado por día (Hoy / Ayer / fecha), un bloque continuo por día, fila igual a la del detalle del sobre con liga de color partida según lo que se llevó cada categoría y chip "N partes"; totales por moneda en una línea (RN-33)
-  - [ ] U8.2 Formulario de presupuesto (+ umbrales)
+  - [x] U8.2 Formulario de presupuesto: sobre en vivo arriba (liga de la categoría, periodo, cupo y alertas como ligas punteadas), categorías en chips horizontales, monto grande con chip de moneda (bloqueado al editar, RN-02), fechas lado a lado, alertas como chips (RN-24/RN-25) y botón oscuro fijo abajo
   - [ ] U8.3 Categorías
   - [ ] U8.4 Ajustes
   - [ ] U8.5 Registro, Bloqueo y Perfil
