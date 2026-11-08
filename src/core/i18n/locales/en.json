@@ -169,6 +169,10 @@
       "incomeNote": "The envelope will go from {{from}} to {{to}} of available money. {{left}} will be left.",
       "chooseCategory": "Choose category",
       "close": "Close"
+    },
+    "history": {
+      "parts_one": "{{count}} part",
+      "parts_other": "{{count}} parts"
     }
   },
   "categories": {

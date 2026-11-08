@@ -9,7 +9,7 @@ import type { MovementRepository } from './movement.repository';
 import { budgetAssignmentRules } from './movement.rules';
 import type { Movement } from './movement.types';
 import { MovementRepositoryProvider } from './useMovementRepository';
-import { useMovements } from './useMovements';
+import { bandSegments, dayLabel, groupMovementsByDay, useMovements } from './useMovements';
 
 const today = todayLocalDate();
 
@@ -121,6 +121,60 @@ describe('useMovements pagination', () => {
     expect(result.current.hasMore).toBe(false);
     expect(result.current.totals).toEqual([
       { currency: 'COP', expense: 5000, refund: 0, income: 0 },
+    ]);
+  });
+});
+
+describe('history grouped by day', () => {
+  const line = (id: string, categoryId: string, amountMinor: number) => ({
+    id,
+    categoryId,
+    budgetId: null,
+    amountMinor,
+  });
+
+  it('puts a day heading before the first movement of each day, and marks where each block ends', () => {
+    const items = groupMovementsByDay([
+      movement(0, { id: 'a' }),
+      movement(0, { id: 'b' }),
+      movement(2, { id: 'c' }),
+    ]);
+
+    expect(
+      items.map((item) =>
+        item.type === 'day'
+          ? `day ${item.date}`
+          : `${item.movement.id} ${String(item.isFirst)} ${String(item.isLast)}`,
+      ),
+    ).toEqual([
+      `day ${today}`,
+      'a true false',
+      'b false true',
+      `day ${addDaysToLocalDate(today, -2)}`,
+      'c true true',
+    ]);
+  });
+
+  it('an empty history has no headings', () => {
+    expect(groupMovementsByDay([])).toEqual([]);
+  });
+
+  it('names today and yesterday; any other day keeps its date', () => {
+    expect(dayLabel(today, today)).toEqual({ kind: 'TODAY' });
+    expect(dayLabel(addDaysToLocalDate(today, -1), today)).toEqual({ kind: 'YESTERDAY' });
+    const older = addDaysToLocalDate(today, -2);
+    expect(dayLabel(older, today)).toEqual({ kind: 'DATE', date: older });
+  });
+
+  it('RN-14 the band of a split movement has one part per category, sized by its amount', () => {
+    const split = movement(0, {
+      totalMinor: 10000,
+      lines: [line('1', 'food', 5000), line('2', 'fun', 2000), line('3', 'food', 3000)],
+    });
+
+    expect(bandSegments(split)).toEqual([
+      { categoryId: 'food', amountMinor: 8000 },
+      { categoryId: 'fun', amountMinor: 2000 },
     ]);
   });
 });

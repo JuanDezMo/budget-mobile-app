@@ -58,6 +58,14 @@ Category colors are fixed hex values (12 choices) stored with the category.
 
 - **Home:** app name · date (13), title "Tus sobres" (30), sentence "Quedan COP 390.000 y USD 50,00"
   (one amount per currency, never added), grid of open envelopes, **"＋ Anotar gasto"** pill bottom right.
+- **Movements (history, no sketch; chosen 2026-11-07):** title "Movimientos", one line of totals per
+  currency ("Gastos COP 118.000 · Reembolsos …", a total at zero is left out, never added across
+  currencies), kind and currency chips, then the movements **grouped by day** under small headings
+  (HOY, AYER, "6 nov"; the year only when it is not this one). Each day is one continuous block of rows,
+  not separate cards. A row is the detail row (icon of the biggest category, title = note or kind,
+  "payment · categories" — payment first so it is never cut —, signed amount, chip "3 partes" when
+  split) plus the **band** on the left edge (6 px) in the category color; a split movement splits the
+  band by what each category took.
 - **Budgets:** envelopes grouped Activos / En periodo de gracia / Cerrados; full-width "Nuevo presupuesto"
   pinned at the bottom.
 - **Detail:** big envelope, three figures (Gastado, Reembolsos, Usado), "MOVIMIENTOS · {currency}" with a
@@ -85,12 +93,13 @@ Category colors are fixed hex values (12 choices) stored with the category.
 - Never hard-code a color or a font: tokens and `AppText`.
 - Touch targets are at least 44 px; labels and roles are set for screen readers.
 - Dates are `YYYY-MM-DD` text; money is an integer in the minor unit, formatted only for display.
+- Amount fields show the thousands separator while typing (`core/i18n/amount-input.ts`): "1.500.000,5" in
+  Spanish, "1,500,000.5" in English. The form keeps plain text with a dot ("1500000.5").
 - Screens under a stack header use `<Screen topInset={false}>` (the header already covers the status bar).
 
 ## Known gaps
 
-- Screens without a sketch (Movements history, budget form, Categories, Settings, Profile, Registration,
+- Screens without a sketch (budget form, Categories, Settings, Profile, Registration,
   Lock) only share the colors and the font; they have not been redesigned.
-- Amounts typed in forms have no thousands separator while typing.
 - iOS has not been run. Release build and low-end phone performance are pending (iteration 7).
 - Notifications of the system cannot be tested in Expo Go on Android.

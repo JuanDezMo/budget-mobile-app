@@ -5,6 +5,7 @@ import { Alert, Platform } from 'react-native';
 import type { AlertButton } from 'react-native';
 
 import { SEED_SYSTEM_CATEGORIES } from '@/core/db/seed-data';
+import { formatShortDate } from '@/core/i18n/format';
 import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
 import { addDaysToLocalDate, todayLocalDate } from '@/core/shared/dates';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
@@ -556,9 +557,10 @@ describe('movement history', () => {
     });
 
     const usd = await screen.findByLabelText('USD Totales');
-    expect(usd).toHaveTextContent(/GastosUSD\s40,00/);
-    expect(usd).toHaveTextContent(/ReembolsosUSD\s10,00/);
-    expect(screen.getByLabelText('COP Totales')).toHaveTextContent(/GastosCOP\s50\.000/);
+    expect(usd).toHaveTextContent(/Gastos USD\s40,00/);
+    expect(usd).toHaveTextContent(/Reembolsos USD\s10,00/);
+    expect(usd).not.toHaveTextContent(/Ingresos/); // a total at zero is left out
+    expect(screen.getByLabelText('COP Totales')).toHaveTextContent(/Gastos COP\s50\.000/);
   });
 
   it('filters by kind and by currency', async () => {
@@ -597,6 +599,58 @@ describe('movement history', () => {
 
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.length).toBeLessThanOrEqual(20);
+  });
+
+  it('groups the movements by day under "Hoy", "Ayer" and the date', async () => {
+    setup([
+      movement('today', { localDate: day(0), occurredAt: `${day(0)}T09:00:00-05:00` }),
+      movement('yesterday'),
+      movement('older', { localDate: day(-3), occurredAt: `${day(-3)}T09:00:00-05:00` }),
+    ]);
+    await render(<MovementList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    const headings = await screen.findAllByRole('header');
+    const expected = ['HOY', 'AYER', formatShortDate(day(-3), 'es').toUpperCase()];
+    expect(headings).toHaveLength(expected.length);
+    expected.forEach((text, index) => expect(headings[index]).toHaveTextContent(text));
+  });
+
+  it('RN-14 a split movement shows its note, its categories, "3 partes" and a band in 3 parts', async () => {
+    setup([
+      movement('split', {
+        totalMinor: 10000,
+        note: 'Mercado Éxito',
+        lines: [
+          { id: 'l1', categoryId: FOOD, budgetId: null, amountMinor: 5000 },
+          { id: 'l2', categoryId: FUN, budgetId: null, amountMinor: 2000 },
+          { id: 'l3', categoryId: HOME, budgetId: null, amountMinor: 3000 },
+        ],
+      }),
+    ]);
+    await render(<MovementList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findByText('Mercado Éxito')).toBeTruthy();
+    expect(screen.getByText('3 partes')).toBeTruthy();
+    expect(
+      screen.getByText(/^Efectivo · Alimentación, Entretenimiento, Obligaciones/),
+    ).toBeTruthy();
+    const parts = screen.getAllByTestId('band-segment-split');
+    expect(parts).toHaveLength(3);
+    [5000, 2000, 3000].forEach((flex, index) => expect(parts[index]).toHaveStyle({ flex }));
+  });
+
+  it('a movement in one category has a whole band and no "partes" chip', async () => {
+    setup([movement('m1')]);
+    await render(<MovementList categories={categories} onCreate={noop} onOpen={noop} />, {
+      wrapper: Providers,
+    });
+
+    expect(await screen.findAllByTestId('band-segment-m1')).toHaveLength(1);
+    expect(screen.queryByText(/partes?$/)).toBeNull();
   });
 
   it('opens a movement when its row is pressed', async () => {

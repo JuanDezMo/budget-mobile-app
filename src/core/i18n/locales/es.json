@@ -169,6 +169,10 @@
       "incomeNote": "El sobre pasará de {{from}} a {{to}} de cupo. Quedarán {{left}}.",
       "chooseCategory": "Elegir categoría",
       "close": "Cerrar"
+    },
+    "history": {
+      "parts_one": "{{count}} parte",
+      "parts_other": "{{count}} partes"
     }
   },
   "categories": {
