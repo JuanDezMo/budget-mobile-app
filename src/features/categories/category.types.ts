@@ -28,7 +28,7 @@ export const CATEGORY_COLORS = [
   '#2F66D8',
   '#23955E',
   '#7A4FD0',
-  '#E3A21A',
+  '#283593', // indigo: a manila-like yellow would hide the band on the manila fill
   '#C2185B',
   '#00838F',
   '#6D4C41',

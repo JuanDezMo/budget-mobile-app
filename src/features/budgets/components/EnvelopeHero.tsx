@@ -11,7 +11,7 @@ import { AUTOMATIC_THRESHOLD_PERCENTAGE } from '../../alerts/alert.types';
 import { getCategoryLabel } from '../../categories/category.rules';
 import type { Category } from '../../categories/category.types';
 import type { Budget, BudgetPhase, BudgetUsage, UsageState } from '../budget.types';
-import { EnvelopeFrame, leftPercentage } from './EnvelopeFrame';
+import { EnvelopeFrame, leftPercentage } from '@/core/theme/EnvelopeFrame';
 import { ThresholdBands } from './ThresholdBands';
 
 export const ENVELOPE_HERO_HEIGHT = 250;

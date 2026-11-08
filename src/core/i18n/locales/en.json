@@ -204,7 +204,10 @@
       "name": "Name",
       "icon": "Icon",
       "color": "Color",
-      "submit": "Create category"
+      "submit": "Create category",
+      "previewName": "Your category",
+      "previewCaption": "This is how its envelopes will look.",
+      "previewLabel": "Preview: {{name}} envelope"
     }
   },
   "settings": {

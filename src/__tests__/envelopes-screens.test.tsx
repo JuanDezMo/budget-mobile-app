@@ -14,7 +14,7 @@ import type { BudgetRepository } from '@/features/budgets/budget.repository';
 import type { Budget, BudgetLine, UsageTotals } from '@/features/budgets/budget.types';
 import { BudgetDetail } from '@/features/budgets/components/BudgetDetail';
 import { BudgetList } from '@/features/budgets/components/BudgetList';
-import { leftPercentage } from '@/features/budgets/components/EnvelopeFrame';
+import { leftPercentage } from '@/core/theme/EnvelopeFrame';
 import { OpenBudgetsOverview } from '@/features/budgets/components/OpenBudgetsOverview';
 import { BudgetRepositoryProvider } from '@/features/budgets/useBudgetRepository';
 import { useBudgetDetail } from '@/features/budgets/useBudgetDetail';

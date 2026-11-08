@@ -9,7 +9,7 @@ import { useTheme } from '@/core/theme/ThemeProvider';
 import { AUTOMATIC_THRESHOLD_PERCENTAGE } from '../../alerts/alert.types';
 import { getCategoryLabel } from '../../categories/category.rules';
 import type { BudgetPreview } from '../useBudgetForm';
-import { EnvelopeFrame } from './EnvelopeFrame';
+import { EnvelopeFrame } from '@/core/theme/EnvelopeFrame';
 import { ThresholdBands } from './ThresholdBands';
 
 const PREVIEW_HEIGHT = 190;

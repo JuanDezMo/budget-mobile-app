@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
-import { useTheme } from '@/core/theme/ThemeProvider';
+import { useTheme } from './ThemeProvider';
 
 type Props = {
   height: number;
@@ -19,7 +19,7 @@ type Props = {
   children?: ReactNode;
 };
 
-// The envelope drawn by every budget: white paper, manila filled up to what is left, the flap
+// The envelope drawn by budgets (and the category preview): white paper, manila filled up to what is left, the flap
 // (two lines meeting at the middle), and the colored band of its category. Content goes on top.
 export function EnvelopeFrame({
   height,

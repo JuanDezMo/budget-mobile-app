@@ -9,7 +9,7 @@ import { useTheme } from '@/core/theme/ThemeProvider';
 import { getCategoryLabel } from '../../categories/category.rules';
 import type { Category } from '../../categories/category.types';
 import type { BudgetItem } from '../budget.types';
-import { EnvelopeFrame, leftPercentage } from './EnvelopeFrame';
+import { EnvelopeFrame, leftPercentage } from '@/core/theme/EnvelopeFrame';
 
 export const ENVELOPE_CARD_HEIGHT = 200;
 

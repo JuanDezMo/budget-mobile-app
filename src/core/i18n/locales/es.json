@@ -204,7 +204,10 @@
       "name": "Nombre",
       "icon": "Ícono",
       "color": "Color",
-      "submit": "Crear categoría"
+      "submit": "Crear categoría",
+      "previewName": "Tu categoría",
+      "previewCaption": "Así se verán sus sobres.",
+      "previewLabel": "Vista previa: sobre de {{name}}"
     }
   },
   "settings": {

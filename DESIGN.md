@@ -26,7 +26,9 @@ green/red progress bar.
 | positive | `#1E8A52` | `#4CC98A` | Saved, "to assign ✓", refunds and incomes     |
 | link     | `#2558C9` | `#7FA6FF` | Text links ("＋ Split into another category") |
 
-Category colors are fixed hex values (12 choices) stored with the category.
+Category colors are fixed hex values (12 choices) stored with the category. None may look like manila:
+the band would vanish on the envelope fill (the old `#E3A21A` choice became indigo `#283593`; categories
+already saved with it keep it).
 
 ## Typography (`src/core/theme/typography.ts`, `AppText`)
 
@@ -75,6 +77,12 @@ Category colors are fixed hex values (12 choices) stored with the category.
   scrolls sideways, the big amount with its currency chip (shared `AmountInput`; locked when editing,
   RN-02), start and end dates side by side, alerts as chips ("50 % ✕", dashed "＋ Alerta", up to 3),
   and the dark save button pinned at the bottom.
+- **Categories (no sketch; chosen 2026-11-07):** sections TUYAS / DEL SISTEMA / ARCHIVADAS as small
+  uppercase headings, each one continuous block; every row has the 6 px band of its color, the icon and
+  the name; a quiet "Quitar" only on yours (RN-34); archived rows have a faded band and muted name.
+  The form shows a small envelope (150 × 140, full) with the band, the icon and the name typed, "Así se
+  verán sus sobres", the icon grid, colors as circles (selected = ink ring) and the dark save button
+  pinned at the bottom.
 - **Budgets:** envelopes grouped Activos / En periodo de gracia / Cerrados; full-width "Nuevo presupuesto"
   pinned at the bottom.
 - **Detail:** big envelope, three figures (Gastado, Reembolsos, Usado), "MOVIMIENTOS · {currency}" with a
@@ -92,6 +100,7 @@ Category colors are fixed hex values (12 choices) stored with the category.
 
 - `PrimaryButton`: manila (primary), ink (dark call to action; manila with dark text in dark mode), danger.
 - `FloatingAction`: `wide` (bottom, full width) and `pill` (bottom right).
+- `EnvelopeFrame`: the envelope itself (paper, fill, flap, band); used by budgets and the category preview.
 - `AmountInput`: big condensed amount with the currency chip beside it; used by the movement and budget
   forms (`currencyLocked` for a budget being edited).
 - `SegmentedControl`, `ChoiceChips`, `OptionGroup` (compact = one row of chips that scrolls sideways),
@@ -110,7 +119,7 @@ Category colors are fixed hex values (12 choices) stored with the category.
 
 ## Known gaps
 
-- Screens without a sketch (Categories, Settings, Profile, Registration,
+- Screens without a sketch (Settings, Profile, Registration,
   Lock) only share the colors and the font; they have not been redesigned.
 - iOS has not been run. Release build and low-end phone performance are pending (iteration 7).
 - Notifications of the system cannot be tested in Expo Go on Android.

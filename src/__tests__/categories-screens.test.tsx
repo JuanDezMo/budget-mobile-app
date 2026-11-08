@@ -65,8 +65,25 @@ describe('category list', () => {
     await render(<CategoryList onCreate={() => undefined} />, { wrapper: Providers });
 
     expect(await screen.findByText('Mascotas')).toBeTruthy();
-    expect(screen.getByText('Archivadas')).toBeTruthy();
+    const headings = screen.getAllByRole('header');
+    const expected = ['TUYAS', 'DEL SISTEMA', 'ARCHIVADAS'];
+    expect(headings).toHaveLength(expected.length);
+    expected.forEach((text, index) => expect(headings[index]).toHaveTextContent(text));
     expect(screen.getByText('Viejo')).toBeTruthy();
+  });
+
+  it('each row carries the band of its color; an archived one is faded (RN-36)', async () => {
+    const pets = await repository.create({ name: 'Mascotas', icon: 'paw', color: '#7A4FD0' });
+    const old = await repository.create({ name: 'Viejo', icon: 'star', color: '#5C6570' });
+    await repository.archive(old.id);
+
+    await render(<CategoryList onCreate={() => undefined} />, { wrapper: Providers });
+
+    expect(await screen.findByTestId(`category-band-${pets.id}`)).toHaveStyle({
+      backgroundColor: '#7A4FD0',
+      opacity: 1,
+    });
+    expect(screen.getByTestId(`category-band-${old.id}`)).toHaveStyle({ opacity: 0.4 });
   });
 
   it('RN-36 removing a category asks for confirmation first', async () => {
@@ -97,6 +114,23 @@ describe('category form', () => {
       icon: 'paw',
       color: '#7A4FD0',
     });
+  });
+
+  it('shows the small envelope live with the name typed', async () => {
+    await render(<CategoryForm onCreated={() => undefined} />, { wrapper: Providers });
+
+    expect(screen.getByLabelText('Vista previa: sobre de Tu categoría')).toBeTruthy();
+
+    await fireEvent.changeText(screen.getByLabelText('Nombre'), 'Mascotas');
+
+    expect(screen.getByLabelText('Vista previa: sobre de Mascotas')).toBeTruthy();
+  });
+
+  it('offers no color that looks like the manila of the envelopes', async () => {
+    await render(<CategoryForm onCreated={() => undefined} />, { wrapper: Providers });
+
+    expect(screen.getAllByRole('radio', { name: /^#/ })).toHaveLength(12);
+    expect(screen.queryByRole('radio', { name: '#E3A21A' })).toBeNull();
   });
 
   it('RN-35 refuses "mascotas" when "Mascotas" already exists', async () => {
