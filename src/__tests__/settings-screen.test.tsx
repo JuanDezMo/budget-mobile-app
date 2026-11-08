@@ -1,5 +1,7 @@
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+
+import { router } from 'expo-router';
 
 import SettingsScreen from '@/app/(tabs)/settings';
 import { initI18n, setAppLanguage } from '@/core/i18n/i18n';
@@ -59,5 +61,21 @@ describe('settings screen', () => {
 
     expect((await repository.get()).theme).toBe('DARK');
     expect(screen.getByRole('radio', { name: 'Oscuro', selected: true })).toBeTruthy();
+  });
+
+  it('groups preferences and account; each account row opens its screen', async () => {
+    const push = jest.spyOn(router, 'push').mockImplementation(() => undefined);
+    await renderSettings();
+
+    const headings = screen.getAllByRole('header');
+    expect(headings).toHaveLength(2);
+    expect(headings[0]).toHaveTextContent('PREFERENCIAS');
+    expect(headings[1]).toHaveTextContent('TU CUENTA');
+
+    await fireEvent.press(screen.getByRole('link', { name: 'Categorías' }));
+    await fireEvent.press(screen.getByRole('link', { name: 'Perfil y seguridad' }));
+
+    expect(push.mock.calls.map(([href]) => href)).toEqual(['/categories', '/profile']);
+    push.mockRestore();
   });
 });

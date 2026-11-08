@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AppText } from '@/core/theme/AppText';
 import { iconToEmoji } from '@/core/theme/category-icons';
 import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
+import { SectionHeading } from '@/core/theme/SectionHeading';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
 import { getCategoryLabel } from '../category.rules';
@@ -63,14 +64,7 @@ export function CategoryList({ refreshKey, onCreate }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         {sections.map((section) => (
           <View key={section.key} style={styles.section}>
-            <AppText
-              accessibilityRole="header"
-              variant="muted"
-              weight="bold"
-              style={styles.heading}
-            >
-              {section.title.toUpperCase()}
-            </AppText>
+            <SectionHeading title={section.title} />
             {section.items.length === 0 && section.empty ? (
               <AppText variant="muted">{section.empty}</AppText>
             ) : null}
@@ -148,7 +142,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: { gap: 20, paddingTop: 4, paddingBottom: FLOATING_ACTION_SPACE },
   section: { gap: 8 },
-  heading: { fontSize: 12, letterSpacing: 0.7 },
   block: { borderRadius: 12, overflow: 'hidden' },
   row: {
     minHeight: 56,

@@ -83,6 +83,9 @@ already saved with it keep it).
   The form shows a small envelope (150 × 140, full) with the band, the icon and the name typed, "Así se
   verán sus sobres", the icon grid, colors as circles (selected = ink ring) and the dark save button
   pinned at the bottom.
+- **Settings (no sketch; chosen 2026-11-07):** title, then PREFERENCIAS (one block: language and theme as
+  `SegmentedControl`, so manila stays for actions) and TU CUENTA (rows "Categorías" and "Perfil y
+  seguridad", each with a one-line hint and "›").
 - **Budgets:** envelopes grouped Activos / En periodo de gracia / Cerrados; full-width "Nuevo presupuesto"
   pinned at the bottom.
 - **Detail:** big envelope, three figures (Gastado, Reembolsos, Usado), "MOVIMIENTOS · {currency}" with a
@@ -100,6 +103,8 @@ already saved with it keep it).
 
 - `PrimaryButton`: manila (primary), ink (dark call to action; manila with dark text in dark mode), danger.
 - `FloatingAction`: `wide` (bottom, full width) and `pill` (bottom right).
+- `SectionHeading`: small uppercase heading over a block of rows (history days, category sections,
+  settings); announced as a heading.
 - `EnvelopeFrame`: the envelope itself (paper, fill, flap, band); used by budgets and the category preview.
 - `AmountInput`: big condensed amount with the currency chip beside it; used by the movement and budget
   forms (`currencyLocked` for a budget being edited).
@@ -119,7 +124,6 @@ already saved with it keep it).
 
 ## Known gaps
 
-- Screens without a sketch (Settings, Profile, Registration,
-  Lock) only share the colors and the font; they have not been redesigned.
+- Screens without a sketch (Profile, Registration, Lock) only share the colors and the font; they have not been redesigned.
 - iOS has not been run. Release build and low-end phone performance are pending (iteration 7).
 - Notifications of the system cannot be tested in Expo Go on Android.

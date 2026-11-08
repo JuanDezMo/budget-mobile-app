@@ -222,6 +222,14 @@
       "LIGHT": "Light",
       "DARK": "Dark",
       "SYSTEM": "System"
+    },
+    "sections": {
+      "preferences": "Preferences",
+      "account": "Your account"
+    },
+    "links": {
+      "categoriesHint": "Icons, colors and archived",
+      "profileHint": "Name, email and PIN"
     }
   },
   "registration": {

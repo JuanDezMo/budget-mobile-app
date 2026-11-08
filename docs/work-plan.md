@@ -161,7 +161,7 @@ Se aplicó la dirección visual de `.impeccable/surfaces/src-app.md` y los bocet
   - [x] U8.1 Historial de Movimientos: agrupado por día (Hoy / Ayer / fecha), un bloque continuo por día, fila igual a la del detalle del sobre con liga de color partida según lo que se llevó cada categoría y chip "N partes"; totales por moneda en una línea (RN-33)
   - [x] U8.2 Formulario de presupuesto: sobre en vivo arriba (liga de la categoría, periodo, cupo y alertas como ligas punteadas), categorías en chips horizontales, monto grande con chip de moneda (bloqueado al editar, RN-02), fechas lado a lado, alertas como chips (RN-24/RN-25) y botón oscuro fijo abajo
   - [x] U8.3 Categorías: secciones en mayúsculas con un bloque continuo cada una y la liga del color en cada fila (archivadas atenuadas, RN-36; "Quitar" solo en las tuyas, RN-34); formulario con sobre pequeño en vivo, colores en círculos y botón oscuro fijo; el amarillo `#E3A21A` (igual al manila) se cambió por índigo `#283593` en la paleta (RN-35)
-  - [ ] U8.4 Ajustes
+  - [x] U8.4 Ajustes: secciones PREFERENCIAS y TU CUENTA como bloques; idioma y tema con control segmentado (RN-37); Categorías y Perfil como filas con descripción y "›"; encabezado de sección compartido (`SectionHeading`) también en historial y Categorías
   - [ ] U8.5 Registro, Bloqueo y Perfil
 - [x] U9 Montos con separador de miles mientras se escriben
 

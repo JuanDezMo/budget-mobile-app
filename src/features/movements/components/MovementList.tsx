@@ -10,6 +10,7 @@ import type { LocalDate } from '@/core/shared/dates';
 import { AppText } from '@/core/theme/AppText';
 import { OptionGroup } from '@/core/theme/OptionGroup';
 import { FLOATING_ACTION_SPACE, FloatingAction } from '@/core/theme/FloatingAction';
+import { SectionHeading } from '@/core/theme/SectionHeading';
 import { useTheme } from '@/core/theme/ThemeProvider';
 
 import type { Category } from '../../categories/category.types';
@@ -131,9 +132,7 @@ export function MovementList({ refreshKey, categories, onCreate, onOpen }: Props
         contentContainerStyle={styles.content}
         renderItem={({ item }) =>
           item.type === 'day' ? (
-            <AppText accessibilityRole="header" variant="muted" weight="bold" style={styles.day}>
-              {dayText(item.date).toUpperCase()}
-            </AppText>
+            <SectionHeading title={dayText(item.date)} style={styles.day} />
           ) : (
             <MovementRow
               movement={item.movement}
@@ -156,5 +155,5 @@ const styles = StyleSheet.create({
   header: { gap: 8, paddingBottom: 4 },
   head: { gap: 2, paddingBottom: 4 },
   totals: { fontSize: 15 },
-  day: { fontSize: 12, letterSpacing: 0.7, paddingTop: 16, paddingBottom: 8 },
+  day: { paddingTop: 16, paddingBottom: 8 },
 });
