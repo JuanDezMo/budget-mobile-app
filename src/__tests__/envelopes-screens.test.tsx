@@ -15,7 +15,9 @@ import type { Budget, BudgetLine, UsageTotals } from '@/features/budgets/budget.
 import { BudgetDetail } from '@/features/budgets/components/BudgetDetail';
 import { BudgetList } from '@/features/budgets/components/BudgetList';
 import { leftPercentage } from '@/core/theme/EnvelopeFrame';
+import { ENVELOPE_HERO_HEIGHT } from '@/features/budgets/components/EnvelopeHero';
 import { OpenBudgetsOverview } from '@/features/budgets/components/OpenBudgetsOverview';
+import { layoutBandLabels } from '@/features/budgets/components/ThresholdBands';
 import { BudgetRepositoryProvider } from '@/features/budgets/useBudgetRepository';
 import { useBudgetDetail } from '@/features/budgets/useBudgetDetail';
 import type { Category } from '@/features/categories/category.types';
@@ -405,6 +407,29 @@ describe('envelope detail', () => {
     expect(screen.getByText('50 %')).toBeTruthy();
     expect(screen.getByText('90 %')).toBeTruthy();
     expect(screen.getByText('100 %')).toBeTruthy();
+  });
+
+  it('the amount left ends above the 50 % band, so the most common alert never crosses it', async () => {
+    makeRepository([budgetEndingIn('b1', 5)], { usageById: { b1: example } });
+    await render(<DetailHarness budgetId="b1" thresholds={[50]} />, { wrapper: Providers });
+    await screen.findByText('Queda en el sobre');
+
+    const top = Number(style('envelope-amount').top);
+    const captionAndAmount = 18 + 62; // line heights of the caption and the big amount
+    expect(top).toBeGreaterThanOrEqual(46); // under the flap
+    expect(top + captionAndAmount).toBeLessThanOrEqual(ENVELOPE_HERO_HEIGHT / 2 - 8);
+  });
+
+  it('band labels that would touch (90 % and 100 % on a short envelope) move apart', () => {
+    const short = layoutBandLabels([50, 90, 100], 190);
+    expect(short.get(50)?.column).toBe(0);
+    expect(short.get(90)?.column).toBe(0);
+    expect(short.get(100)?.column).toBe(1);
+
+    // On the taller detail envelope they fit one over the other, in line.
+    const tall = layoutBandLabels([90, 100], ENVELOPE_HERO_HEIGHT);
+    expect(tall.get(100)?.column).toBe(0);
+    expect((tall.get(100)?.top ?? 0) - (tall.get(90)?.top ?? 0)).toBeGreaterThanOrEqual(26);
   });
 
   it('a band already crossed is solid, the others are dashed', async () => {

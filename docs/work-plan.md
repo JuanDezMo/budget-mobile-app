@@ -165,6 +165,19 @@ Se aplicó la dirección visual de `.impeccable/surfaces/src-app.md` y los bocet
   - [x] U8.5 Registro, Bloqueo y Perfil: sobre de marca manila con el nombre de la app (registro y bloqueo), PIN en casillas (4 obligatorias + 2 opcionales, RN-43), "Desbloquear" oscuro y "Olvidé mi PIN" como enlace discreto que sigue pidiendo confirmación (RN-46); secciones TUS DATOS / TU PIN y CAMBIAR PIN (RN-47) con "Guardado" en verde; el botón fijo de los formularios se oculta con el teclado abierto (`PinnedFooter`)
 - [x] U9 Montos con separador de miles mientras se escriben
 
+## Revisión final de diseño (2026-11-08)
+
+Revisión con `impeccable-finish-reviewer` contra `.impeccable/surfaces/src-app.md` y los bocetos. Veredicto: **pasa con correcciones**; se conserva la firma (sobre lleno hasta lo que queda, liga, ligas de umbral, fondo gris frío, montos condensados). Orden acordado:
+
+- [x] R1 Las ligas no tapan el monto: sobre de detalle de 290 con el monto entre la solapa y la liga del 50 % y el resto debajo; en la vista previa cada texto va sobre una placa del color del relleno; etiquetas que se tocarían (90 % / 100 %) se corren una columna a la izquierda
+- [ ] R2 Tinta en vez de manila para chips seleccionados y botón principal en modo claro (manila en oscuro), como pide la paleta A
+- [ ] R3 Cabecera manila en Inicio e ícono activo de la pestaña en manila (se conserva el rótulo "app · fecha" del boceto)
+- [ ] R4 Barra de navegación de Android con el color del tema (`expo-system-ui`)
+- [ ] R5 Par oscuro para el índigo de categoría
+- [ ] R6 "Borrar" presupuesto: de botón rojo grande en el detalle a enlace discreto en la pantalla de edición, con la misma confirmación
+- [ ] R7 Liga de las filas (historial y categorías) como pastilla suelta en vez de franja en el borde
+- Pospuesto a después de la iteración 7: emojis y glifos → íconos de contorno; animación del relleno al guardar; relleno sólido con texto en dos tonos en modo oscuro
+
 ## Iteración 7 — Pruebas en dispositivos (opcional)
 
 - [ ] T7.1 Configurar EAS Build (perfil `preview` → APK interno)

@@ -14,7 +14,11 @@ import type { Budget, BudgetPhase, BudgetUsage, UsageState } from '../budget.typ
 import { EnvelopeFrame, leftPercentage } from '@/core/theme/EnvelopeFrame';
 import { ThresholdBands } from './ThresholdBands';
 
-export const ENVELOPE_HERO_HEIGHT = 250;
+export const ENVELOPE_HERO_HEIGHT = 290;
+const FLAP_HEIGHT = 46;
+// The amount sits between the flap and the 50 % band, with this much room above the band, so the
+// most common alert never crosses the digits. The rest of the text goes under that band.
+const ROOM_ABOVE_HALF = 8;
 
 type Props = {
   budget: Budget;
@@ -53,18 +57,19 @@ export function EnvelopeHero({ budget, phase, usage, state, category, thresholds
       bandColor={category?.color ?? colors.mute}
       bandLeft={28}
       bandWidth={10}
-      flapHeight={46}
+      flapHeight={FLAP_HEIGHT}
       exceeded={exceeded}
       accessibilityLabel={`${label}, ${caption} ${amount}`}
     >
       <ThresholdBands
+        height={ENVELOPE_HERO_HEIGHT}
         bands={bands.map((percentage) => ({
           percentage,
           crossed: hasReachedThreshold(usage.spentMinor, usage.availableMinor, percentage),
         }))}
       />
 
-      <View style={styles.texts} pointerEvents="none">
+      <View testID="envelope-amount" style={styles.top} pointerEvents="none">
         <AppText weight="semibold" style={[styles.caption, { color: colors.ink }]}>
           {caption}
         </AppText>
@@ -76,6 +81,8 @@ export function EnvelopeHero({ budget, phase, usage, state, category, thresholds
         >
           {amount}
         </AppText>
+      </View>
+      <View style={styles.under} pointerEvents="none">
         <AppText numberOfLines={2} style={{ color: colors.ink }}>
           {t('budgets.detail.of', {
             available: money(usage.availableMinor),
@@ -90,7 +97,14 @@ export function EnvelopeHero({ budget, phase, usage, state, category, thresholds
 
 const styles = StyleSheet.create({
   // Room on the right for the labels of the bands, so the big amount never goes under them.
-  texts: { position: 'absolute', left: 52, right: 80, top: 58, gap: 2 },
-  caption: { fontSize: 13 },
+  // Caption (18) + amount (62) end ROOM_ABOVE_HALF over the 50 % band.
+  top: {
+    position: 'absolute',
+    left: 52,
+    right: 80,
+    top: ENVELOPE_HERO_HEIGHT / 2 - ROOM_ABOVE_HALF - 18 - 62,
+  },
+  under: { position: 'absolute', left: 52, right: 80, top: ENVELOPE_HERO_HEIGHT / 2 + 10 },
+  caption: { fontSize: 13, lineHeight: 18 },
   big: { fontSize: 56, lineHeight: 62 },
 });
